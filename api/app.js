@@ -292,6 +292,56 @@ export default async function handler(req, res) {
         }),
       );
     }
+    // ── Maison experts: approved listings are public; requests work signed in or not ──
+    const EXPERT_CATS = ["venues","planners","dining","flowers","photography","bridal","music","cakes","beauty","decoration","family"];
+    const uuidOk = (v) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(v || ""));
+    const expertsMissing = (e) => /maison_expert|maison_admins|maison_is_admin/.test(e.message) && /(schema cache|does not exist|Could not find)/i.test(e.message);
+    const expertsNotReady = (res) => res.status(501).json({ error: "Expert listings are not activated yet. Run database/experts.sql once in Supabase.", code: "experts_migration_missing" });
+    const LISTING_PUBLIC = "id,name,category,city,address,description,services,price_from,phone,website,created_at";
+    if (action === "experts-list") {
+      if (req.method !== "GET") return res.status(405).end();
+      const cat = String(req.query.category || "");
+      const town = String(req.query.city || "").split(",")[0].trim().replace(/[%_*(),.]/g, " ").trim().slice(0, 60);
+      if (!EXPERT_CATS.includes(cat) || town.length < 2) return res.json([]);
+      try {
+        const rows = await sb(`/rest/v1/maison_expert_listings?status=eq.approved&category=eq.${cat}&city=ilike.*${encodeURIComponent(town)}*&select=${LISTING_PUBLIC},maison_expert_photos(id,thumb)&order=created_at.desc&limit=24`);
+        return res.json(rows.map(({ maison_expert_photos: ph, ...l }) => ({ ...l, photos: (ph || []).map((p) => ({ id: p.id, thumb: p.thumb })) })));
+      } catch (e) {
+        if (expertsMissing(e)) return res.json([]);
+        throw e;
+      }
+    }
+    if (action === "expert-photo") {
+      if (!uuidOk(req.query.id)) return res.status(400).json({ error: "Photo not found" });
+      const v = await session(req, res);
+      const r = await sb(`/rest/v1/maison_expert_photos?id=eq.${req.query.id}&select=id,image`, { token: v?.token });
+      return r.length ? res.json(r[0]) : res.status(404).json({ error: "Photo not found" });
+    }
+    if (action === "expert-request") {
+      if (req.method !== "POST") return res.status(405).end();
+      if (b.website) return res.status(400).json({ error: "Invalid request" });
+      const v = await session(req, res);
+      const txt = (x, n) => String(x ?? "").trim().slice(0, n);
+      const email = txt(b.email, 120), phone = txt(b.phone, 40);
+      if (!uuidOk(b.listing_id) || txt(b.name, 80).length < 2 || txt(b.message, 3000).length < 5)
+        return res.status(400).json({ error: "Please add your name and a short message." });
+      if (!v && !email && !phone) return res.status(400).json({ error: "Please add your email or phone so the expert can answer." });
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: "Please check your email address." });
+      const date = /^\d{4}-\d{2}-\d{2}$/.test(String(b.date || "")) ? b.date : null;
+      const guests = Number.isInteger(Number(b.guests)) && Number(b.guests) > 0 && Number(b.guests) <= 5000 ? Number(b.guests) : null;
+      try {
+        const id = await sb("/rest/v1/rpc/maison_expert_request", {
+          method: "POST",
+          token: v?.token,
+          body: { p_listing: b.listing_id, p_name: txt(b.name, 80), p_email: email, p_phone: phone, p_date: date, p_guests: guests, p_budget: txt(b.budget, 60), p_message: txt(b.message, 3000) },
+        });
+        return res.json({ id, signedIn: !!v });
+      } catch (e) {
+        if (expertsMissing(e)) return expertsNotReady(res);
+        if (/not available|own listing|Too many/i.test(e.message)) return res.status(400).json({ error: e.message });
+        throw e;
+      }
+    }
     const s = await session(req, res);
     if (action === "session")
       return res.json({
@@ -301,6 +351,89 @@ export default async function handler(req, res) {
       return res
         .status(401)
         .json({ error: "Please sign in to save your invitation." });
+    if (action.startsWith("expert-")) {
+      const t = { token: s.token };
+      const txt = (x, n) => String(x ?? "").trim().slice(0, n);
+      try {
+        if (action === "expert-me") {
+          if (req.method === "GET") {
+            const [rows, admin] = await Promise.all([
+              sb(`/rest/v1/maison_expert_listings?owner_id=eq.${s.user.id}&select=*,maison_expert_photos(id,thumb)`, t),
+              sb("/rest/v1/rpc/maison_is_admin", { ...t, method: "POST", body: {} }),
+            ]);
+            const l = rows[0];
+            return res.json({ listing: l ? { ...l, maison_expert_photos: undefined, photos: l.maison_expert_photos || [] } : null, admin: !!admin });
+          }
+          if (req.method === "DELETE") {
+            await sb(`/rest/v1/maison_expert_listings?owner_id=eq.${s.user.id}`, { ...t, method: "DELETE" });
+            return res.json({ ok: true });
+          }
+          const site = txt(b.website, 300);
+          const row = {
+            name: txt(b.name, 120), category: String(b.category || ""), city: txt(b.city, 80), address: txt(b.address, 200),
+            description: txt(b.description, 2000), services: txt(b.services, 1000), price_from: txt(b.price_from, 60),
+            phone: txt(b.phone, 40), email: txt(b.email, 120), website: site && /^https?:\/\//i.test(site) ? site : site ? "https://" + site : "",
+          };
+          if (row.name.length < 2 || row.city.length < 2 || !EXPERT_CATS.includes(row.category))
+            return res.status(400).json({ error: "Please add your business name, category and city." });
+          if (!row.phone && !row.email && !row.website)
+            return res.status(400).json({ error: "Please add at least one way to reach you: phone, email or website." });
+          const existing = await sb(`/rest/v1/maison_expert_listings?owner_id=eq.${s.user.id}&select=id`, t);
+          const saved = existing.length
+            ? await sb(`/rest/v1/maison_expert_listings?id=eq.${existing[0].id}`, { ...t, method: "PATCH", body: row, headers: { Prefer: "return=representation" } })
+            : await sb("/rest/v1/maison_expert_listings", { ...t, method: "POST", body: { ...row, owner_id: s.user.id }, headers: { Prefer: "return=representation" } });
+          return res.json(saved[0]);
+        }
+        if (action === "expert-photos") {
+          if (req.method === "DELETE") {
+            if (!uuidOk(b.id)) return res.status(400).json({ error: "Photo not found" });
+            await sb(`/rest/v1/maison_expert_photos?id=eq.${b.id}`, { ...t, method: "DELETE" });
+            return res.json({ ok: true });
+          }
+          const jpeg = (v, max) => typeof v === "string" && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(v) && v.length < max;
+          if (!uuidOk(b.listing_id) || !jpeg(b.thumb, 80000) || !jpeg(b.image, 360000))
+            return res.status(400).json({ error: "Please choose a JPEG, PNG or WebP photo." });
+          const rows = await sb("/rest/v1/maison_expert_photos", { ...t, method: "POST", body: { listing_id: b.listing_id, owner_id: s.user.id, thumb: b.thumb, image: b.image }, headers: { Prefer: "return=representation" } });
+          return res.json({ id: rows[0].id, thumb: rows[0].thumb });
+        }
+        if (action === "expert-inbox") {
+          const rows = await sb(`/rest/v1/maison_expert_requests?select=*,maison_expert_listings(name,category,city,phone)&order=created_at.desc&limit=200`, t);
+          return res.json(rows.map(({ maison_expert_listings: l, ...r }) => ({ ...r, listing: l, mine: r.expert_id === s.user.id })));
+        }
+        if (action === "expert-thread") {
+          if (req.method === "GET") {
+            if (!uuidOk(req.query.id)) return res.status(400).json({ error: "Conversation not found" });
+            return res.json(await sb(`/rest/v1/maison_expert_messages?request_id=eq.${req.query.id}&select=id,from_expert,body,created_at&order=created_at.asc&limit=500`, t));
+          }
+          if (!uuidOk(b.request_id)) return res.status(400).json({ error: "Conversation not found" });
+          const reqs = await sb(`/rest/v1/maison_expert_requests?id=eq.${b.request_id}&select=id,expert_id,sender_id,status`, t);
+          if (!reqs.length) return res.status(404).json({ error: "Conversation not found" });
+          const r = reqs[0], fromExpert = r.expert_id === s.user.id;
+          if (b.status) {
+            if (!fromExpert || !["new", "answered", "closed"].includes(b.status)) return res.status(400).json({ error: "Not allowed" });
+            await sb(`/rest/v1/maison_expert_requests?id=eq.${r.id}`, { ...t, method: "PATCH", body: { status: b.status } });
+            return res.json({ ok: true });
+          }
+          const body = txt(b.body, 3000);
+          if (!body) return res.status(400).json({ error: "Write a message first." });
+          if (!fromExpert && r.sender_id !== s.user.id) return res.status(403).json({ error: "Not allowed" });
+          const rows = await sb("/rest/v1/maison_expert_messages", { ...t, method: "POST", body: { request_id: r.id, author_id: s.user.id, from_expert: fromExpert, body }, headers: { Prefer: "return=representation" } });
+          if (fromExpert && r.status === "new") await sb(`/rest/v1/maison_expert_requests?id=eq.${r.id}`, { ...t, method: "PATCH", body: { status: "answered" } });
+          return res.json(rows[0]);
+        }
+        if (action === "expert-admin") {
+          if (req.method === "GET")
+            return res.json(await sb(`/rest/v1/maison_expert_listings?status=neq.approved&select=*,maison_expert_photos(id,thumb)&order=updated_at.desc&limit=100`, t));
+          if (!uuidOk(b.id) || !["approved", "hidden", "pending"].includes(b.status)) return res.status(400).json({ error: "Not allowed" });
+          const rows = await sb(`/rest/v1/maison_expert_listings?id=eq.${b.id}`, { ...t, method: "PATCH", body: { status: b.status }, headers: { Prefer: "return=representation" } });
+          if (!rows.length) return res.status(403).json({ error: "Only an admin can do this." });
+          return res.json(rows[0]);
+        }
+      } catch (e) {
+        if (expertsMissing(e)) return expertsNotReady(res);
+        throw e;
+      }
+    }
     if(action==='journey'){
       const [planning,shortlist,guests]=await Promise.all([
         sb('/rest/v1/maison_planning?select=*',{token:s.token}),
@@ -408,7 +541,7 @@ export default async function handler(req, res) {
       if(req.method==='GET')return res.json(await sb('/rest/v1/maison_shortlist?select=*&order=created_at.desc',{token:s.token}));
       if(req.method==='DELETE'){await sb('/rest/v1/maison_shortlist?id=eq.'+encodeURIComponent(b.id),{method:'DELETE',token:s.token});return res.json({ok:true})}
       if(!eventWorlds.some(w=>w.occasion===b.occasion)||typeof b.provider_id!=='string'||b.provider_id.length>300||!b.data||JSON.stringify(b.data).length>19000||typeof b.data.name!=='string'||b.data.name.length>160)return res.status(400).json({error:'Please check the expert details.'});
-      if(!b.provider_id.startsWith('geo:')&&!providerSources.some(p=>p.id===b.provider_id))return res.status(400).json({error:'Unknown expert source'});
+      if(!b.provider_id.startsWith('geo:')&&!b.provider_id.startsWith('maison:')&&!providerSources.some(p=>p.id===b.provider_id))return res.status(400).json({error:'Unknown expert source'});
       const rows=await sb('/rest/v1/maison_shortlist?on_conflict=owner_id,occasion,provider_id',{method:'POST',token:s.token,body:{owner_id:s.user.id,occasion:b.occasion,provider_id:b.provider_id,data:b.data},headers:{Prefer:'resolution=merge-duplicates,return=representation'}});return res.json(rows[0]);
     }
     if (action === "logout") {

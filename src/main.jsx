@@ -52,6 +52,7 @@ import { hasJourney } from "./packages";
 const AuthDialog = lazy(() => import("./AuthDialog"));
 const Editor = lazy(() => import("./Editor"));
 const Dashboard = lazy(() => import("./Dashboard"));
+const ExpertSpace = lazy(() => import("./ExpertSpace"));
 const ShareDialog = lazy(() => import("./Dialogs").then((m) => ({ default: m.ShareDialog })));
 const InfoDialog = lazy(() => import("./Dialogs").then((m) => ({ default: m.InfoDialog })));
 const GuestPage = lazy(() => import("./Guest"));
@@ -81,6 +82,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [view, setView] = useState(() => { const v = new URLSearchParams(location.search).get("view"); return ["cinema", "gallery", "experts", "dashboard"].includes(v) ? v : "cinema"; });
   const [editor, setEditor] = useState(null);
+  const [spaceTab, setSpaceTab] = useState("listing");
   const [experience, setExperience] = useState(null);
   const [auth, setAuth] = useState(false);
   const [info, setInfo] = useState(null);
@@ -375,10 +377,33 @@ function App() {
               if (invitation) setEditor({ ...invitation, content: { ...invitation.content, ...venue }, step: "details" });
               else studio({ ...firstEvent(), ...venue }, "details");
             }}
+            onSpace={(tab) => {
+              setSpaceTab(tab);
+              show("expert-space");
+              if (!user) setAuth(true);
+            }}
             notify={setToast}
             Modal={Modal}
             lang={lang}
           />
+        ) : view === "expert-space" ? (
+          user ? (
+            <Suspense fallback={<Loading />}>
+              <ExpertSpace key={spaceTab} user={user} tab={spaceTab} onBack={() => show("experts")} notify={setToast} />
+            </Suspense>
+          ) : (
+            <main className="es-page">
+              <div className="es-head">
+                <span className="royal-eyebrow dark">FOR VENUES & EXPERTS</span>
+                <h1>Your Maison business space</h1>
+                <p>Sign in or create a free account to add your business and answer quote requests.</p>
+                <div className="es-actions">
+                  <button className="royal-btn ink" onClick={() => setAuth(true)}>Sign in or create account</button>
+                  <button className="royal-text" onClick={() => show("experts")}>Back to Venues & Experts</button>
+                </div>
+              </div>
+            </main>
+          )
         ) : view === "gallery" ? (
           <main className="lx-main">
           <section id="collection" className="lx-section lx-collection">

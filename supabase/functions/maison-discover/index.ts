@@ -173,6 +173,17 @@ export function merge(a: any[], b: any[], max = 60) {
   return [...a, ...extra].slice(0, max);
 }
 
+async function nominatim(city: string, language: string) {
+  const u = new URL("https://nominatim.openstreetmap.org/search");
+  u.search = new URLSearchParams({ q: city, format: "jsonv2", limit: "1", addressdetails: "1", "accept-language": language }).toString();
+  const r = await fetch(u, { headers: { "User-Agent": "MaisonInvitations/1.0 (venues & experts search)" }, signal: AbortSignal.timeout(6000) }).catch(() => null);
+  if (!r?.ok) return null;
+  const hit = (await r.json())?.[0];
+  if (!hit) return null;
+  const a = hit.address || {};
+  return { lat: +hit.lat, lon: +hit.lon, country_code: a.country_code, country: a.country, city: a.city || a.town || a.village || hit.name, name: hit.name };
+}
+
 async function identity(req: Request) {
   const auth = req.headers.get("Authorization") || "";
   if (!auth.startsWith("Bearer ")) return VISITOR;
@@ -202,22 +213,24 @@ Deno.serve(async (req: Request) => {
       const cached = await cache.json();
       if (cached[0]) return json({ ...cached[0].data, cached: true });
     }
-    // Only a new area costs anything, so only a new area counts against the quota.
-    const quota = await db("rpc/maison_search_quota", "POST", { p_user: user });
-    if (!quota.ok || !(await quota.json()))
-      return json({ error: "Today's allowance for new areas has been reached. Try a city that was searched before, or the directories below.", limited: true }, 429);
-
-    if (!GEO) return json({ error: "The Geoapify key is not configured in this Supabase project." }, 503);
-    const geocode = new URL("https://api.geoapify.com/v1/geocode/search");
-    geocode.search = new URLSearchParams({ text: city, type: "city", limit: "1", format: "json", apiKey: GEO }).toString();
-    const gr = await fetch(geocode, { signal: AbortSignal.timeout(6000) });
-    if (!gr.ok) return json({ error: "City search is temporarily unavailable. Please try again later." }, 502);
-    const loc = (await gr.json()).results?.[0];
-    if (!loc) return json({ error: "We couldn't find that city. Try adding the country." }, 404);
+    // Only a new area costs Geoapify credits, so only a new area counts against the daily allowance.
+    // When the allowance is used up (or no key is set), the search still works with free
+    // OpenStreetMap data only: Nominatim finds the city (≤1 request/s, cached here) and Overpass the places.
+    const quota = GEO ? await db("rpc/maison_search_quota", "POST", { p_user: user }) : null;
+    const full = !!(quota?.ok && (await quota.json()));
+    let loc: any = null;
+    if (full) {
+      const geocode = new URL("https://api.geoapify.com/v1/geocode/search");
+      geocode.search = new URLSearchParams({ text: city, type: "city", limit: "1", format: "json", apiKey: GEO! }).toString();
+      const gr = await fetch(geocode, { signal: AbortSignal.timeout(6000) }).catch(() => null);
+      if (gr?.ok) loc = (await gr.json()).results?.[0] || null;
+    }
+    if (!loc) loc = await nominatim(city, language);
+    if (!loc) return json({ error: "We couldn't find that city. Try adding the country, for example “Mainz, Germany”." }, 404);
     if (!EUROPE.includes(loc.country_code)) return json({ error: "Please choose a European city." }, 400);
 
     const [geo, osm] = await Promise.all([
-      fromGeoapify(category, loc, language).catch(() => []),
+      full ? fromGeoapify(category, loc, language).catch(() => []) : Promise.resolve([]),
       fromOverpass(category, loc).catch(() => []),
     ]);
     const rows = merge(geo, osm);
@@ -237,7 +250,8 @@ Deno.serve(async (req: Request) => {
     await db("maison_discovery_cache?on_conflict=cache_key", "POST", {
       cache_key: key,
       data: result,
-      expires_at: new Date(Date.now() + CACHE_DAYS * 86400000).toISOString(),
+      // OpenStreetMap-only results are kept for a week, so the area gets the fuller search again later
+      expires_at: new Date(Date.now() + (full ? CACHE_DAYS : 7) * 86400000).toISOString(),
     });
     return json(result);
   } catch {
