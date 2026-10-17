@@ -136,3 +136,41 @@ export function milestones({ published, guests, tasks }) {
     ["All set", tasks.length > 0 && open === 0],
   ];
 }
+
+// Which Venues & Experts category helps with a task (picking, booking or buying).
+// Checked by task id first, then by words in the title, so the host's own tasks match too.
+const EXPERT_BY_ID = {
+  "w-venue": "Venues", "w-photo": "Photography", "w-attire": "Bridal shops", "w-catering": "Catering",
+  "w-music": "Music & entertainment", "w-decor": "Flowers", "w-hair": "Beauty",
+  "e-venue": "Venues", "e-photo": "Photography", "e-decor": "Flowers",
+  "b-food": "Catering", "b-cake": "Cakes", "b-fun": "Family activities",
+  "s-food": "Cakes", "s-games": "Decoration", "g-venue": "Venues", "g-food": "Catering", "d-table": "Decoration",
+};
+const EXPERT_WORDS = [
+  [/venue|location|restaurant|hall|room/i, "Venues"],
+  [/photo|video/i, "Photography"],
+  [/flower|florist|bouquet/i, "Flowers"],
+  [/cater|food|menu|buffet|dinner/i, "Catering"],
+  [/cake|bak/i, "Cakes"],
+  [/music|dj|band|singer/i, "Music & entertainment"],
+  [/hair|make-?up|beauty|nails/i, "Beauty"],
+  [/dress|suit|bridal|gown/i, "Bridal shops"],
+  [/decor|balloon|table setting/i, "Decoration"],
+  [/planner|planning agency|coordinator/i, "Planners"],
+  [/game|activit|entertain|kids|children/i, "Family activities"],
+];
+export function expertFor(task) {
+  if (!task || task.auto) return null;
+  if (EXPERT_BY_ID[task.id]) return EXPERT_BY_ID[task.id];
+  const hit = EXPERT_WORDS.find(([re]) => re.test(task.title || ""));
+  return hit ? hit[1] : null;
+}
+// The town of the celebration from the address ("Berger Str. 3, 60316 Frankfurt" → "Frankfurt").
+const COUNTRIES = /^(germany|deutschland|france|frankreich|austria|österreich|switzerland|schweiz|suisse|italy|italia|italien|spain|españa|spanien|netherlands|nederland|niederlande|belgium|belgique|belgien|united kingdom|uk|england|ireland|portugal|poland|polska|czechia|czech republic|denmark|sweden|norway|finland|greece|luxembourg|hungary|croatia)$/i;
+export function townOf(content = {}) {
+  const parts = String(content.address || "").split(",").map((x) => x.trim()).filter(Boolean);
+  while (parts.length && COUNTRIES.test(parts[parts.length - 1])) parts.pop();
+  const last = (parts[parts.length - 1] || "").replace(/^[A-Z]{0,2}-?\d{4,5}\s*/i, "").trim();
+  if (last.length >= 2 && !/\d/.test(last)) return last;
+  return "";
+}

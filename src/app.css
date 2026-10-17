@@ -1401,3 +1401,6 @@
   .ev-side { order: -1; }
 }
 @media (max-width: 820px) { .st-title { display: none !important; } }
+.ev-map-journey { margin: 0 0 18px; }
+.ws-find { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; gap: 6px; margin: 2px 0 0 30px; padding: 6px 12px; border-radius: 999px; font-size: 12px; color: var(--ev-accent, #8b4a5c); background: var(--ev-soft, #f3e7ea); border: 1px solid color-mix(in srgb, var(--ev-accent, #8b4a5c) 30%, transparent); }
+.ws-find:hover { background: var(--ev-card, #fff); }

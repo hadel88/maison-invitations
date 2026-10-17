@@ -29,7 +29,7 @@ import { sceneFor } from "./cinemaThemes";
 import { templates } from "./catalog";
 import { occasionFor, worldFor, journeyProgress } from "./worlds";
 import { JourneyMap } from "./RoyalHub";
-import { buildTasks, groupTasks, milestones } from "./journey";
+import { buildTasks, groupTasks, milestones, expertFor, townOf } from "./journey";
 import { DetailsPanel, LocationPanel, TimelinePanel, GiftsPanel, RsvpPanel, SettingsPanel, initials } from "./EventPanels";
 import "./app.css";
 
@@ -484,7 +484,7 @@ const when = (iso) =>
   new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack, onEdit, onShare, onPreview }) {
-  const [tab, setTab] = useState(initialTab && initialTab !== "overview" ? initialTab : "guests");
+  const [tab, setTab] = useState(initialTab && initialTab !== "overview" ? initialTab : "tasks");
   const [guests, setGuests] = useGuests(invite, notify);
   const [plan, setPlan] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -600,20 +600,20 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
     [() => onEdit(invite), () => onShare(invite), () => onExperts(invite), () => setTab("guests"), () => setTab("tasks")][i]();
   const photos = (wall || []).filter((x) => x.kind === "photo");
   const tabs = [
-    ["guests", "Guests" + (s.total ? " · " + s.total : "")],
-    ["rsvps", "RSVPs" + (s.replied ? " · " + s.replied : "")],
     ["wall", "Wall"],
     ["tasks", "Tasks" + (tasks.length ? " · " + (tasks.length - open.length) + "/" + tasks.length : "")],
-    ["photos", "Gallery" + (photos.length ? " · " + photos.length : "")],
-    ["settings", "Settings"],
+    ["gifts", "Gift registry" + (c.gifts?.length ? " · " + c.gifts.length : "")],
+    ["photos", "Photo gallery" + (photos.length ? " · " + photos.length : "")],
   ];
   const side = [
+    ["guests", Users, "Guests" + (s.total ? " · " + s.total : "")],
+    ["rsvps", Mail, "RSVPs" + (s.replied ? " · " + s.replied : "")],
     ["details", CalendarHeart, "Event details"],
     ["location", MapPin, "Location & map"],
     ["timeline", Clock, "Timeline"],
-    ["gifts", Gift, "Gift registry"],
-    ["photos", ImageIcon, "Photo gallery"],
+    ["settings", Settings2, "Settings"],
   ];
+  const town = townOf(c);
   const art = "/" + sceneFor(c).cover + ".webp";
   const daysLeft = Math.round((new Date(c.date + "T12:00:00") - new Date(new Date().toDateString() + " 12:00")) / DAY);
   const panelProps = { content: c, onSaveContent: saveContent };
@@ -669,6 +669,9 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
             <p>Everything in one place.</p>
           </div>
         </div>
+        <div className="ws-map ev-map-journey">
+          <JourneyMap world={worldFor(occasion)} progress={progress} onAction={mapAction} theme={c.worldTheme || "midnight"} />
+        </div>
         <div className="ev-grid">
           <div className="ev-main">
             <div className="ev-tabs" role="tablist">
@@ -697,16 +700,20 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
               <WallPanel invite={invite} wall={wall} setWall={setWall} off={wallOff} guests={guests} notify={notify} />
             )}
             {tab === "tasks" && (
-              <>
-                <div className="ws-map">
-                  <JourneyMap world={worldFor(occasion)} progress={progress} onAction={mapAction} theme={c.worldTheme || "midnight"} />
-                </div>
-                {plan ? (
-                  <JourneyPanel tasks={tasks} plan={plan} saving={saving} onToggle={toggle} onSave={savePlan} occasion={occasion} />
-                ) : (
-                  <p className="ws-muted">Loading your journey…</p>
-                )}
-              </>
+              plan ? (
+                <JourneyPanel
+                  tasks={tasks}
+                  plan={plan}
+                  saving={saving}
+                  onToggle={toggle}
+                  onSave={savePlan}
+                  occasion={occasion}
+                  town={town}
+                  onFind={(category) => onExperts(invite, { category, city: town })}
+                />
+              ) : (
+                <p className="ws-muted">Loading your journey…</p>
+              )
             )}
             {tab === "photos" && (
               <PhotosPanel
@@ -734,13 +741,13 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
                 {label}
               </button>
             ))}
-            <button onClick={() => onExperts(invite)}>
+            <button onClick={() => onExperts(invite, { city: town })}>
               <span><Compass size={16} strokeWidth={1.5} /></span>
               Venues & experts
             </button>
           </nav>
         </div>
-        <p className="ev-foot">Track RSVPs, manage guests, share updates, add the location, a programme and a gift list.</p>
+        <p className="ev-foot">Follow your journey, find the right experts, track every reply and keep your memories in one place.</p>
       </section>
     </main>
   );
@@ -954,7 +961,12 @@ function PhotosPanel({ invite, photos, setWall, off, cover, onCover, notify }) {
   );
 }
 
-function JourneyPanel({ tasks, plan, saving, disabled = false, onToggle, onSave, occasion }) {
+const FIND_LABEL = {
+  Venues: "venues", Planners: "planners", Catering: "caterers", Flowers: "florists", Photography: "photographers",
+  "Bridal shops": "bridal shops", "Music & entertainment": "music & DJs", Cakes: "cake makers", Beauty: "hair & make-up",
+  Decoration: "decoration", "Family activities": "activities",
+};
+function JourneyPanel({ tasks, plan, saving, disabled = false, onToggle, onSave, occasion, town, onFind }) {
   const [title, setTitle] = useState("");
   const [due, setDue] = useState("");
   const g = groupTasks(tasks);
@@ -1017,6 +1029,11 @@ function JourneyPanel({ tasks, plan, saving, disabled = false, onToggle, onSave,
                     </span>
                   </label>
                   <time dateTime={t.due}>{dateLabel(t.due, "en")}</time>
+                  {onFind && !t.done && expertFor(t) && (
+                    <button className="ws-find" onClick={() => onFind(expertFor(t))}>
+                      <Compass size={13} /> Find {FIND_LABEL[expertFor(t)] || expertFor(t).toLowerCase()}{town ? " in " + town : ""}
+                    </button>
+                  )}
                   {t.own && !disabled && (
                     <button
                       className="ws-icon"

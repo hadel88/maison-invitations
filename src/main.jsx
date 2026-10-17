@@ -258,8 +258,11 @@ function App() {
     setFocus({ id: null, at: Date.now() });
     show("dashboard");
   };
-  const openExperts = (invitation) => {
+  // From a dashboard task: open Venues & Experts with the right category and town already searched.
+  const [expertsPreset, setExpertsPreset] = useState(null);
+  const openExperts = (invitation, preset) => {
     if (invitation) setWorldOccasion(occasionFor(invitation, templates));
+    setExpertsPreset(preset && (preset.category || preset.city) ? { ...preset, at: Date.now() } : null);
     show("experts");
   };
   const NAV = [
@@ -377,6 +380,7 @@ function App() {
               if (invitation) setEditor({ ...invitation, content: { ...invitation.content, ...venue }, step: "details" });
               else studio({ ...firstEvent(), ...venue }, "details");
             }}
+            preset={expertsPreset}
             onSpace={(tab) => {
               setSpaceTab(tab);
               show("expert-space");
