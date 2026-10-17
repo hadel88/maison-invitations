@@ -4,6 +4,7 @@ import { dateLabel } from './catalog';
 import { countdownParts, eventInstant } from './craftTime';
 import { ensureFont } from './fonts';
 import './craft.css';
+import { createCurtainRenderer } from './curtainGL';
 
 const language = {
   en: { family: 'Together with our families', open: 'Unfold our story', scroll: 'A little more to discover', replay: 'Replay opening', welcome: 'A day woven with love', countdown: 'Until we celebrate', days: 'Days', hours: 'Hours', minutes: 'Minutes', details: 'Ceremony & reception', dress: 'The dress code', gifts: 'A little note on gifts', moment: 'Made for our moment', heart: 'Save a little space in your heart', attire: 'A little dressed-up magic' },
@@ -20,25 +21,19 @@ export function CraftStage({ event, guest, opened, onOpen, onReplay, lang = 'en'
   const root = useRef(null), c = craftWords(lang), names = event.names.split(/\s*&\s*/);
   const font = ensureFont(event.font);
   const [revealed, setRevealed] = useState(false);
-  useEffect(() => {
-    if (!opened) { setRevealed(false); return; }
-    const delay = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 6600;
-    const timer = setTimeout(() => setRevealed(true), delay);
-    return () => clearTimeout(timer);
-  }, [opened]);
-  const initials = names.map(name => Array.from(name.trim())[0] || '').join(' & ');
+  useEffect(() => { if (!opened) setRevealed(false); }, [opened]);
   function discover() { root.current?.closest('.guest-experience')?.querySelector('#craft-welcome')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' }); }
   function replay() { onReplay(); root.current?.closest('.guest-experience')?.scrollTo({ top: 0, behavior: 'instant' }); }
   return <section ref={root} className={'craft-stage ' + (opened ? 'craft-unfolded ' : '') + (revealed ? 'craft-revealed' : '')} aria-label="The Secret Conservatory invitation">
     <div className="craft-stitched-orbit" aria-hidden="true" />
     <img className="craft-hero-garland" src="/craft-garland.webp" width="2172" height="724" alt="" aria-hidden="true" />
-    <div className="craft-opening-curtains" aria-hidden="true"><div className="craft-curtain-left" /><div className="craft-curtain-right" /></div>
+    <CraftCurtain opened={opened} onReveal={setRevealed} />
     <div className="craft-cover craft-cover-left" aria-hidden="true" />
-    <div className="craft-cover craft-cover-right">
-      <button className="craft-cover-plaque" onClick={onOpen} disabled={opened} aria-label={c.open}>
-        <span className="craft-plaque-initials" aria-hidden="true">{initials}</span><span>{c.open}</span><ArrowDown size={16} aria-hidden="true" />
-      </button>
-    </div>
+    <div className="craft-cover craft-cover-right" aria-hidden="true" />
+    <button className="craft-wax-open" onClick={onOpen} disabled={opened} aria-label={c.open}>
+      <img src="/maison-green-wax.webp" width="640" height="640" alt="" />
+      <span>{c.open}</span>
+    </button>
     <div className="craft-hero-layout">
       <header className="craft-hero-copy" aria-hidden={!revealed}>
         <span className="craft-eyebrow">{guest?.name ? guest.name : c.family}</span>
@@ -53,6 +48,23 @@ export function CraftStage({ event, guest, opened, onOpen, onReplay, lang = 'en'
     <span className="craft-hero-edition" aria-hidden="true">MAISON · L’ATELIER DES SOUVENIRS</span>
     {revealed && <button className="craft-replay" onClick={replay} aria-label={c.replay}><RotateCcw size={16} /></button>}
   </section>;
+}
+
+function CraftCurtain({ opened, onReveal }) {
+  const canvas = useRef(null), renderer = useRef(null);
+  const [fallback, setFallback] = useState(false);
+  useEffect(() => {
+    try { renderer.current = createCurtainRenderer(canvas.current, { onComplete: () => onReveal(true), onError: () => setFallback(true) }); }
+    catch { setFallback(true); }
+    return () => { renderer.current?.dispose(); renderer.current = null; };
+  }, [onReveal]);
+  useEffect(() => {
+    if (opened) renderer.current?.open(); else renderer.current?.reset();
+    if (!fallback || !opened) return;
+    const timer = setTimeout(() => onReveal(true), matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 4200);
+    return () => clearTimeout(timer);
+  }, [opened, fallback, onReveal]);
+  return fallback ? <div className="craft-curtain-fallback" aria-hidden="true" /> : <canvas ref={canvas} className="craft-curtain-canvas" aria-hidden="true" />;
 }
 
 export function CraftWelcome({ event, lang = 'en' }) {

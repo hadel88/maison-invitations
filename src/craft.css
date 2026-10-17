@@ -151,16 +151,6 @@
 .craft-cover-right { right: 0; border-left: 1px solid #d3c6a4; box-shadow: inset 10px 0 14px #26341d27; }
 .craft-unfolded .craft-cover-left { transform: translateX(-102%); }
 .craft-unfolded .craft-cover-right { transform: translateX(150%); }
-.craft-cover-plaque { position: absolute; top: 50%; left: 0; transform: translate(-50%, -50%); width: clamp(165px, 18vw, 230px); min-height: 215px; padding: 35px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; border: 1px solid #b29b70; outline: 1px dashed #c5b190; outline-offset: -10px; border-radius: 44% 44% 38% 38% / 28% 28% 40% 40%; background: #f7f1e4; color: #83704d; box-shadow: 0 9px 24px #25301c40, inset 0 0 0 5px #eee3cc; cursor: pointer; font: italic 15px Georgia; }
-.craft-cover-plaque:disabled { opacity: 1; cursor: default; }
-.craft-cover-plaque:focus-visible { outline: 3px solid #fff5dc; outline-offset: 6px; }
-.craft-plaque-initials { font: 400 clamp(32px, 4vw, 49px)/1.1 var(--serif, Georgia); }
-.craft-opening-curtains { position: absolute; inset: 0; z-index: 8; pointer-events: none; overflow: hidden; }
-.craft-opening-curtains > div { position: absolute; top: 0; bottom: 0; width: 50%; background-image: url('/craft-ivory-curtains.webp'); background-repeat: no-repeat; background-size: 200% 100%; transition: transform 2.6s cubic-bezier(.3,.05,.22,1) 3.8s, clip-path 2.6s ease 3.8s; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); filter: drop-shadow(0 6px 9px #65503728); }
-.craft-curtain-left { left: 0; background-position: left top; transform-origin: left top; }
-.craft-curtain-right { right: 0; background-position: right top; transform-origin: right top; }
-.craft-unfolded .craft-curtain-left { transform: scaleX(.34); clip-path: polygon(0 0, 100% 0, 85% 20%, 46% 60%, 80% 100%, 0 100%); }
-.craft-unfolded .craft-curtain-right { transform: scaleX(.34); clip-path: polygon(0 0, 100% 0, 100% 100%, 20% 100%, 54% 60%, 15% 20%); }
 .craft-hero-copy { opacity: 0; transition: opacity 1.2s ease 5s; }
 .craft-unfolded .craft-hero-copy { opacity: 1; }
 .craft-discover:disabled { visibility: hidden; }
@@ -170,8 +160,6 @@
 .craft-dress .craft-garland { margin-top: -20px; }
 @media (max-width: 760px) {
  .craft-cover::before { inset: 14px; border-radius: 20px; }
- .craft-cover-plaque { min-height: 200px; width: 172px; }
- .craft-opening-curtains { bottom: 42%; }
  .craft-hero-garland { top: 38px; height: 100px; object-fit: cover; object-position: top; }
  .craft-hero-layout { padding-top: 142px; }
  .craft-hero-copy::before { inset: -16px 6px -18px; }
@@ -182,9 +170,46 @@
  .craft-dress .craft-garland { width: calc(100% + 40px); margin-left: -20px; }
 }
 @media (prefers-reduced-motion: reduce) {
- .craft-cover, .craft-opening-curtains > div, .craft-hero-copy { transition: none !important; }
 }
 
 .craft-stage:not(.craft-unfolded) .craft-cover,
-.craft-stage:not(.craft-unfolded) .craft-opening-curtains > div,
 .craft-stage:not(.craft-unfolded) .craft-hero-copy { transition: none; }
+/* Photographic materials on a lit, deforming WebGL cloth surface. */
+.craft-stage { perspective: 1600px; }
+.craft-curtain-canvas, .craft-curtain-fallback { position: absolute; inset: 0; display: block; width: 100%; height: 100%; z-index: 8; pointer-events: none; }
+.craft-curtain-canvas { filter: drop-shadow(6px 12px 12px #74624928); }
+.craft-curtain-fallback { background: url('/craft-ivory-curtains.webp') center / 100% 100%; transition: opacity 1s 3.2s; }
+.craft-unfolded .craft-curtain-fallback { opacity: 0; }
+.craft-cover { background: url('/craft-cotton-paper.webp') center / 580px 580px, #879173; background-blend-mode: multiply; backface-visibility: hidden; transform-style: preserve-3d; transition: transform 2.6s cubic-bezier(.42,0,.15,1) .7s, filter 2.6s ease .7s; }
+.craft-cover::before { display: none; }
+.craft-cover::after { content: ''; position: absolute; top: 0; bottom: 0; width: 3px; background: linear-gradient(90deg, #ebe4cd, #687153); opacity: .75; }
+.craft-cover-left { transform-origin: left center; border: 0; box-shadow: inset -14px 0 24px #38442b30, 2px 0 3px #d6d0b97a; }
+.craft-cover-left::after { right: 0; }
+.craft-cover-right { transform-origin: right center; border: 0; box-shadow: inset 14px 0 24px #38442b30, -2px 0 3px #28321c40; }
+.craft-cover-right::after { left: 0; }
+.craft-unfolded .craft-cover-left { transform: rotateY(-112deg); filter: brightness(.72); }
+.craft-unfolded .craft-cover-right { transform: rotateY(112deg); filter: brightness(.72); }
+.craft-wax-open { position: absolute; top: 50%; left: 50%; z-index: 14; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; width: 170px; padding: 0; border: 0; background: transparent; cursor: pointer; color: #f7f0dd; text-shadow: 0 1px 4px #24301870; }
+.craft-wax-open img { display: block; width: 142px; height: 142px; object-fit: contain; filter: drop-shadow(3px 8px 6px #25301d60); transition: transform .7s cubic-bezier(.2,.6,.2,1), filter .7s; }
+.craft-wax-open span { font: italic 16px Georgia; margin-top: 20px; }
+.craft-wax-open:hover img { transform: rotate(-4deg) translateY(-3px); filter: drop-shadow(5px 12px 8px #25301d50); }
+.craft-wax-open:focus-visible { outline: 2px solid #eee6cd; outline-offset: 10px; border-radius: 50%; }
+.craft-wax-open:disabled { cursor: default; }
+.craft-unfolded .craft-wax-open { pointer-events: none; animation: craft-seal-release 1.2s cubic-bezier(.25,.6,.3,1) both; }
+@keyframes craft-seal-release {
+  0% { opacity: 1; transform: translate(-50%, -50%) translateZ(0) rotate(0); }
+  45% { opacity: 1; transform: translate(-50%, -55%) translateZ(90px) rotate(-11deg); }
+  100% { opacity: 0; transform: translate(-50%, -33%) translateZ(160px) rotate(-18deg); }
+}
+.craft-hero-copy { transition: opacity 1.5s ease 3.5s; }
+.craft-unfolded .craft-estate { transform: none; }
+.craft-hero-copy::before, .craft-stitched-orbit { display: none; }
+@media (max-width: 760px) {
+ .craft-curtain-canvas, .craft-curtain-fallback { height: 62%; }
+ .craft-wax-open img { width: 132px; height: 132px; }
+ .craft-cover { background-size: 430px 430px; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .craft-cover, .craft-curtain-fallback { transition: none !important; }
+ .craft-unfolded .craft-wax-open { animation: none; visibility: hidden; }
+}
