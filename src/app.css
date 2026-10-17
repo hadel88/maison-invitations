@@ -1404,3 +1404,45 @@
 .ev-map-journey { margin: 0 0 18px; }
 .ws-find { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; gap: 6px; margin: 2px 0 0 30px; padding: 6px 12px; border-radius: 999px; font-size: 12px; color: var(--ev-accent, #8b4a5c); background: var(--ev-soft, #f3e7ea); border: 1px solid color-mix(in srgb, var(--ev-accent, #8b4a5c) 30%, transparent); }
 .ws-find:hover { background: var(--ev-card, #fff); }
+/* ── Invitation page: big journey map with the essentials, then "Manage your magical day" ── */
+.ev-hero { margin-top: 10px; }
+.ev-hero .journey-map { height: clamp(460px, 46vw, 560px); }
+.ev-map-info { position: absolute; top: 26px; left: 50%; transform: translateX(-50%); z-index: 3; width: min(380px, 40%); text-align: center; color: #f4e7c9; padding: 14px 18px 16px; border-radius: 18px; background: rgba(10, 18, 34, 0.45); backdrop-filter: blur(5px); border: 1px solid rgba(225, 196, 138, 0.35); }
+.ev-map-occasion { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #dcc48e; }
+.ev-map-info h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(26px, 3vw, 38px); line-height: 1.05; margin: 4px 0 8px; color: #fbf1dc; overflow-wrap: anywhere; }
+.ev-map-info p { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 2px 0; font-size: 13px; color: #e8dcc2; }
+.ev-map-days { display: inline-block; margin-top: 10px; padding: 6px 16px; border-radius: 999px; font-family: var(--serif); font-size: 20px; font-weight: 500; color: #2b2214; background: linear-gradient(105deg, #d6b981, #efdab1); }
+@media (min-width: 801px) {
+  .ev-hero .landmark-1 { top: 44%; }
+  .ev-hero .landmark-3 { top: 40%; }
+}
+.ev-actions { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 14px 0 0; }
+.ev-icon-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--ev-line); background: var(--ev-card); color: var(--ev-ink); font-size: 13px; }
+.ev-icon-btn svg { color: var(--ev-accent); }
+.ev-icon-btn:hover:not(:disabled) { background: var(--ev-soft); }
+.ev-icon-btn:disabled { opacity: 0.5; }
+.ev-actions-meta { display: inline-flex; align-items: center; gap: 6px; margin-left: 6px; }
+.ev-head { margin-bottom: 14px; }
+.ev-head > div { text-align: center; width: 100%; }
+.ev-tabs { margin-bottom: 6px; }
+.ev-tabs button { flex: 1 1 0; }
+.ev-main { margin-top: 10px; }
+.ev-details-stack { display: flex; flex-direction: column; gap: 26px; }
+.ev-details-stack > .ws-panel + .ws-panel { border-top: 1px solid var(--ev-line) !important; padding-top: 22px; }
+.ev-main > .ws-panel + .ws-panel { border-top: 1px solid var(--ev-line); padding-top: 22px; margin-top: 22px; }
+.ev-experts-link { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 24px auto 0; padding: 10px 18px; border-radius: 999px; color: var(--ev-accent); background: var(--ev-soft); font-size: 14px; }
+@media (max-width: 800px) {
+  .ev-hero .journey-map { height: auto; padding-top: 0; }
+  .ev-map-info { position: relative; top: auto; left: auto; transform: none; width: auto; margin: 18px 16px 0; }
+  .ev-hero .journey-map { min-height: 690px; display: flex; flex-direction: column; }
+  .ev-tabs button { flex: 1 0 auto; }
+  .ev-icon-btn span { display: none; }
+  .ev-icon-btn { padding: 11px; }
+}
+.ev-map-info-mobile { display: none; }
+@media (max-width: 800px) {
+  .ev-hero .journey-map .ev-map-info { display: none; }
+  .ev-map-info-mobile { display: block; margin-top: -1px; }
+  .ev-map-info-mobile .ev-map-info { margin: 12px 0 0; width: auto; background: #101b2d; border-radius: 18px; }
+  .ev-hero .journey-map { min-height: 0; display: block; height: 690px; }
+}
