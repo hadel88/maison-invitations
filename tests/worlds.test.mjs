@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {eventWorlds,journeyProgress,occasionFor} from '../src/worlds.js';
+import {templates,occasions} from '../src/catalog.js';
+import {safeWebsite,providerSources} from '../src/providers.js';
+test('every event world has multiple invitations and its own checklist',()=>{assert.equal(eventWorlds.length,10);for(const w of eventWorlds){assert.ok(occasions.includes(w.occasion));assert.ok(templates.filter(t=>t.occasion===w.occasion).length>=2);assert.equal(w.tasks.length,6)}});
+test('world progress comes from published invitation, scoped RSVPs and saved experts',()=>{const date=new Date(Date.now()+10*86400000).toISOString().slice(0,10);const invitation={id:'mine',published:true,content:{date}};const p=journeyProgress({invitation,plan:{theme:'garden'},savedExperts:1,guests:[{invitation_id:'mine',response:'yes',party_size:2},{invitation_id:'other',response:'yes',party_size:9}]});assert.deepEqual(p.stages,[true,true,true,true,true]);assert.equal(p.attending,2);assert.equal(p.replies,1);assert.equal(p.invited,1)});
+test('an empty world does not fabricate invitation or RSVP progress',()=>{const p=journeyProgress({});assert.deepEqual(p.stages,[false,false,false,false,false]);assert.equal(p.attending,0);assert.equal(p.days,null)});
+test('legacy saved invitations retain the occasion of their design',()=>{assert.equal(occasionFor({content:{template:'ribbon'}},templates),'Birthday')});
+test('external websites reject executable schemes and directory URLs are secure',()=>{assert.equal(safeWebsite('javascript:alert(1)'),null);assert.equal(safeWebsite('data:text/html,test'),null);for(const p of providerSources){assert.ok(p.url.startsWith('https://'));assert.equal(safeWebsite(p.url),p.url)}});

@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {point,ribbonPhases} from '../src/ribbonGL.js';
+test('ribbon releases before gravity starts and has fallen clear before reveal',()=>{assert.equal(ribbonPhases(0).release,0);assert.equal(ribbonPhases(2.5).release,1);assert.equal(ribbonPhases(2.5).fall,0);assert.ok(point(.5,.5,1,'loop',5.2)[1]<-15)});
+test('ribbon surfaces remain finite throughout untying, including mesh edges',()=>{for(const type of ['loop','tail','knot'])for(const t of [0,.8,1.5,2.5,3.3,5.2])for(const side of [-1,1])for(const u of [0,.25,.5,.75,1,1.001])for(const v of [0,.5,1,1.001])assert.ok(point(u,v,side,type,t).every(Number.isFinite))});
