@@ -137,7 +137,7 @@ export function GuestExperience({
     }
   }
   return (
-    <div className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : "") + (opened ? "is-open" : "")}>
+    <div className="invitation-screen"><div className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : "") + (opened ? "is-open" : "")}>
       <div className="guest-controls">
         <a href="/" className="brand">
           maison
@@ -391,7 +391,7 @@ export function GuestExperience({
           </div>
         </div></div>
       )}
-    </div>
+    </div></div>
   );
 }
 export default function GuestPage({ slug, token, initialLang }) {

@@ -6,6 +6,7 @@ import './cinema.css';
 import './atelier.css';
 import {ensureFont} from './fonts';
 import {CraftStage} from './CraftInvitation';
+import {createEnvelopeRenderer} from './envelopeGL';
 const words={en:{open:'Open your invitation',touch:'Touch to open',scroll:'Scroll to discover',invited:'TOGETHER WITH OUR FAMILIES',celebrate:'invite you to celebrate our wedding',replay:'Replay opening'},de:{open:'Einladung öffnen',touch:'Zum Öffnen berühren',scroll:'Nach unten entdecken',invited:'GEMEINSAM MIT UNSEREN FAMILIEN',celebrate:'laden wir euch zu unserer Hochzeit ein',replay:'Erneut öffnen'},fr:{open:'Ouvrir votre invitation',touch:'Touchez pour ouvrir',scroll:'Faites défiler pour découvrir',invited:'ENTOURÉS DE NOS FAMILLES',celebrate:'nous vous invitons à célébrer notre mariage',replay:'Revoir l’ouverture'}};
 export function CinemaStage({event,guest,opened,onOpen,onReplay,lang='en'}){
  const theme=sceneFor(event),c=words[lang]||words.en,root=useRef(null),ribbonCanvas=useRef(null),ribbonEngine=useRef(null);
@@ -13,7 +14,7 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,lang='en'}){
  useEffect(()=>{if(theme.kind!=='rose')return;let dead=false;import('./ribbonGL').then(({createRibbonRenderer})=>{if(dead)return;try{ribbonEngine.current=createRibbonRenderer(ribbonCanvas.current,{onReady:()=>setRibbonReady(true),onError:()=>setRibbonReady(false)});if(opened)ribbonEngine.current.open()}catch{setRibbonReady(false)}});return()=>{dead=true;ribbonEngine.current?.dispose();ribbonEngine.current=null}},[theme.kind]);
  useEffect(()=>{if(opened)ribbonEngine.current?.open();else ribbonEngine.current?.reset()},[opened]);
  const [revealed,setRevealed]=useState(false);
- useEffect(()=>{setRevealed(false);if(!opened)return;const id=setTimeout(()=>setRevealed(true),matchMedia('(prefers-reduced-motion: reduce)').matches?50:theme.kind==='rose'?10500:5500);return()=>clearTimeout(id)},[opened,theme.kind]);
+ useEffect(()=>{setRevealed(false);if(!opened||theme.kind==='sage')return;const id=setTimeout(()=>setRevealed(true),matchMedia('(prefers-reduced-motion: reduce)').matches?50:theme.kind==='rose'?10500:5500);return()=>clearTimeout(id)},[opened,theme.kind]);
  const names=event.names.split(/\s*&\s*/);
  const font=ensureFont(event.font);
  if(theme.kind==='craft')return <CraftStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>;
@@ -29,15 +30,21 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,lang='en'}){
    <span className="atelier-place">{event.venue}</span>
   </div>
   {theme.kind==='rose'&&<canvas className="atelier-ribbon-canvas" ref={ribbonCanvas} aria-hidden="true"/>}
-  <div className="atelier-curtains" aria-hidden="true"><div className="atelier-leaf leaf-left" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/><div className="atelier-leaf leaf-right" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/>{theme.kind==='sage'&&<div className="atelier-envelope-flap" style={{backgroundImage:`url(/${theme.cover}.webp)`}}><img className="atelier-wax atelier-wax-flap" src="/maison-wax-seal.png" alt=""/></div>}</div>
+  {theme.kind==='sage'?<SageEnvelope opened={opened} onComplete={setRevealed}/>:<div className="atelier-curtains" aria-hidden="true"><div className="atelier-leaf leaf-left" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/><div className="atelier-leaf leaf-right" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/></div>}
   {!opened&&<button className={`atelier-open-control ${theme.kind==='rose'?'with-ribbon':''}`} onClick={onOpen} aria-label={c.open}>
-    {theme.kind==='rose'?<img className="atelier-bow" src="/atelier-bow.webp" alt=""/>:theme.kind==='sage'?null:<span className="atelier-monogram">{names.map(n=>n.trim()[0]).join(' & ')}</span>}
+    {theme.kind==='rose'?<img className="atelier-bow" src="/atelier-bow.webp" alt=""/>:theme.kind==='sage'?<span className="sage-seal-hitarea" aria-hidden="true"/>:<span className="atelier-monogram">{names.map(n=>n.trim()[0]).join(' & ')}</span>}
     <span className="atelier-touch">{c.touch}</span>
   </button>}
   {opened&&theme.kind==='rose'&&!ribbonReady&&<img className="atelier-bow departing-bow" src="/atelier-bow.webp" alt=""/>}
   {revealed&&<div className="atelier-scroll-hint"><span>{c.scroll}</span><ArrowDown size={17}/></div>}
-  {revealed&&<button className="atelier-replay" aria-label={c.replay} onClick={()=>{onReplay();if(theme.kind==='rose')root.current?.closest('.guest-experience')?.scrollTo({top:0,behavior:'instant'})}}><RotateCcw size={15}/></button>}
+  {revealed&&<button className="atelier-replay" aria-label={c.replay} onClick={()=>{onReplay();if(theme.kind==='rose'||theme.kind==='sage')root.current?.closest('.guest-experience')?.scrollTo({top:0,behavior:'instant'})}}><RotateCcw size={15}/></button>}
  </section>
+}
+function SageEnvelope({opened,onComplete}){
+ const canvas=useRef(null),renderer=useRef(null),[fallback,setFallback]=useState(false);
+ useEffect(()=>{try{renderer.current=createEnvelopeRenderer(canvas.current,{onComplete:()=>onComplete(true),onError:()=>setFallback(true)})}catch{setFallback(true)}return()=>{renderer.current?.dispose();renderer.current=null}},[onComplete]);
+ useEffect(()=>{if(opened)renderer.current?.open();else renderer.current?.reset();if(!opened||!fallback)return;const timer=setTimeout(()=>onComplete(true),matchMedia('(prefers-reduced-motion: reduce)').matches?0:4200);return()=>clearTimeout(timer)},[opened,fallback,onComplete]);
+ return <>{fallback?<div className="sage-envelope-fallback" aria-hidden="true"/>:<canvas className="sage-envelope-canvas" ref={canvas} aria-hidden="true"/>}<img className="sage-wax-release" src="/maison-wax-seal.png" width="132" height="132" alt="" aria-hidden="true"/></>;
 }
 export function CinemaCollection({onPreview,onCreate,notify}){
  const [copied,setCopied]=useState('');
