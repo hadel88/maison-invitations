@@ -51,6 +51,48 @@ const website = (v: unknown) => {
 };
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9äöüßéèàç]/g, "");
 
+// Real photos, only where OpenStreetMap links a freely licensed Wikimedia Commons file
+// (tags wikimedia_commons=File:… or image=<commons/upload.wikimedia URL>). Other image URLs are
+// skipped because their licence is unknown.
+function commonsTitle(t: Record<string, any>): string | null {
+  const wc = String(t.wikimedia_commons || "");
+  if (/^File:/i.test(wc)) return "File:" + wc.slice(5).trim();
+  const img = String(t.image || "");
+  let m = img.match(/commons\.wikimedia\.org\/wiki\/(File:[^?#]+)/i);
+  if (m) return decodeURIComponent(m[1]).replace(/_/g, " ");
+  m = img.match(/upload\.wikimedia\.org\/wikipedia\/commons\/(?:thumb\/)?[0-9a-f]\/[0-9a-f]{2}\/([^/?#]+)/i);
+  if (m) return "File:" + decodeURIComponent(m[1]).replace(/_/g, " ");
+  return null;
+}
+const strip = (html: unknown) => safe(String(html ?? "").replace(/<[^>]*>/g, " "), 80);
+
+async function addPhotos(rows: any[]) {
+  const wanted = rows.filter((r) => r.commons).slice(0, 50);
+  if (!wanted.length) return;
+  const url = new URL("https://commons.wikimedia.org/w/api.php");
+  url.search = new URLSearchParams({
+    action: "query", format: "json", prop: "imageinfo", iiprop: "url|extmetadata", iiurlwidth: "640",
+    iiextmetadatafilter: "Artist|LicenseShortName", titles: [...new Set(wanted.map((r) => r.commons))].join("|"),
+  }).toString();
+  try {
+    const r = await fetch(url, { headers: { "User-Agent": "MaisonInvitations/1.0 (venues & experts search)" }, signal: AbortSignal.timeout(5000) });
+    if (!r.ok) return;
+    const data = await r.json();
+    const norm: Record<string, string> = {};
+    for (const n of data.query?.normalized || []) norm[n.from] = n.to;
+    const pages: Record<string, any> = {};
+    for (const pg of Object.values<any>(data.query?.pages || {})) if (pg.imageinfo?.[0]) pages[pg.title] = pg.imageinfo[0];
+    for (const row of wanted) {
+      const info = pages[norm[row.commons] || row.commons];
+      if (!info?.thumburl) continue;
+      const meta = info.extmetadata || {};
+      row.photo = info.thumburl;
+      row.photoSource = info.descriptionurl;
+      row.photoCredit = [strip(meta.Artist?.value) || "Unknown author", strip(meta.LicenseShortName?.value), "Wikimedia Commons"].filter(Boolean).join(" · ");
+    }
+  } catch { /* photos are optional */ }
+}
+
 async function fromGeoapify(cat: string, loc: any, language: string) {
   if (!GEO || !CATEGORIES[cat].geo) return [];
   const url = new URL("https://api.geoapify.com/v2/places");
@@ -62,7 +104,7 @@ async function fromGeoapify(cat: string, loc: any, language: string) {
     lang: language,
     apiKey: GEO,
   }).toString();
-  const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
+  const r = await fetch(url, { signal: AbortSignal.timeout(9000) });
   if (!r.ok) return [];
   const data = await r.json();
   return (data.features || [])
@@ -79,6 +121,7 @@ async function fromGeoapify(cat: string, loc: any, language: string) {
         category: cat,
         distance: p.distance ? Math.round(p.distance) : null,
         source: "Geoapify / OpenStreetMap",
+        commons: commonsTitle(raw),
       };
     })
     .filter((p: any) => p.name && p.id);
@@ -86,12 +129,12 @@ async function fromGeoapify(cat: string, loc: any, language: string) {
 
 async function fromOverpass(cat: string, loc: any) {
   const around = `(around:${RADIUS_M},${loc.lat},${loc.lon})`;
-  const q = `[out:json][timeout:20];(${CATEGORIES[cat].osm.map((t) => `nwr[${t}]${around};`).join("")});out center 60;`;
+  const q = `[out:json][timeout:9];(${CATEGORIES[cat].osm.map((t) => `nwr[${t}]${around};`).join("")});out center 60;`;
   const r = await fetch("https://overpass-api.de/api/interpreter", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "MaisonInvitations/1.0 (venues & experts search)" },
     body: "data=" + encodeURIComponent(q),
-    signal: AbortSignal.timeout(20000),
+    signal: AbortSignal.timeout(10000),
   });
   if (!r.ok) return [];
   const data = await r.json();
@@ -111,6 +154,7 @@ async function fromOverpass(cat: string, loc: any) {
         category: cat,
         distance: null,
         source: "OpenStreetMap",
+        commons: commonsTitle(t),
       };
     })
     .filter((p: any) => p.name);
@@ -118,8 +162,15 @@ async function fromOverpass(cat: string, loc: any) {
 
 // Geoapify first, then OpenStreetMap entries that Geoapify did not already have.
 export function merge(a: any[], b: any[], max = 60) {
-  const seen = new Set(a.map((p) => norm(p.name)));
-  return [...a, ...b.filter((p) => !seen.has(norm(p.name)) && seen.add(norm(p.name)))].slice(0, max);
+  const byName = new Map(a.map((p) => [norm(p.name), p]));
+  const extra: any[] = [];
+  for (const p of b) {
+    const k = norm(p.name), same = byName.get(k);
+    if (same) { if (!same.commons && p.commons) same.commons = p.commons; continue; }
+    byName.set(k, p);
+    extra.push(p);
+  }
+  return [...a, ...extra].slice(0, max);
 }
 
 async function identity(req: Request) {
@@ -145,7 +196,7 @@ Deno.serve(async (req: Request) => {
     const language = ["en", "de", "fr"].includes(body.language) ? body.language : "en";
     if (city.length < 2 || !CATEGORIES[category]) return json({ error: "Choose a city and a supported search category." }, 400);
 
-    const key = "v2:" + city.toLowerCase() + ":" + category + ":" + language;
+    const key = "v3:" + city.toLowerCase() + ":" + category + ":" + language;
     const cache = await db("maison_discovery_cache?cache_key=eq." + encodeURIComponent(key) + "&expires_at=gt." + encodeURIComponent(new Date().toISOString()) + "&select=data");
     if (cache.ok) {
       const cached = await cache.json();
@@ -159,7 +210,7 @@ Deno.serve(async (req: Request) => {
     if (!GEO) return json({ error: "The Geoapify key is not configured in this Supabase project." }, 503);
     const geocode = new URL("https://api.geoapify.com/v1/geocode/search");
     geocode.search = new URLSearchParams({ text: city, type: "city", limit: "1", format: "json", apiKey: GEO }).toString();
-    const gr = await fetch(geocode, { signal: AbortSignal.timeout(10000) });
+    const gr = await fetch(geocode, { signal: AbortSignal.timeout(6000) });
     if (!gr.ok) return json({ error: "City search is temporarily unavailable. Please try again later." }, 502);
     const loc = (await gr.json()).results?.[0];
     if (!loc) return json({ error: "We couldn't find that city. Try adding the country." }, 404);
@@ -170,6 +221,8 @@ Deno.serve(async (req: Request) => {
       fromOverpass(category, loc).catch(() => []),
     ]);
     const rows = merge(geo, osm);
+    await addPhotos(rows);
+    for (const r of rows) delete r.commons;
     const result = {
       rows,
       city: loc.city || loc.name || city,

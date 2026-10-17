@@ -168,7 +168,7 @@ export default async function handler(req, res) {
       const v=await session(req,res);
       const headers={apikey:KEY,'Content-Type':'application/json'};
       if(v?.token)headers.Authorization='Bearer '+v.token;else if(KEY.startsWith('eyJ'))headers.Authorization='Bearer '+KEY;
-      const r=await fetch(SB+'/functions/v1/maison-discover',{method:'POST',headers,body:JSON.stringify({city:b.city,category:b.category,language:b.language})});
+      let r;try{r=await fetch(SB+'/functions/v1/maison-discover',{method:'POST',headers,body:JSON.stringify({city:b.city,category:b.category,language:b.language}),signal:AbortSignal.timeout(40000)})}catch{return res.status(504).json({error:'The search took too long. Please try again in a moment.'})}
       let data;try{data=await r.json()}catch{data={error:'Search is temporarily unavailable. Try the directories below.'}}
       return res.status(r.status).json(data);
     }

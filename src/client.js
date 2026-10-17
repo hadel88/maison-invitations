@@ -1,15 +1,21 @@
 export async function api(action, { method = "GET", data, query = {} } = {}) {
   const q = new URLSearchParams({ action, ...query });
-  const r = await fetch("/api/app?" + q, {
-    method,
-    credentials: "same-origin",
-    ...(data
-      ? {
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        }
-      : {}),
-  });
+  let r;
+  try {
+    r = await fetch("/api/app?" + q, {
+      method,
+      credentials: "same-origin",
+      ...(data
+        ? {
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          }
+        : {}),
+    });
+  } catch {
+    // Browsers report a dropped connection as "Load failed" / "Failed to fetch"
+    throw Object.assign(new Error("The connection was interrupted. Please try again."), { network: true });
+  }
   const d = await r
     .json()
     .catch(() => ({ error: "Service unavailable. Please retry." }));
