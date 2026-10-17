@@ -1224,3 +1224,4 @@
   .es-two, .ec-two, .ec-three { grid-template-columns: minmax(0, 1fr); }
   .es-panel { padding: 18px; }
 }
+.experts-content > .join-maison { margin-bottom: 18px; }
