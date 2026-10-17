@@ -534,7 +534,7 @@ function App() {
             <p className="lx-collection-note">
               <Check size={14} strokeWidth={1.5} /> Prefer the full experience?{" "}
               <button className="lx-inline" onClick={() => go("designs")}>
-                See the three signature invitations
+                See the signature invitations
               </button>
             </p>
           </section>

@@ -7,7 +7,7 @@ export const PACKAGES = [
     price: 19,
     tagline: "Your invitation, beautifully sent",
     features: [
-      "One of the three signature invitations, personalised",
+      "One of the signature invitations, personalised",
       "One link to share by WhatsApp, email or text",
       "Guests reply online: yes or no, how many, a note",
       "Replies listed in your invitation space",

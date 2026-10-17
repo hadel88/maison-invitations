@@ -2,7 +2,7 @@ import React from "react";
 import { ArrowRight, Plus } from "lucide-react";
 import { PACKAGES } from "./packages";
 
-// Everything below the three signature designs, in the order people decide:
+// Everything below the signature designs, in the order people decide:
 // how it works → which package → questions → start.
 export default function HomeSections({ onStart }) {
   return (
@@ -14,7 +14,7 @@ export default function HomeSections({ onStart }) {
         </div>
         <ol className="lx-steps lx-steps-4">
           {[
-            ["I", "Choose your design", "Open the three signature invitations above and pick the one that feels like you."],
+            ["I", "Choose your design", "Open the signature invitations above and pick the one that feels like you."],
             ["II", "Make it yours", "Names, date, place and a few warm words. You see every change straight away."],
             ["III", "Pick your package", "Just the invitation, or the invitation with guest tracking and a planner."],
             ["IV", "Send & follow", "Share your link. Replies arrive in your invitation space."],

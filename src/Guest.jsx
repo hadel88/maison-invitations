@@ -37,6 +37,7 @@ import { copy, dateLabel, defaultEvent, templates } from "./catalog";
 import { api, download, calendar } from "./client";
 import { Field } from "./ui";
 import { CinemaStage } from "./Cinema";
+import { CraftWelcome, CraftGarland, craftWords } from "./CraftInvitation";
 
 function useSound(music, active) {
   const [muted, setMuted] = useState(false);
@@ -88,6 +89,7 @@ export function GuestExperience({
   useEffect(()=>{document.documentElement.dataset.world=event.worldTheme||"midnight"},[event.worldTheme]);
   const [lang, setLang] = useState(event.language || "en");
   const c = copy[lang];
+  const crafted = event.scene === 'embroidered-chateau';
   const [muted, toggleSound] = useSound(event.music, opened);
   const [name, setName] = useState(guest?.name || "");
   const [response, setResponse] = useState(
@@ -135,7 +137,7 @@ export function GuestExperience({
     }
   }
   return (
-    <div className={"guest-experience cinema-guest " + (opened ? "is-open" : "")}>
+    <div className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : "") + (opened ? "is-open" : "")}>
       <div className="guest-controls">
         <a href="/" className="brand">
           maison
@@ -170,10 +172,10 @@ export function GuestExperience({
       {opened && (
         <div className="cinema-detail-sheet" aria-label="Invitation details and RSVP">
         <div className="opened-invite">
-          <p className="guest-message">{event.message}</p>
+          {crafted ? <CraftWelcome event={event} lang={lang} /> : <p className="guest-message">{event.message}</p>}
           <section className="event-details">
             <span className="eyebrow">{c.details}</span>
-            <h2>A day to remember.</h2>
+            <h2>{crafted ? craftWords(lang).details : 'A day to remember.'}</h2>
             <div>
               <CalendarDays />
               <span>
@@ -195,7 +197,7 @@ export function GuestExperience({
                 {event.address}
               </span>
             </div>
-            {event.dressCode && (
+            {event.dressCode && !crafted && (
               <div>
                 <Sparkles />
                 <span>
@@ -228,9 +230,11 @@ export function GuestExperience({
               </a>
             </div>
           </section>
+          {crafted && event.dressCode && <section className="craft-dress"><CraftGarland /><span className="craft-eyebrow">{craftWords(lang).attire}</span><h2>{craftWords(lang).dress}</h2><p>{event.dressCode}</p></section>}
           {Array.isArray(event.timeline) && event.timeline.length > 0 && (
             <section className="event-details guest-timeline">
               <span className="eyebrow">{{ en: "THE PROGRAMME", de: "DER ABLAUF", fr: "LE PROGRAMME" }[lang] || "THE PROGRAMME"}</span>
+              {crafted && <h2>{{en:'The order of our day',de:'Unser gemeinsamer Tag',fr:'Le fil de notre journée'}[lang] || 'The order of our day'}</h2>}
               <ol>
                 {event.timeline.map((t, i) => (
                   <li key={i}>
@@ -247,6 +251,7 @@ export function GuestExperience({
           {Array.isArray(event.gifts) && event.gifts.length > 0 && (
             <section className="event-details guest-gifts">
               <span className="eyebrow">{{ en: "GIFT WISHES", de: "WUNSCHLISTE", fr: "LISTE DE SOUHAITS" }[lang] || "GIFT WISHES"}</span>
+              {crafted && <h2>{craftWords(lang).gifts}</h2>}
               <ul>
                 {event.gifts.map((g, i) => (
                   <li key={i}>

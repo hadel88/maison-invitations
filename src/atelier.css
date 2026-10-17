@@ -85,3 +85,24 @@
 .atelier-rose .atelier-bow { width: min(100vw, 700px); max-width: none; }
 .atelier-rose:not(.atelier-opening) .atelier-leaf,
 .atelier-rose:not(.atelier-opening) .atelier-landscape { transition: none; }
+
+/* Full-bleed invitations: each half samples the same uncropped screen plane. */
+@media (min-width: 750px) {
+  .atelier-landscape, .atelier-curtains { width: 100%; left: 0; right: 0; }
+  .atelier-landscape { transform: scale(1.04); }
+  .atelier-curtains { transform: none; }
+  .atelier-opening .atelier-landscape { transform: scale(1); }
+}
+.atelier-curtains .atelier-leaf { width: 100%; background-size: cover; background-position: center; border: 0; }
+.atelier-curtains .leaf-left { left: 0; clip-path: inset(0 50% 0 0); }
+.atelier-curtains .leaf-right { right: 0; clip-path: inset(0 0 0 50%); }
+.atelier-rose .atelier-ribbon-canvas { inset: 0; width: 100%; transform: none; }
+.atelier-rose .atelier-bow { width: 100vw; }
+.atelier-three { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 1320px; gap: 24px; }
+@media (max-width: 1100px) and (min-width: 651px) { .atelier-three { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 780px; gap: 40px 28px; } }
+@media (max-width: 650px) { .atelier-three { grid-template-columns: 1fr; max-width: 370px; gap: 45px; } }
+
+.modal-backdrop:has(.experience-modal) { padding: 0; align-items: stretch; overflow: hidden; }
+.modal.experience-modal { position: fixed; inset: 0; width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; border-radius: 0; overflow: hidden; }
+.modal.experience-modal > .close { position: fixed; top: 12px; right: 12px; z-index: 60; background: #fffaf1dc; color: #635a4d; border: 1px solid #c6b79d66; border-radius: 50%; }
+.experience-modal .guest-controls { max-width: none; padding-right: 65px; }
