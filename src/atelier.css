@@ -38,3 +38,39 @@
 .atelier-inscription{opacity:1;visibility:hidden;transform:none;transition:none;text-shadow:0 1px 9px #fff8}
 .atelier-opening .atelier-inscription{visibility:visible}
 .cinema-detail-sheet{animation:none}
+
+/* A real Maison wax seal sits on the sage envelope flap and turns with it. */
+.atelier-wax {
+  display: block;
+  object-fit: contain;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  filter: drop-shadow(2px 8px 8px #18201566);
+}
+.atelier-sage .atelier-wax-flap {
+  position: absolute;
+  z-index: 1;
+  top: 78%;
+  left: 50%;
+  width: clamp(62px, 8vw, 88px);
+  height: clamp(58px, 7.5vw, 82px);
+  transform: translate(-50%, -50%) rotate(-5deg);
+  pointer-events: none;
+}
+.atelier-sage .atelier-leaf {
+  transition: transform 3.1s .45s cubic-bezier(.4, .01, .2, 1), opacity .6s 2.5s;
+}
+.atelier-sage .leaf-left { transform-origin: left center; }
+.atelier-sage .leaf-right { transform-origin: right center; }
+.atelier-sage.atelier-opening .leaf-left {
+  transform: rotateY(-112deg);
+  filter: brightness(.82);
+  opacity: 0;
+}
+.atelier-sage.atelier-opening .leaf-right {
+  transform: rotateY(112deg);
+  filter: brightness(.82);
+  opacity: 0;
+}
