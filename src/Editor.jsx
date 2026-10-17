@@ -4,14 +4,20 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
-  Edit3,
-  Eye,
+  Image as ImageIcon,
+  LayoutTemplate,
   Loader2,
   MapPin,
+  Music2,
+  Package as PackageIcon,
+  Palette,
   Play,
   ShieldCheck,
+  Type,
+  Users,
   X,
 } from "lucide-react";
+import { FONTS, fontFor, ensureAllFonts } from "./fonts";
 import { dateLabel } from "./catalog";
 import { Modal, Field } from "./ui";
 import { PACKAGES } from "./packages";
@@ -27,12 +33,17 @@ import { templates } from "./catalog";
 
 // The studio is one clear path: design → details → guest page → package → publish.
 const small = (name) => "/" + name + "-sm.webp";
-const STEPS = [
-  ["design", "Design"],
-  ["details", "Details"],
-  ["guests", "Guest page"],
-  ["package", "Package"],
+// The studio: tools on the left, the card in the middle, quick touches on the right.
+const TOOLS = [
+  ["design", "Designs", LayoutTemplate],
+  ["details", "Text", Type],
+  ["photo", "Photos", ImageIcon],
+  ["music", "Music", Music2],
+  ["background", "Backgrounds", Palette],
+  ["guests", "Guest page", Users],
+  ["package", "Package", PackageIcon],
 ];
+const MUSIC = [["soft", "Soft piano"], ["celestial", "Celestial chimes"], ["none", "No music"]];
 const ZONES = [
   "Europe/Berlin", "Europe/Paris", "Europe/London", "Europe/Rome",
   "Europe/Amsterdam", "Europe/Madrid", "Europe/Lisbon", "Europe/Zurich",
@@ -42,12 +53,10 @@ const ZONES = [
 
 export default function Editor({ record, user, onClose, onSave, onPreview }) {
   const [event, setEvent] = useState(withPackage(record));
-  const [step, setStep] = useState(
-    STEPS.findIndex(([id]) => id === (record.step || "details")),
-  );
+  const [tool, setTool] = useState(TOOLS.some(([id]) => id === record.step) ? record.step : "details");
+  useEffect(() => { ensureAllFonts(); }, []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [mobilePreview, setMobilePreview] = useState(false);
   const update = (k, v) => setEvent((e) => ({ ...e, [k]: v }));
   useEffect(() => {
     setEvent(withPackage(record));
@@ -57,13 +66,11 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
       localStorage.setItem("maison-draft", JSON.stringify(event));
     } catch {}
   }, [event]);
-  const last = step === STEPS.length - 1;
   function check() {
-    if (!event.names?.trim()) return "Please add names or a title (step 2).";
-    if (!event.date || !event.time) return "Please add the date and time (step 2).";
-    if (!event.rsvpDeadline) return "Please set an RSVP date (step 3).";
-    if (event.rsvpDeadline > event.date)
-      return "The RSVP date should be before the celebration (step 3).";
+    if (!event.names?.trim()) { setTool("details"); return "Please add names or a title (Text)."; }
+    if (!event.date || !event.time) { setTool("details"); return "Please add the date and time (Text)."; }
+    if (!event.rsvpDeadline) { setTool("guests"); return "Please set a reply date (Guest page)."; }
+    if (event.rsvpDeadline > event.date) { setTool("guests"); return "The reply date should be before the celebration (Guest page)."; }
     return "";
   }
   async function save(publish) {
@@ -239,38 +246,45 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
           onChange={(v) => update("dressCode", v)}
           maxLength={120}
         />
+        <div className="small-note">
+          <ShieldCheck size={19} />
+          <span>Guests don’t need an account. Their replies are visible only to you.</span>
+        </div>
+      </>
+    ),
+    music: (
+      <>
+        <p className="st-lead">Music starts softly after your guest opens the envelope.</p>
+        <div className="st-choice-list">
+          {MUSIC.map(([id, label]) => (
+            <button key={id} className={(event.music || "soft") === id ? "selected" : ""} onClick={() => update("music", id)}>
+              <Music2 size={15} /> {label} {(event.music || "soft") === id && <Check size={14} />}
+            </button>
+          ))}
+        </div>
+      </>
+    ),
+    background: (
+      <>
+        <p className="st-lead">The colour world of the details page your guests see after opening, and of your dashboard.</p>
+        <div className="st-worlds">
+          {worldThemes.map((w) => (
+            <button key={w.id} className={(event.worldTheme || "midnight") === w.id ? "selected" : ""} onClick={() => update("worldTheme", w.id)}>
+              <span style={{ backgroundImage: `url(${w.image})` }} />
+              <strong>{w.name}</strong>
+              <small>{w.subtitle}</small>
+            </button>
+          ))}
+        </div>
+      </>
+    ),
+    photo: (
+      <>
+        <p className="st-lead">A photo of you, shown on the details page of your invitation.</p>
+        {event.photo && <img className="st-photo" src={event.photo} alt="Your photo" />}
         <label className="field">
-          Opening music
-          <select
-            value={event.music}
-            onChange={(e) => update("music", e.target.value)}
-          >
-            <option value="soft">Soft piano</option>
-            <option value="celestial">Celestial chimes</option>
-            <option value="none">No music</option>
-          </select>
-          <small>Plays only after your guest opens the envelope.</small>
-        </label>
-        <label className="field">
-          Colour mood of the details page
-          <select
-            value={event.worldTheme || "midnight"}
-            onChange={(e) => update("worldTheme", e.target.value)}
-          >
-            {worldThemes.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          Your photo (optional)
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(e) => photo(e.target.files[0])}
-          />
+          {event.photo ? "Choose another photo" : "Your photo (optional)"}
+          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => photo(e.target.files[0])} />
           <small>JPG, PNG or WebP, resized automatically.</small>
         </label>
         {event.photo && (
@@ -278,10 +292,6 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
             Remove photo <X size={14} />
           </button>
         )}
-        <div className="small-note">
-          <ShieldCheck size={19} />
-          <span>Guests don’t need an account. Their replies are visible only to you.</span>
-        </div>
       </>
     ),
     package: (
@@ -325,136 +335,111 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
         </div>
       </>
     ),
-  }[STEPS[step][0]];
+  }[tool];
 
+  const font = fontFor(event.font);
+  const label = TOOLS.find(([id]) => id === tool)?.[1];
   return (
-    <Modal className="editor-modal" onClose={onClose}>
+    <Modal className="editor-modal st-studio" onClose={onClose}>
       <div className="editor-top">
         <button className="text-link" onClick={onClose}>
           <ArrowLeft size={16} />
           <span>Close studio</span>
         </button>
-        <ol className="st-steps" aria-label="Steps">
-          {STEPS.map(([id, label], i) => (
-            <li key={id}>
-              <button
-                className={(i === step ? "current " : "") + (i < step ? "past" : "")}
-                aria-current={i === step ? "step" : undefined}
-                onClick={() => setStep(i)}
-              >
-                <span>{i < step ? <Check size={12} /> : i + 1}</span>
-                {label}
-              </button>
-            </li>
-          ))}
-        </ol>
-        <button
-          className="btn secondary"
-          disabled={saving}
-          onClick={() => save(false)}
-        >
-          {saving ? <Loader2 className="spin" size={14} /> : <Check size={14} />}
-          {record.published ? "Save" : "Save draft"}
-        </button>
-      </div>
-      <div className="editor-layout">
-        <aside className={mobilePreview ? "hide-mobile" : ""}>
-          <div className="editor-intro">
-            <span className="eyebrow">
-              STEP {step + 1} OF {STEPS.length}
-            </span>
-            <h2>
-              {["Choose your", "Tell your", "Shape the", "Pick your"][step]}{" "}
-              <em>{["design.", "story.", "guest page.", "package."][step]}</em>
-            </h2>
-          </div>
-          <div className="editor-fields">
-            {error && (
-              <div className="error" role="alert">
-                {error}
-              </div>
-            )}
-            {panel}
-            {!user && (
-              <div className="small-note">
-                Explore freely. You’ll sign in when you save or publish.
-              </div>
-            )}
-          </div>
-          <div className="st-nav">
-            {step > 0 ? (
-              <button className="btn secondary" onClick={() => setStep(step - 1)}>
-                <ArrowLeft size={15} /> Back
-              </button>
-            ) : (
-              <span />
-            )}
-            {last ? (
-              <button
-                className="btn primary"
-                disabled={saving}
-                onClick={() => save(true)}
-              >
-                {record.published ? "Save & share" : "Publish & share"}
-                <ArrowRight size={15} />
-              </button>
-            ) : (
-              <button className="btn primary" onClick={() => setStep(step + 1)}>
-                Next: {STEPS[step + 1][1]}
-                <ArrowRight size={15} />
-              </button>
-            )}
-          </div>
-        </aside>
-        <div
-          className={
-            "editor-preview " + (!mobilePreview ? "hide-mobile-preview" : "")
-          }
-        >
-          <div className="preview-topline">
-            <span>
-              <span className="live-dot" /> LIVE PREVIEW
-            </span>
-            <button className="text-link" onClick={() => onPreview(event)}>
-              <Play size={13} />
-              Open the envelope
-            </button>
-          </div>
-          <div className="preview-paper">
-            <div className="cinema-editor-cover">
-              <img src={small(scene.cover)} alt="Your invitation" />
-              <div>
-                <h3>{event.names}</h3>
-                <p>{event.subtitle}</p>
-                <small>{dateLabel(event.date, event.language)}</small>
-              </div>
-              <button onClick={() => onPreview(event)}>Open it full-screen ↗</button>
-            </div>
-            <div className="preview-event">
-              <p>{event.message}</p>
-              <span>
-                <CalendarDays size={15} />
-                {dateLabel(event.date, event.language)} · {event.time}
-              </span>
-              <span>
-                <MapPin size={15} />
-                {event.venue}, {event.address}
-              </span>
-            </div>
-          </div>
-          <p className="preview-caption">
-            {scene.name} <span>·</span>{" "}
-            {PACKAGES.find((p) => p.id === event.package)?.name || "Invitation"}
-          </p>
+        <div className="st-title">
+          <strong>Personalise & create</strong>
+          <span>Make it uniquely yours.</span>
+        </div>
+        <div className="st-top-actions">
+          <button className="btn secondary" disabled={saving} onClick={() => save(false)}>
+            {saving ? <Loader2 className="spin" size={14} /> : <Check size={14} />}
+            {record.published ? "Save" : "Save draft"}
+          </button>
+          <button className="btn primary" disabled={saving} onClick={() => save(true)}>
+            {record.published ? "Save & share" : "Publish & share"}
+            <ArrowRight size={15} />
+          </button>
         </div>
       </div>
-      <button
-        className="mobile-preview-toggle btn primary"
-        onClick={() => setMobilePreview(!mobilePreview)}
-      >
-        {mobilePreview ? <Edit3 size={15} /> : <Eye size={15} />}{" "}
-        {mobilePreview ? "Back to editing" : "See your preview"}
-      </button>
+      <div className="st-layout">
+        <nav className="st-tools" aria-label="Studio tools">
+          {TOOLS.map(([id, name, Icon]) => (
+            <button key={id} className={tool === id ? "selected" : ""} aria-pressed={tool === id} onClick={() => setTool(id)}>
+              <span><Icon size={17} strokeWidth={1.5} /></span>
+              {name}
+            </button>
+          ))}
+        </nav>
+        <section className="st-panel" aria-label={label}>
+          <h2>{label}</h2>
+          {error && (
+            <div className="error" role="alert">
+              {error}
+            </div>
+          )}
+          {panel}
+          {!user && <div className="small-note">Explore freely. You’ll sign in when you save or publish.</div>}
+        </section>
+        <div className="st-stage">
+          <div className="st-card" style={{ backgroundImage: `url(${small(scene.cover)})` }}>
+            <div className="st-card-text" style={{ fontFamily: font.family }}>
+              <span className="st-card-over">You’re invited</span>
+              <h3>{event.names}</h3>
+              {event.subtitle && <p>{event.subtitle}</p>}
+              <small>{dateLabel(event.date, event.language)} · {event.time}</small>
+              {event.venue && <em>{event.venue}</em>}
+            </div>
+          </div>
+          <div className="st-card-designs" aria-label="Choose the design">
+            {cinemaThemes.map((x) => (
+              <button key={x.id} className={scene.id === x.id ? "selected" : ""} aria-pressed={scene.id === x.id} onClick={() => choose(x)} title={x.name}>
+                <img src={small(x.cover)} alt={x.name} loading="lazy" />
+              </button>
+            ))}
+          </div>
+          <button className="text-link st-open" onClick={() => onPreview(event)}>
+            <Play size={13} /> Open the envelope
+          </button>
+          <p className="preview-caption">
+            {scene.name} <span>·</span> {PACKAGES.find((p) => p.id === event.package)?.name || "Invitation"}
+          </p>
+        </div>
+        <aside className="st-touch" aria-label="Add your touch">
+          <h3>Add your touch</h3>
+          <div className="st-touch-designs">
+            {cinemaThemes.map((x) => (
+              <button key={x.id} className={scene.id === x.id ? "selected" : ""} onClick={() => choose(x)} aria-label={x.name}>
+                <img src={small(x.cover)} alt="" loading="lazy" />
+              </button>
+            ))}
+          </div>
+          <h3>Fonts</h3>
+          <div className="st-fonts">
+            {FONTS.map((f) => (
+              <button
+                key={f.id}
+                className={font.id === f.id ? "selected" : ""}
+                style={{ fontFamily: f.family }}
+                onClick={() => update("font", f.id)}
+                aria-label={f.name + " font"}
+                title={f.name}
+              >
+                A
+              </button>
+            ))}
+          </div>
+          <h3>Add music</h3>
+          <select className="st-music" value={event.music || "soft"} onChange={(e) => update("music", e.target.value)} aria-label="Music">
+            {MUSIC.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+          </select>
+          <h3>Colour world</h3>
+          <div className="st-swatches">
+            {worldThemes.map((w) => (
+              <button key={w.id} className={(event.worldTheme || "midnight") === w.id ? "selected" : ""} style={{ background: w.color }} onClick={() => update("worldTheme", w.id)} aria-label={w.name} title={w.name} />
+            ))}
+          </div>
+        </aside>
+      </div>
     </Modal>
   );
 }

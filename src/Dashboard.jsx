@@ -16,6 +16,10 @@ import {
   Settings2,
   Trash2,
   Users,
+  CalendarHeart,
+  Clock,
+  Gift,
+  Image as ImageIcon,
 } from "lucide-react";
 import { dateLabel } from "./catalog";
 import { api, download } from "./client";
@@ -26,6 +30,7 @@ import { templates } from "./catalog";
 import { occasionFor, worldFor, journeyProgress } from "./worlds";
 import { JourneyMap } from "./RoyalHub";
 import { buildTasks, groupTasks, milestones } from "./journey";
+import { DetailsPanel, LocationPanel, TimelinePanel, GiftsPanel, RsvpPanel, SettingsPanel, initials } from "./EventPanels";
 import "./app.css";
 
 const DAY = 86400000;
@@ -83,9 +88,9 @@ function exportCsv(guests) {
 }
 const answer = (g) =>
   g.response === "yes"
-    ? ["Coming", "yes"]
+    ? ["Going", "yes"]
     : g.response === "no"
-      ? ["Can’t come", "no"]
+      ? ["Can’t go", "no"]
       : ["No answer yet", "pending"];
 
 export default function Dashboard({
@@ -479,7 +484,7 @@ const when = (iso) =>
   new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack, onEdit, onShare, onPreview }) {
-  const [tab, setTab] = useState(initialTab && initialTab !== "overview" ? initialTab : "tasks");
+  const [tab, setTab] = useState(initialTab && initialTab !== "overview" ? initialTab : "guests");
   const [guests, setGuests] = useGuests(invite, notify);
   const [plan, setPlan] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -552,6 +557,17 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
       setSaving(false);
     }
   }
+  async function saveContent(patch, message) {
+    try {
+      await api("invitations", { method: "POST", data: { id: invite.id, content: { ...invite.content, ...patch }, published: invite.published } });
+      await onRefresh();
+      notify(message || "Saved.");
+      return true;
+    } catch (e) {
+      notify(e.message);
+      return false;
+    }
+  }
   const toggle = (t) => savePlan({ ...plan, done: { ...(plan.done || {}), [t.id]: !t.done } });
   // One step: pick a picture, it is added to Photos and becomes the cover.
   const [coverBusy, setCoverBusy] = useState(false);
@@ -584,14 +600,25 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
     [() => onEdit(invite), () => onShare(invite), () => onExperts(invite), () => setTab("guests"), () => setTab("tasks")][i]();
   const photos = (wall || []).filter((x) => x.kind === "photo");
   const tabs = [
-    ["tasks", "Tasks" + (tasks.length ? " · " + (tasks.length - open.length) + "/" + tasks.length : "")],
-    ["wall", "Wall"],
-    ["photos", "Photos" + (photos.length ? " · " + photos.length : "")],
     ["guests", "Guests" + (s.total ? " · " + s.total : "")],
+    ["rsvps", "RSVPs" + (s.replied ? " · " + s.replied : "")],
+    ["wall", "Wall"],
+    ["tasks", "Tasks" + (tasks.length ? " · " + (tasks.length - open.length) + "/" + tasks.length : "")],
+    ["photos", "Gallery" + (photos.length ? " · " + photos.length : "")],
+    ["settings", "Settings"],
+  ];
+  const side = [
+    ["details", CalendarHeart, "Event details"],
+    ["location", MapPin, "Location & map"],
+    ["timeline", Clock, "Timeline"],
+    ["gifts", Gift, "Gift registry"],
+    ["photos", ImageIcon, "Photo gallery"],
   ];
   const art = "/" + sceneFor(c).cover + ".webp";
+  const daysLeft = Math.round((new Date(c.date + "T12:00:00") - new Date(new Date().toDateString() + " 12:00")) / DAY);
+  const panelProps = { content: c, onSaveContent: saveContent };
   return (
-    <main className="ws ws-journey">
+    <main className="ws ws-journey ev" data-world={c.worldTheme || "midnight"}>
       <button className="lx-link ws-back" onClick={onBack}>
         <ArrowLeft size={15} /> My invitations
       </button>
@@ -613,7 +640,7 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
               Share link <ArrowUpRight size={15} />
             </button>
             <button className="lx-btn ws-btn ws-btn-glass" onClick={() => onEdit(invite)}>
-              <Edit3 size={14} /> Edit
+              <Edit3 size={14} /> Edit design
             </button>
             <button className="lx-btn ws-btn ws-btn-glass" onClick={() => onPreview(c)}>
               <Eye size={14} /> Preview
@@ -631,52 +658,90 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
         </div>
       </section>
 
-      <div className="ws-map">
-        <JourneyMap world={worldFor(occasion)} progress={progress} onAction={mapAction} theme={c.worldTheme || "midnight"} />
-      </div>
-
-      <StatTiles
-        s={s}
-        labels={[
-          ["total", "Invited"],
-          ["attending", "People coming"],
-          ["declined", "Can’t come"],
-          ["waiting", "No answer yet"],
-        ]}
-      />
-
-      <div className="ws-tabs" role="tablist">
-        {tabs.map(([id, label]) => (
-          <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? "selected" : ""} onClick={() => setTab(id)}>
-            {label}
-          </button>
-        ))}
-        <button className="ws-tab-link" onClick={() => onExperts(invite)}>
-          <MapPin size={13} /> Venues & experts
-        </button>
-      </div>
-
-      {tab === "tasks" &&
-        (plan ? (
-          <JourneyPanel tasks={tasks} plan={plan} saving={saving} onToggle={toggle} onSave={savePlan} occasion={occasion} />
-        ) : (
-          <p className="ws-muted">Loading your journey…</p>
-        ))}
-      {tab === "wall" && (
-        <WallPanel invite={invite} wall={wall} setWall={setWall} off={wallOff} guests={guests} notify={notify} />
-      )}
-      {tab === "photos" && (
-        <PhotosPanel
-          invite={invite}
-          photos={photos}
-          setWall={setWall}
-          off={wallOff}
-          cover={plan?.cover}
-          onCover={(id) => plan && savePlan({ ...plan, cover: id || undefined })}
-          notify={notify}
-        />
-      )}
-      {tab === "guests" && <GuestsPanel invite={invite} guests={guests} setGuests={setGuests} notify={notify} />}
+      <section className="ev-card">
+        <div className="ev-head">
+          <span className="ev-badge" title="Days to go">
+            {daysLeft >= 0 ? daysLeft : "✓"}
+            <small>{daysLeft === 1 ? "day" : daysLeft >= 0 ? "days" : "done"}</small>
+          </span>
+          <div>
+            <h2>Manage your event</h2>
+            <p>Everything in one place.</p>
+          </div>
+        </div>
+        <div className="ev-grid">
+          <div className="ev-main">
+            <div className="ev-tabs" role="tablist">
+              {tabs.map(([id, label]) => (
+                <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? "selected" : ""} onClick={() => setTab(id)}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="ev-stats">
+              {[
+                ["total", "Invited"],
+                ["attending", "Going"],
+                ["declined", "Can’t go"],
+                ["waiting", "No answer"],
+              ].map(([k, label]) => (
+                <div key={k} className={"ev-stat ev-stat-" + k}>
+                  <strong>{s[k]}</strong>
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+            {tab === "guests" && <GuestsPanel invite={invite} guests={guests} setGuests={setGuests} notify={notify} />}
+            {tab === "rsvps" && <RsvpPanel guests={guests} onExport={() => exportCsv(guests)} />}
+            {tab === "wall" && (
+              <WallPanel invite={invite} wall={wall} setWall={setWall} off={wallOff} guests={guests} notify={notify} />
+            )}
+            {tab === "tasks" && (
+              <>
+                <div className="ws-map">
+                  <JourneyMap world={worldFor(occasion)} progress={progress} onAction={mapAction} theme={c.worldTheme || "midnight"} />
+                </div>
+                {plan ? (
+                  <JourneyPanel tasks={tasks} plan={plan} saving={saving} onToggle={toggle} onSave={savePlan} occasion={occasion} />
+                ) : (
+                  <p className="ws-muted">Loading your journey…</p>
+                )}
+              </>
+            )}
+            {tab === "photos" && (
+              <PhotosPanel
+                invite={invite}
+                photos={photos}
+                setWall={setWall}
+                off={wallOff}
+                cover={plan?.cover}
+                onCover={(id) => plan && savePlan({ ...plan, cover: id || undefined })}
+                notify={notify}
+              />
+            )}
+            {tab === "settings" && (
+              <SettingsPanel invite={invite} onSaveContent={saveContent} onEdit={onEdit} onShare={onShare} onRefresh={onRefresh} notify={notify} setPackage={setPackage} />
+            )}
+            {tab === "details" && <DetailsPanel key={invite.updated_at} {...panelProps} />}
+            {tab === "location" && <LocationPanel key={invite.updated_at} {...panelProps} />}
+            {tab === "timeline" && <TimelinePanel key={invite.updated_at} {...panelProps} />}
+            {tab === "gifts" && <GiftsPanel key={invite.updated_at} {...panelProps} />}
+          </div>
+          <nav className="ev-side" aria-label="Event sections">
+            {side.map(([id, Icon, label]) => (
+              <button key={id} className={tab === id ? "selected" : ""} onClick={() => setTab(id)}>
+                <span><Icon size={16} strokeWidth={1.5} /></span>
+                {label}
+              </button>
+            ))}
+            <button onClick={() => onExperts(invite)}>
+              <span><Compass size={16} strokeWidth={1.5} /></span>
+              Venues & experts
+            </button>
+          </nav>
+        </div>
+        <p className="ev-foot">Track RSVPs, manage guests, share updates, add the location, a programme and a gift list.</p>
+      </section>
     </main>
   );
 }
@@ -1050,6 +1115,7 @@ function GuestsPanel({ invite, guests, setGuests, notify }) {
             const [label, cls] = answer(g);
             return (
               <li key={g.id}>
+                <span className="ev-avatar" aria-hidden="true">{initials(g.name)}</span>
                 <span className="ws-guest-name">
                   <strong>{g.name}</strong>
                   {g.note && <small>“{g.note}”</small>}

@@ -4,6 +4,7 @@ import {cinemaThemes,sceneFor,cinemaEvent} from './cinemaThemes';
 import {dateLabel,defaultEvent,templates} from './catalog';
 import './cinema.css';
 import './atelier.css';
+import {ensureFont} from './fonts';
 const words={en:{open:'Open your invitation',touch:'Touch to open',scroll:'Scroll to discover',invited:'TOGETHER WITH OUR FAMILIES',celebrate:'invite you to celebrate our wedding',replay:'Replay opening'},de:{open:'Einladung öffnen',touch:'Zum Öffnen berühren',scroll:'Nach unten entdecken',invited:'GEMEINSAM MIT UNSEREN FAMILIEN',celebrate:'laden wir euch zu unserer Hochzeit ein',replay:'Erneut öffnen'},fr:{open:'Ouvrir votre invitation',touch:'Touchez pour ouvrir',scroll:'Faites défiler pour découvrir',invited:'ENTOURÉS DE NOS FAMILLES',celebrate:'nous vous invitons à célébrer notre mariage',replay:'Revoir l’ouverture'}};
 export function CinemaStage({event,guest,opened,onOpen,onReplay,lang='en'}){
  const theme=sceneFor(event),c=words[lang]||words.en,root=useRef(null),ribbonCanvas=useRef(null),ribbonEngine=useRef(null);
@@ -13,13 +14,14 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,lang='en'}){
  const [revealed,setRevealed]=useState(false);
  useEffect(()=>{setRevealed(false);if(!opened)return;const id=setTimeout(()=>setRevealed(true),matchMedia('(prefers-reduced-motion: reduce)').matches?50:theme.kind==='rose'?10500:5500);return()=>clearTimeout(id)},[opened,theme.kind]);
  const names=event.names.split(/\s*&\s*/);
+ const font=ensureFont(event.font);
  return <section ref={root} className={`atelier-stage atelier-${theme.kind} ${opened?'atelier-opening':''} ${revealed?'atelier-revealed':''} ${ribbonReady?'ribbon-ready':''}`} aria-label={theme.name+' invitation'} style={{'--atelier-ink':theme.ink}}>
   <div className="atelier-landscape" style={{backgroundImage:`url(/${theme.image}.webp)`}}/>
   <div className="atelier-light" aria-hidden="true"/>
   <div className="atelier-petals" aria-hidden="true">{Array.from({length:9},(_,i)=><i key={i} style={{left:`${i*13%100}%`,animationDelay:`${-i*2.3}s`,animationDuration:`${14+i}s`}}/>)}</div>
   <div className="atelier-inscription" aria-hidden={!revealed}>
    <span className="atelier-overline">{guest?.name?`FOR ${guest.name.toUpperCase()}`:c.invited}</span>
-   <h1>{names.map((name,i)=><React.Fragment key={i}>{i>0&&<em>&</em>}<span>{name}</span></React.Fragment>)}</h1>
+   <h1 style={event.font&&event.font!=='classic'?{fontFamily:font.family}:undefined}>{names.map((name,i)=><React.Fragment key={i}>{i>0&&<em>&</em>}<span>{name}</span></React.Fragment>)}</h1>
    <p>{event.subtitle||c.celebrate}</p>
    <div className="atelier-date">{dateLabel(event.date,lang)}</div>
    <span className="atelier-place">{event.venue}</span>

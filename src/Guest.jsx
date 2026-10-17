@@ -228,6 +228,42 @@ export function GuestExperience({
               </a>
             </div>
           </section>
+          {Array.isArray(event.timeline) && event.timeline.length > 0 && (
+            <section className="event-details guest-timeline">
+              <span className="eyebrow">{{ en: "THE PROGRAMME", de: "DER ABLAUF", fr: "LE PROGRAMME" }[lang] || "THE PROGRAMME"}</span>
+              <ol>
+                {event.timeline.map((t, i) => (
+                  <li key={i}>
+                    <time>{t.time}</time>
+                    <span>
+                      <strong>{t.title}</strong>
+                      {t.note && <small>{t.note}</small>}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+          {Array.isArray(event.gifts) && event.gifts.length > 0 && (
+            <section className="event-details guest-gifts">
+              <span className="eyebrow">{{ en: "GIFT WISHES", de: "WUNSCHLISTE", fr: "LISTE DE SOUHAITS" }[lang] || "GIFT WISHES"}</span>
+              <ul>
+                {event.gifts.map((g, i) => (
+                  <li key={i}>
+                    <span>
+                      <strong>{g.title}</strong>
+                      {g.note && <small>{g.note}</small>}
+                    </span>
+                    {/^https?:\/\//i.test(g.link || "") && (
+                      <a className="text-link" href={g.link} target="_blank" rel="noopener noreferrer">
+                        {{ en: "View", de: "Ansehen", fr: "Voir" }[lang] || "View"} <ArrowUpRight size={13} />
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           <section className="rsvp">
             <span className="eyebrow">WE SAVED YOU A PLACE</span>
             <h2>{c.rsvp}</h2>

@@ -98,6 +98,14 @@ function checkEvent(c) {
       new Error("Upload a JPG, PNG or WebP photo using the editor."),
       { status: 400 },
     );
+  const text = (v, n) => v == null || (typeof v === "string" && v.length <= n);
+  const list = (v, max, ok) => v == null || (Array.isArray(v) && v.length <= max && v.every((x) => x && typeof x === "object" && ok(x)));
+  if (
+    !list(c.timeline, 30, (t) => /^([01]\d|2[0-3]):[0-5]\d$/.test(t.time) && typeof t.title === "string" && t.title.trim() && text(t.title, 120) && text(t.note, 300)) ||
+    !list(c.gifts, 40, (g) => typeof g.title === "string" && g.title.trim() && text(g.title, 140) && text(g.note, 300) && (!g.link || /^https?:\/\/[^\s]{3,500}$/i.test(g.link))) ||
+    !text(c.font, 20)
+  )
+    throw Object.assign(new Error("Please check the programme and gift list."), { status: 400 });
   if (JSON.stringify(c).length > 1400000)
     throw Object.assign(new Error("Please choose a smaller photo."), {
       status: 400,
