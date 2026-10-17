@@ -103,6 +103,35 @@ function checkEvent(c) {
       status: 400,
     });
 }
+export function checkPlan(p) {
+  const bad = () =>
+    Object.assign(new Error("Please check your journey tasks."), {
+      status: 400,
+    });
+  if (!p || typeof p !== "object" || Array.isArray(p)) throw bad();
+  const done = {};
+  for (const [k, v] of Object.entries(p.done || {})) {
+    if (!/^[a-z0-9-]{1,40}$/i.test(k) || typeof v !== "boolean") throw bad();
+    if (v) done[k] = true;
+  }
+  const custom = p.custom || [];
+  if (!Array.isArray(custom) || custom.length > 60) throw bad();
+  const clean = custom.map((t) => {
+    if (
+      !t ||
+      !/^c-[a-z0-9]{4,20}$/i.test(t.id) ||
+      typeof t.title !== "string" ||
+      t.title.trim().length < 1 ||
+      t.title.length > 120 ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(t.due)
+    )
+      throw bad();
+    return { id: t.id, title: t.title.trim(), due: t.due };
+  });
+  if (Object.keys(done).length > 200) throw bad();
+  if (p.cover != null && !/^[0-9a-f-]{36}$/i.test(String(p.cover))) throw bad();
+  return { done, custom: clean, ...(p.cover ? { cover: p.cover } : {}) };
+}
 const paymentsReady = () =>
   !!(
     process.env.STRIPE_SECRET_KEY &&
@@ -268,6 +297,97 @@ export default async function handler(req, res) {
         sb('/rest/v1/maison_guests?select=id,invitation_id,response,party_size',{token:s.token})
       ]);return res.json({planning,shortlist,guests});
     }
+    if (action === "invitation-journey") {
+      // One journey per invitation (package 2), stored privately in maison_planning
+      // under the key "inv:<invitation id>". Never part of the public invitation.
+      const id = req.method === "GET" ? req.query.id : b.id;
+      if (!/^[0-9a-f-]{36}$/i.test(String(id || "")))
+        return res.status(400).json({ error: "Invitation not found" });
+      const key = "inv:" + id;
+      if (req.method === "GET") {
+        const rows = await sb(
+          `/rest/v1/maison_planning?occasion=eq.${encodeURIComponent(key)}&select=data`,
+          { token: s.token },
+        );
+        return res.json({ plan: rows[0]?.data || { done: {}, custom: [] } });
+      }
+      if (req.method !== "POST") return res.status(405).end();
+      const own = await sb(
+        `/rest/v1/maison_invitations?id=eq.${encodeURIComponent(id)}&select=id`,
+        { token: s.token },
+      );
+      if (!own.length) return res.status(404).json({ error: "Invitation not found" });
+      const plan = checkPlan(b.plan);
+      const rows = await sb("/rest/v1/maison_planning?on_conflict=owner_id,occasion", {
+        method: "POST",
+        token: s.token,
+        body: { owner_id: s.user.id, occasion: key, data: plan, updated_at: new Date().toISOString() },
+        headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+      });
+      return res.json({ plan: rows[0]?.data || plan });
+    }
+    if (action === "wall") {
+      // Posts and photos of one invitation (package 2). Private to the host.
+      const missing = (e) =>
+        /maison_wall/.test(e.message) && /(schema cache|does not exist)/i.test(e.message);
+      const idOk = (v) => /^[0-9a-f-]{36}$/i.test(String(v || ""));
+      try {
+        if (req.method === "GET") {
+          if (req.query.photo) {
+            if (!idOk(req.query.photo)) return res.status(400).json({ error: "Photo not found" });
+            const r = await sb(`/rest/v1/maison_wall?id=eq.${req.query.photo}&select=id,image`, { token: s.token });
+            return r.length ? res.json(r[0]) : res.status(404).json({ error: "Photo not found" });
+          }
+          if (!idOk(req.query.id)) return res.status(400).json({ error: "Invitation not found" });
+          return res.json(
+            await sb(
+              `/rest/v1/maison_wall?invitation_id=eq.${req.query.id}&select=id,kind,body,thumb,created_at&order=created_at.desc&limit=300`,
+              { token: s.token },
+            ),
+          );
+        }
+        if (req.method === "DELETE") {
+          if (!idOk(b.id)) return res.status(400).json({ error: "Not found" });
+          await sb(`/rest/v1/maison_wall?id=eq.${b.id}`, { token: s.token, method: "DELETE" });
+          return res.json({ ok: true });
+        }
+        const jpeg = (v, max) =>
+          v == null || (typeof v === "string" && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(v) && v.length < max);
+        if (
+          !idOk(b.invitation_id) ||
+          !["post", "photo"].includes(b.kind) ||
+          typeof (b.body ?? "") !== "string" ||
+          (b.body || "").length > 2000 ||
+          (b.kind === "post" && !(b.body || "").trim() && !b.image) ||
+          (b.kind === "photo" && !b.image) ||
+          !jpeg(b.thumb, 120000) ||
+          !jpeg(b.image, 900000)
+        )
+          return res.status(400).json({ error: "Please check your post or photo." });
+        const rows = await sb("/rest/v1/maison_wall", {
+          method: "POST",
+          token: s.token,
+          body: {
+            owner_id: s.user.id,
+            invitation_id: b.invitation_id,
+            kind: b.kind,
+            body: (b.body || "").trim(),
+            thumb: b.thumb || null,
+            image: b.image || null,
+          },
+          headers: { Prefer: "return=representation" },
+        });
+        const { image, ...row } = rows[0];
+        return res.json(row);
+      } catch (e) {
+        if (missing(e))
+          return res.status(501).json({
+            error: "Wall and photos are not activated yet. Run database/wall.sql once in Supabase.",
+            code: "wall_migration_missing",
+          });
+        throw e;
+      }
+    }
     if(action==='planning'){
       if(req.method!=='POST')return res.status(405).end();
       if(!eventWorlds.some(w=>w.occasion===b.occasion)||!b.data||JSON.stringify(b.data).length>19000||!(Number(b.data.budget||0)>=0)||Number(b.data.budget||0)>10000000)return res.status(400).json({error:'Please check your planning details.'});
@@ -308,6 +428,10 @@ export default async function handler(req, res) {
           `/rest/v1/maison_invitations?id=eq.${encodeURIComponent(b.id)}`,
           { token: s.token, method: "DELETE" },
         );
+        await sb(
+          `/rest/v1/maison_planning?occasion=eq.${encodeURIComponent("inv:" + b.id)}`,
+          { token: s.token, method: "DELETE" },
+        ).catch(() => {});
         return res.json({ ok: true });
       }
       checkEvent(b.content);

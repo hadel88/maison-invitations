@@ -44,3 +44,13 @@ test("Stripe webhook rejects tampering, stale signatures and missing secrets", (
   assert.ok(!verifySignature(raw, header, ""));
   assert.ok(!verifySignature(raw, `t=${t},v1=bad`, secret));
 });
+
+test("packages: plain invitation has no dashboard, Journey and Print do", async () => {
+  const { PACKAGES, packageOf, hasJourney } = await import("../src/packages.js");
+  assert.deepEqual(PACKAGES.map((p) => p.id), ["invitation", "journey", "print"]);
+  assert.equal(packageOf({}).id, "journey"); // saved before packages existed
+  assert.equal(packageOf({ package: "invitation" }).id, "invitation");
+  assert.equal(hasJourney({ package: "invitation" }), false);
+  assert.equal(hasJourney({ package: "journey" }), true);
+  assert.ok(PACKAGES.find((p) => p.id === "print").soon);
+});

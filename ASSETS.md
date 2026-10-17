@@ -19,3 +19,7 @@ Use case: stylized-concept. Asset type: original luxurious European fairytale ce
 ## Rose & Reverie prompt
 
 Use case: stylized-concept. Asset type: original luxurious European fairytale celebration website background, wide landscape. Elegant rose-gold sunset over small original European fairytale chateau on RIGHT, pearl stone slender towers, windows glowing warm candlelight, balustraded bridge over reflective lake, pink roses and ivory peonies in foreground, rolling lavender hills, peach sky with first delicate stars, dreamlike mist. LEFT half simple muted dusky mauve blush sky and subtle dark plum foliage for website headline, keep left low-contrast no buildings on left. Fine-art sophisticated adult luxury storybook matte painting, cinematic immersive exquisite detail, champagne gold rose-gold highlights. No people, no recognizable Disney architecture, no copyrighted characters, no text, no logos, no watermark, no UI.
+
+## City list for "Use my location"
+
+`src/europeCities.json` lists European cities with at least 40,000 inhabitants (name, country code, latitude, longitude). Source: GeoNames (geonames.org, licensed CC BY 4.0), taken from the `all-the-cities` npm package 3.1.0. The nearest city is computed in the browser; the visitor's position is never sent to a server.

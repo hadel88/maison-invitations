@@ -108,3 +108,54 @@ test("missing payment credentials cannot enable checkout", async () => {
 });
 test('arbitrary local discovery still requires authentication',async()=>{const res=response();await handler({method:'POST',query:{action:'discover'},headers:{host:'maison.test'},body:{city:'Paris',category:'venues'}},res);assert.equal(res.code,401)});
 test('the public fixed-city preview is read-only',async()=>{const res=response();await handler({method:'POST',query:{action:'discover-demo'},headers:{host:'maison.test'},body:{city:'attacker-controlled'}},res);assert.equal(res.code,405)});
+
+test("invitation journey is saved per invitation under a private key", async () => {
+  const { default: h } = await import("../api/app.js");
+  const orig = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, opts = {}) => {
+    calls.push([String(url), opts.method || "GET", opts.body ? JSON.parse(opts.body) : null]);
+    if (String(url).includes("/auth/v1/user")) return { ok: true, json: async () => ({ id: "u1", email: "a@b.c" }) };
+    if (String(url).includes("maison_invitations")) return { ok: true, json: async () => [{ id: "x" }] };
+    return { ok: true, json: async () => [{ data: { done: { "w-venue": true }, custom: [] } }] };
+  };
+  const res = () => ({ code: 200, headers: {}, setHeader() {}, status(n) { this.code = n; return this; }, json(d) { this.data = d; return this; }, end() { return this; } });
+  const id = "11111111-2222-3333-4444-555555555555";
+  try {
+    const r = res();
+    await h({ method: "POST", query: { action: "invitation-journey" }, headers: { host: "m.test", origin: "https://m.test", cookie: "maison_access=t" }, body: { id, plan: { done: { "w-venue": true } } } }, r);
+    assert.equal(r.code, 200);
+    const save = calls.find((c) => c[0].includes("maison_planning") && c[1] === "POST");
+    assert.equal(save[2].occasion, "inv:" + id);
+    const bad = res();
+    await h({ method: "POST", query: { action: "invitation-journey" }, headers: { host: "m.test", origin: "https://m.test", cookie: "maison_access=t" }, body: { id: "../x", plan: {} } }, bad);
+    assert.equal(bad.code, 400);
+  } finally {
+    globalThis.fetch = orig;
+  }
+});
+
+test("wall rejects non-JPEG data and reports a missing table clearly", async () => {
+  const { default: h, checkPlan } = await import("../api/app.js");
+  assert.equal(checkPlan({ cover: "11111111-2222-3333-4444-555555555555" }).cover, "11111111-2222-3333-4444-555555555555");
+  assert.throws(() => checkPlan({ cover: "x" }));
+  const orig = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("/auth/v1/user")) return { ok: true, json: async () => ({ id: "u1", email: "a@b.c" }) };
+    return { ok: false, status: 404, json: async () => ({ message: "Could not find the table 'public.maison_wall' in the schema cache" }) };
+  };
+  const res = () => ({ code: 200, headers: {}, setHeader() {}, status(n) { this.code = n; return this; }, json(d) { this.data = d; return this; }, end() { return this; } });
+  const hd = { host: "m.test", origin: "https://m.test", cookie: "maison_access=t" };
+  const inv = "11111111-2222-3333-4444-555555555555";
+  try {
+    const bad = res();
+    await h({ method: "POST", query: { action: "wall" }, headers: hd, body: { invitation_id: inv, kind: "photo", image: "data:text/html;base64,AAAA" } }, bad);
+    assert.equal(bad.code, 400);
+    const miss = res();
+    await h({ method: "GET", query: { action: "wall", id: inv }, headers: hd }, miss);
+    assert.equal(miss.code, 501);
+    assert.equal(miss.data.code, "wall_migration_missing");
+  } finally {
+    globalThis.fetch = orig;
+  }
+});

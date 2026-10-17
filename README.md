@@ -1,5 +1,31 @@
 # Maison Invitations
 
+## Hidden from search until launch (temporary)
+
+The site is currently kept out of Google & co. (people with a link can still open it). To make it findable at launch, remove:
+
+1. `index.html`: the line `<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />`
+2. `vercel.json`: the header entry `"key": "X-Robots-Tag"` (the whole `{ ... }` block for it)
+
+Then build and deploy (`npm.cmd run build`, `npx.cmd vercel --prod`).
+
+## Structure & packages (17 October 2026)
+
+**Home** = the three signature invitations (Rose & Ribbon, The Ivory Garden, A Secret in Sage), then *How it works* (4 steps), *Packages*, FAQ. Main navigation: Designs · How it works · Packages · FAQ, plus My invitations and Create an invitation. Classic designs, the Journey planner and Venues & experts are reachable from the footer and from the Journey dashboard.
+
+**Studio** = 4 steps with Back/Next: 1 Design (one of the three) → 2 Details → 3 Guest page (reply date, language, dress code, music, colour mood, photo) → 4 Package → Publish & share. Publishing without an account opens sign-in; the design stays open. After publishing, the studio closes, the invitation space opens and the share dialog appears.
+
+**Packages** (`src/packages.js`, stored as `content.package`; invitations without the field count as *Invitation*):
+
+- *Invitation* (planned €19): the invitation, one link, online RSVP. No dashboard: the invitation space shows only the replies list (+ CSV) and an offer to switch.
+- *Invitation & Journey* (planned €39): dashboard with Overview (invited / coming / can’t come / no answer yet), personal guest links, and Planning (Journey planner, Venues & experts).
+- *Paper & Post*: shown as coming soon, cannot be selected.
+
+Prices are planned launch prices; checkout is still disabled and switching packages is free during the preview. `api/app.js` checkout amounts were not changed (still essential/signature/celebration) because checkout is off; align them before enabling payments.
+
+**Performance**: editor, dashboard, dialogs, guest page and the Journey/Experts pages load on demand (main JS 108.8 → 87.3 kB gzip in a local build); design cards use 600 px poster images (`*-cover-sm.webp`).
+
+
 ## Fairytale edition — current scope
 
 The whole website now uses three original luxury fairytale worlds: Midnight Royal, Enchanted Garden and Rose & Reverie. There are **24 designs across ten occasions**, with a living journey map, an occasion-specific six-step checklist, private EUR budget/city notes, real RSVP-driven constellation progress and saved expert shortlists. World preferences can also be selected per invitation.
