@@ -161,6 +161,17 @@ export default async function handler(req, res) {
       const r=await fetch(SB+'/functions/v1/maison-discover?'+(action==='discover-demo'?'demo=1':'health=1'),{headers:{apikey:KEY}});
       return res.status(r.status).json(await r.json());
     }
+    // Venues & experts search is open to everyone. Signed-in hosts pass their session so their
+    // own daily allowance applies; visitors share one allowance. Cached areas cost nothing.
+    if(action==='discover'){
+      if(req.method!=='POST')return res.status(405).end();
+      const v=await session(req,res);
+      const headers={apikey:KEY,'Content-Type':'application/json'};
+      if(v?.token)headers.Authorization='Bearer '+v.token;else if(KEY.startsWith('eyJ'))headers.Authorization='Bearer '+KEY;
+      const r=await fetch(SB+'/functions/v1/maison-discover',{method:'POST',headers,body:JSON.stringify({city:b.city,category:b.category,language:b.language})});
+      let data;try{data=await r.json()}catch{data={error:'Search is temporarily unavailable. Try the directories below.'}}
+      return res.status(r.status).json(data);
+    }
     if (action === "recover") {
       if (req.method !== "POST") return res.status(405).end();
       if (typeof b.email !== "string" || !b.email.includes("@"))
@@ -399,10 +410,6 @@ export default async function handler(req, res) {
       if(!eventWorlds.some(w=>w.occasion===b.occasion)||typeof b.provider_id!=='string'||b.provider_id.length>300||!b.data||JSON.stringify(b.data).length>19000||typeof b.data.name!=='string'||b.data.name.length>160)return res.status(400).json({error:'Please check the expert details.'});
       if(!b.provider_id.startsWith('geo:')&&!providerSources.some(p=>p.id===b.provider_id))return res.status(400).json({error:'Unknown expert source'});
       const rows=await sb('/rest/v1/maison_shortlist?on_conflict=owner_id,occasion,provider_id',{method:'POST',token:s.token,body:{owner_id:s.user.id,occasion:b.occasion,provider_id:b.provider_id,data:b.data},headers:{Prefer:'resolution=merge-duplicates,return=representation'}});return res.json(rows[0]);
-    }
-    if(action==='discover'){
-      if(req.method!=='POST')return res.status(405).end();
-      const r=await fetch(SB+'/functions/v1/maison-discover',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+s.token,'Content-Type':'application/json'},body:JSON.stringify({city:b.city,category:b.category,language:b.language,health:!!b.health})});return res.status(r.status).json(await r.json());
     }
     if (action === "logout") {
       if (req.method !== "POST") return res.status(405).end();

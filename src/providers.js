@@ -1,5 +1,5 @@
-export const expertCategories=['All experts','Venues','Planners','Catering','Flowers','Photography','Music & entertainment','Cakes','Beauty','Decoration','Family activities'];
-export const discoveryCategories={Venues:'venues',Flowers:'flowers',Cakes:'cakes',Beauty:'beauty',Catering:'dining'};
+export const expertCategories=['All experts','Venues','Planners','Catering','Flowers','Photography','Bridal shops','Music & entertainment','Cakes','Beauty','Decoration','Family activities'];
+export const discoveryCategories={Venues:'venues',Flowers:'flowers',Cakes:'cakes',Beauty:'beauty',Catering:'dining',Photography:'photography','Bridal shops':'bridal',Planners:'planners','Music & entertainment':'music',Decoration:'decoration','Family activities':'family'};
 export const providerSources=[
  {id:'eventlocations',name:'eventlocations',category:'Venues',region:'Europe',description:'Discover event spaces, private dining rooms and celebration venues. Contact the venue through its own listing.',url:'https://www.eventlocations.com/en',occasions:'all',symbol:'♜',tone:'midnight'},
  {id:'tagvenue',name:'Tagvenue',category:'Venues',region:'UK & Ireland',description:'Find and enquire about venues for parties, weddings, private dining and corporate gatherings.',url:'https://www.tagvenue.com/',occasions:'all',symbol:'♜',tone:'rose'},

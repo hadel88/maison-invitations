@@ -1106,3 +1106,33 @@
 .use-location:disabled {
   opacity: 0.6;
 }
+/* Header: six nav items + actions need room; hide the header "Create" button earlier
+   (the hero and every section keep their own create button) so nothing overflows. */
+@media (max-width: 1400px) {
+  .lx-header-create { display: none !important; }
+}
+@media (min-width: 901px) and (max-width: 1100px) {
+  .lx-header nav { gap: 16px; }
+  .lx-header nav button { letter-spacing: 0.12em; }
+}
+.lx-plans { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.lx-plans article { min-width: 0; }
+.lx-plans .lx-btn { white-space: normal; text-align: center; }
+@media (min-width: 901px) and (max-width: 1100px) {
+  .lx-plans article { padding: 40px 22px 28px; }
+  .lx-header { gap: 14px; }
+  .lx-header nav { gap: 12px; }
+  .lx-header nav button { letter-spacing: 0.08em; }
+  .lx-header-actions { gap: 12px; }
+}
+@media (max-width: 900px) {
+  .lx-plans { grid-template-columns: minmax(0, 1fr); }
+}
+@media (min-width: 901px) and (max-width: 990px) {
+  .lx-header nav { gap: 10px; }
+  .lx-header nav button { font-size: 10px !important; letter-spacing: 0.06em; }
+  .lx-brand-tag { display: none; }
+}
+/* Example images on expert cards: label sits at the bottom so the arched corner never clips it */
+.expert-card-art.is-example > span { top: auto; bottom: 12px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
+.expert-card-art.is-example .expert-photo > img { filter: saturate(0.9); }

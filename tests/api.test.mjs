@@ -106,7 +106,7 @@ test("missing payment credentials cannot enable checkout", async () => {
   );
   assert.equal(res.data.payments, false);
 });
-test('arbitrary local discovery still requires authentication',async()=>{const res=response();await handler({method:'POST',query:{action:'discover'},headers:{host:'maison.test'},body:{city:'Paris',category:'venues'}},res);assert.equal(res.code,401)});
+test('venues & experts search is open to visitors and forwards only city, category and language',async()=>{const orig=globalThis.fetch;let sent;globalThis.fetch=async(url,opts)=>{sent={url:String(url),opts};return new Response(JSON.stringify({rows:[],city:'Paris'}),{status:200})};try{const res=response();await handler({method:'POST',query:{action:'discover'},headers:{host:'maison.test'},body:{city:'Paris',category:'photography',language:'fr',health:true,extra:'x'}},res);assert.equal(res.code,200);assert.match(sent.url,/functions\/v1\/maison-discover$/);assert.deepEqual(JSON.parse(sent.opts.body),{city:'Paris',category:'photography',language:'fr'});assert.equal(sent.opts.headers.Authorization,undefined);assert.equal(sent.opts.headers.apikey,'test-publishable')}finally{globalThis.fetch=orig}});
 test('the public fixed-city preview is read-only',async()=>{const res=response();await handler({method:'POST',query:{action:'discover-demo'},headers:{host:'maison.test'},body:{city:'attacker-controlled'}},res);assert.equal(res.code,405)});
 
 test("invitation journey is saved per invitation under a private key", async () => {
