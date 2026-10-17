@@ -114,6 +114,10 @@ export default function Dashboard({
     if (focus) setSelectedId(focus.id || null);
   }, [focus]);
   const selected = invites.find((i) => i.id === selectedId);
+  // Opening an invitation always starts at the top, with the journey map.
+  useEffect(() => {
+    if (selectedId) window.scrollTo({ top: 0, behavior: "auto" });
+  }, [selectedId]);
 
   if (!user)
     return (
