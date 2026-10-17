@@ -1448,29 +1448,24 @@
   .ev-hero .journey-map { min-height: 0; display: block; height: 690px; }
 }
 
-/* The dashboard keeps its existing layout inside a flowering castle arch. */
+/* Keep the dashboard content normal inside a castle-stone floral frame. */
 .ev-card {
   max-width: 1220px;
-  padding: clamp(76px, 8vw, 100px) clamp(46px, 7.1vw, 86px) clamp(62px, 6vw, 80px);
+  padding: clamp(16px, 2.4vw, 30px) clamp(14px, 2.2vw, 28px);
   overflow: visible;
-  border: 0;
+  border: 64px solid transparent;
+  border-image-source: url("/castle-dashboard-frame.png");
+  border-image-slice: 180 fill;
+  border-image-width: 64px;
+  border-image-repeat: stretch round;
   border-radius: 0;
   background: linear-gradient(180deg, #fffaf5, #fffdf9 45%, #fff8f0);
   box-shadow: none;
   isolation: isolate;
 }
-.ev-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background: url("/castle-floral-frame.png") center / 100% 100% no-repeat;
-  pointer-events: none;
-}
-.ev-card > * { position: relative; z-index: 1; }
 @media (max-width: 800px) {
-  .ev-card { padding: 64px 28px 58px; }
+  .ev-card { border-width: 46px 42px; border-image-width: 46px 42px; padding: 14px 12px; }
 }
 @media (max-width: 520px) {
-  .ev-card { padding: 52px 18px 48px; }
+  .ev-card { border-width: 38px 34px; border-image-width: 38px 34px; padding: 12px 8px; }
 }
