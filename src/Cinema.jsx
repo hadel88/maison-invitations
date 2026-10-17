@@ -34,7 +34,7 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,lang='en'}){
   </button>}
   {opened&&theme.kind==='rose'&&!ribbonReady&&<img className="atelier-bow departing-bow" src="/atelier-bow.webp" alt=""/>}
   {revealed&&<div className="atelier-scroll-hint"><span>{c.scroll}</span><ArrowDown size={17}/></div>}
-  {revealed&&<button className="atelier-replay" aria-label={c.replay} onClick={onReplay}><RotateCcw size={15}/></button>}
+  {revealed&&<button className="atelier-replay" aria-label={c.replay} onClick={()=>{onReplay();if(theme.kind==='rose')root.current?.closest('.guest-experience')?.scrollTo({top:0,behavior:'instant'})}}><RotateCcw size={15}/></button>}
  </section>
 }
 export function CinemaCollection({onPreview,onCreate,notify}){

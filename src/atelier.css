@@ -74,3 +74,14 @@
   filter: brightness(.82);
   opacity: 0;
 }
+
+/* Frame the original ribbon animation against the invitation, at full width. */
+.atelier-rose .atelier-ribbon-canvas {
+  inset: 0 auto 0 50%;
+  width: min(100%, 700px);
+  height: 100%;
+  transform: translateX(-50%);
+}
+.atelier-rose .atelier-bow { width: min(100vw, 700px); max-width: none; }
+.atelier-rose:not(.atelier-opening) .atelier-leaf,
+.atelier-rose:not(.atelier-opening) .atelier-landscape { transition: none; }
