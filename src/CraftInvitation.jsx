@@ -13,29 +13,45 @@ const language = {
 export const craftWords = lang => language[lang] || language.en;
 
 export function CraftGarland({ className = '' }) {
-  return <div className={'craft-garland ' + className} aria-hidden="true"><span /><i /><span /></div>;
+  return <img className={'craft-garland ' + className} src="/craft-garland.webp" width="2172" height="724" alt="" loading="lazy" aria-hidden="true" />;
 }
 
 export function CraftStage({ event, guest, opened, onOpen, onReplay, lang = 'en' }) {
   const root = useRef(null), c = craftWords(lang), names = event.names.split(/\s*&\s*/);
   const font = ensureFont(event.font);
+  const [revealed, setRevealed] = useState(false);
+  useEffect(() => {
+    if (!opened) { setRevealed(false); return; }
+    const delay = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 6600;
+    const timer = setTimeout(() => setRevealed(true), delay);
+    return () => clearTimeout(timer);
+  }, [opened]);
+  const initials = names.map(name => Array.from(name.trim())[0] || '').join(' & ');
   function discover() { root.current?.closest('.guest-experience')?.querySelector('#craft-welcome')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' }); }
   function replay() { onReplay(); root.current?.closest('.guest-experience')?.scrollTo({ top: 0, behavior: 'instant' }); }
-  return <section ref={root} className={'craft-stage ' + (opened ? 'craft-unfolded' : '')} aria-label="The Secret Conservatory invitation">
+  return <section ref={root} className={'craft-stage ' + (opened ? 'craft-unfolded ' : '') + (revealed ? 'craft-revealed' : '')} aria-label="The Secret Conservatory invitation">
     <div className="craft-stitched-orbit" aria-hidden="true" />
+    <img className="craft-hero-garland" src="/craft-garland.webp" width="2172" height="724" alt="" aria-hidden="true" />
+    <div className="craft-opening-curtains" aria-hidden="true"><div className="craft-curtain-left" /><div className="craft-curtain-right" /></div>
+    <div className="craft-cover craft-cover-left" aria-hidden="true" />
+    <div className="craft-cover craft-cover-right">
+      <button className="craft-cover-plaque" onClick={onOpen} disabled={opened} aria-label={c.open}>
+        <span className="craft-plaque-initials" aria-hidden="true">{initials}</span><span>{c.open}</span><ArrowDown size={16} aria-hidden="true" />
+      </button>
+    </div>
     <div className="craft-hero-layout">
-      <header className="craft-hero-copy">
+      <header className="craft-hero-copy" aria-hidden={!revealed}>
         <span className="craft-eyebrow">{guest?.name ? guest.name : c.family}</span>
         <div className="craft-flourish" aria-hidden="true">❧</div>
         <h1 style={event.font && event.font !== 'classic' ? { fontFamily: font.family } : undefined}>{names.map((name, i) => <React.Fragment key={i}>{i > 0 && <em>&</em>}<span>{name}</span></React.Fragment>)}</h1>
         <p className="craft-hero-date">{dateLabel(event.date, lang, { day: 'numeric', month: 'long', year: 'numeric' })}</p>
         <p className="craft-hero-line">{event.subtitle}</p>
-        {!opened ? <button className="craft-unfold" onClick={onOpen}>{c.open}<ArrowDown size={15} /></button> : <button className="craft-discover" onClick={discover}>{c.scroll}<ArrowDown size={17} /></button>}
+        <button className="craft-discover" onClick={discover} disabled={!revealed} tabIndex={revealed ? 0 : -1}>{c.scroll}<ArrowDown size={17} /></button>
       </header>
       <div className="craft-estate" aria-hidden="true"><img src="/craft-conservatory.webp" width="1536" height="1024" alt="" fetchPriority="high" /></div>
     </div>
     <span className="craft-hero-edition" aria-hidden="true">MAISON · L’ATELIER DES SOUVENIRS</span>
-    {opened && <button className="craft-replay" onClick={replay} aria-label={c.replay}><RotateCcw size={16} /></button>}
+    {revealed && <button className="craft-replay" onClick={replay} aria-label={c.replay}><RotateCcw size={16} /></button>}
   </section>;
 }
 

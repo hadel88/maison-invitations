@@ -143,3 +143,48 @@
  .cinema-craft .guest-gifts { padding-top: 55px !important; }
 }
 
+
+/* Two-stage opening: textile covers part, then the embroidered curtains gather. */
+.craft-cover { position: absolute; inset-block: 0; width: 50%; z-index: 12; background-color: #737e60; background-image: repeating-linear-gradient(0deg, #dce1c21a 0 .7px, transparent .7px 3px), repeating-linear-gradient(90deg, #34412d20 0 .6px, transparent .6px 3px), linear-gradient(100deg, #899477, #657253); box-shadow: inset 0 0 80px #35432a20; transition: transform 3.8s cubic-bezier(.45,0,.18,1); }
+.craft-cover::before { content: ''; position: absolute; inset: 25px; border: 1px solid #c9c3a361; outline: 1px dashed #c9c3a347; outline-offset: -7px; border-radius: 28px; }
+.craft-cover-left { left: 0; border-right: 1px solid #d3c6a4; box-shadow: inset -10px 0 14px #26341d27; }
+.craft-cover-right { right: 0; border-left: 1px solid #d3c6a4; box-shadow: inset 10px 0 14px #26341d27; }
+.craft-unfolded .craft-cover-left { transform: translateX(-102%); }
+.craft-unfolded .craft-cover-right { transform: translateX(150%); }
+.craft-cover-plaque { position: absolute; top: 50%; left: 0; transform: translate(-50%, -50%); width: clamp(165px, 18vw, 230px); min-height: 215px; padding: 35px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; border: 1px solid #b29b70; outline: 1px dashed #c5b190; outline-offset: -10px; border-radius: 44% 44% 38% 38% / 28% 28% 40% 40%; background: #f7f1e4; color: #83704d; box-shadow: 0 9px 24px #25301c40, inset 0 0 0 5px #eee3cc; cursor: pointer; font: italic 15px Georgia; }
+.craft-cover-plaque:disabled { opacity: 1; cursor: default; }
+.craft-cover-plaque:focus-visible { outline: 3px solid #fff5dc; outline-offset: 6px; }
+.craft-plaque-initials { font: 400 clamp(32px, 4vw, 49px)/1.1 var(--serif, Georgia); }
+.craft-opening-curtains { position: absolute; inset: 0; z-index: 8; pointer-events: none; overflow: hidden; }
+.craft-opening-curtains > div { position: absolute; top: 0; bottom: 0; width: 50%; background-image: url('/craft-ivory-curtains.webp'); background-repeat: no-repeat; background-size: 200% 100%; transition: transform 2.6s cubic-bezier(.3,.05,.22,1) 3.8s, clip-path 2.6s ease 3.8s; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); filter: drop-shadow(0 6px 9px #65503728); }
+.craft-curtain-left { left: 0; background-position: left top; transform-origin: left top; }
+.craft-curtain-right { right: 0; background-position: right top; transform-origin: right top; }
+.craft-unfolded .craft-curtain-left { transform: scaleX(.34); clip-path: polygon(0 0, 100% 0, 85% 20%, 46% 60%, 80% 100%, 0 100%); }
+.craft-unfolded .craft-curtain-right { transform: scaleX(.34); clip-path: polygon(0 0, 100% 0, 100% 100%, 20% 100%, 54% 60%, 15% 20%); }
+.craft-hero-copy { opacity: 0; transition: opacity 1.2s ease 5s; }
+.craft-unfolded .craft-hero-copy { opacity: 1; }
+.craft-discover:disabled { visibility: hidden; }
+.craft-hero-garland { position: absolute; top: 45px; left: 0; width: 100%; height: clamp(90px, 14vw, 185px); object-fit: contain; object-position: top; z-index: 4; pointer-events: none; }
+.craft-garland { display: block; width: min(100%, 1100px); height: auto; max-height: 245px; object-fit: contain; margin: 0 auto 30px; }
+.craft-garland-bottom { margin-top: 65px; transform: rotate(180deg); }
+.craft-dress .craft-garland { margin-top: -20px; }
+@media (max-width: 760px) {
+ .craft-cover::before { inset: 14px; border-radius: 20px; }
+ .craft-cover-plaque { min-height: 200px; width: 172px; }
+ .craft-opening-curtains { bottom: 42%; }
+ .craft-hero-garland { top: 38px; height: 100px; object-fit: cover; object-position: top; }
+ .craft-hero-layout { padding-top: 142px; }
+ .craft-hero-copy::before { inset: -16px 6px -18px; }
+ .craft-hero-copy h1 { font-size: clamp(36px, 5.6svh, 52px); }
+ .craft-unfold, .craft-discover { top: calc(100svh - 217px); }
+ .craft-garland, .craft-countdown .craft-garland { width: calc(100% + 16px); height: auto; max-height: 160px; margin-left: -8px; }
+ .craft-countdown .craft-garland { width: calc(100% + 10vw); margin-left: -5vw; }
+ .craft-dress .craft-garland { width: calc(100% + 40px); margin-left: -20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .craft-cover, .craft-opening-curtains > div, .craft-hero-copy { transition: none !important; }
+}
+
+.craft-stage:not(.craft-unfolded) .craft-cover,
+.craft-stage:not(.craft-unfolded) .craft-opening-curtains > div,
+.craft-stage:not(.craft-unfolded) .craft-hero-copy { transition: none; }
