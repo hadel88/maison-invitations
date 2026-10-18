@@ -14,7 +14,7 @@ precision mediump float; uniform sampler2D uVideo; uniform vec2 uScale; varying 
 void main(){ vec2 uv = vUV.xy / vUV.z; gl_FragColor = texture2D(uVideo, vec2(uv.x, uv.y * uScale.y)); }`;
 const FS_LAYER = `
 precision mediump float;
-uniform sampler2D uTex; uniform sampler2D uVideo;
+uniform sampler2D uTex; uniform sampler2D uVideo; uniform sampler2D uTransition; uniform float uDissolve;
 uniform float uOpacity, uMasked, uShade;
 uniform float uCoverCount; uniform vec4 uCover1A,uCover1B,uCover2A,uCover2B,uCover3A,uCover3B; uniform vec4 uBand; uniform vec2 uVideoSize;
 varying vec3 vUV; varying vec2 vPx;
@@ -30,6 +30,7 @@ void main(){
   vec2 uv = vUV.xy / vUV.z;
   if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) discard;
   vec4 c = texture2D(uTex, uv);
+  if(uDissolve>0.)c.rgb=mix(c.rgb,texture2D(uTransition,vPx/uVideoSize).rgb,uDissolve);
   float a = c.a * uOpacity;
   if (uMasked > 0.5) {
     vec2 m = (uBand.xy + vPx * uBand.zw) / uVideoSize;
@@ -121,6 +122,7 @@ export function createPearlRenderer(canvas, video, data) {
     bind(pl);
     gl.uniform1i(gl.getUniformLocation(pl, "uVideo"), 0);
     gl.uniform1i(gl.getUniformLocation(pl, "uTex"), 1);
+    gl.uniform1i(gl.getUniformLocation(pl, "uTransition"), 2);
     gl.uniform2f(gl.getUniformLocation(pl, "uVideoSize"), W, VH);
     const band = data.band || [0, 0, 0, 0];
     gl.uniform4f(gl.getUniformLocation(pl, "uBand"), band[0], band[1], band[2] / W, band[3] / H);
@@ -132,6 +134,11 @@ export function createPearlRenderer(canvas, video, data) {
       covers.forEach((x,i)=>{const p=x.slice(2,10),q=[];for(let k=0;k<4;k++){const j=(k+1)%4,l=(k+3)%4;q.push(p[k*2]+(p[k*2]-p[j*2])*.24+(p[k*2]-p[l*2])*.21,p[k*2+1]+(p[k*2+1]-p[j*2+1])*.24+(p[k*2+1]-p[l*2+1])*.21);}gl.uniform4f(gl.getUniformLocation(pl,"uCover"+(i+1)+"A"),...q.slice(0,4));gl.uniform4f(gl.getUniformLocation(pl,"uCover"+(i+1)+"B"),...q.slice(4,8));});
       const bookCover=id==='book1'?data.bookOcclusion?.[Math.round(t*data.fps)]:null;
       if(bookCover){gl.uniform1f(gl.getUniformLocation(pl,'uCoverCount'),1);gl.uniform4f(gl.getUniformLocation(pl,'uCover1A'),...bookCover.slice(0,4));gl.uniform4f(gl.getUniformLocation(pl,'uCover1B'),...bookCover.slice(4,8));}
+      const dissolve=data.bookDissolve,transition=layers.get('ttransition');
+      const mix=kind===0&&id==='book1'&&dissolve&&transition?Math.max(0,Math.min(1,(t*data.fps-dissolve[0])/(dissolve[1]-dissolve[0]))):0;
+      gl.uniform1f(gl.getUniformLocation(pl,'uDissolve'),mix);
+      // Bind a valid texture even outside the dissolve; never sample the active render target.
+      gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,transition||vtex);
       if (!tex || op <= 0) continue;
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tex);
       gl.uniform1f(gl.getUniformLocation(pl, "uOpacity"), op);

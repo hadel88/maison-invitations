@@ -25,3 +25,11 @@ test('tracked surfaces never contain invalid coordinates or opacity',()=>{
     assert.ok(it[10]>=0&&it[10]<=1,'opacity at '+f);assert.ok(it[11]===0,'This video has no person-mask band.');
   }
 });
+
+// A replacement must stay opaque even when the source painting turns or dissolves.
+test('Pearl never fades back to source portraits during rotations or page turns',()=>{
+ for(let f=480;f<720;f++)for(const id of [1,2,3,4])assert.ok(data.frames[f].some(x=>x[0]===0&&x[1]===id&&x[10]===1),`Source portrait exposed: slot ${id}, frame ${f}`);
+ assert.ok(data.frames[672].some(x=>x[1]==='4back'&&x[10]===1),'The second visible face of the hinged frame needs its own photo.');
+ for(const items of data.frames)for(const x of items)if(x[0]===0)assert.equal(x[10],1,'Use an opaque replacement, never a fade over the original.');
+ assert.deepEqual(data.bookDissolve,[106,119]);assert.ok(existsSync(new URL('../public/pearl-film-transition.webp',import.meta.url)));
+});

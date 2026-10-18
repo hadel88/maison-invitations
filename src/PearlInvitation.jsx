@@ -41,11 +41,13 @@ export function PearlStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='en
     canvas.current?.addEventListener('webglcontextlost',lost);const el=canvas.current;
     return()=>{dead.current=true;clear();el?.removeEventListener('webglcontextlost',lost);e?.destroy();engine.current=null;};
   },[]);
+  useEffect(()=>{let cancelled=false;const image=new Image();image.onload=()=>{if(!cancelled){engine.current?.setLayer('ttransition',image);if(video.current?.readyState>=2)engine.current?.draw(video.current.currentTime);}};image.src='/pearl-film-transition.webp';return()=>{cancelled=true;};},[gl]);
   useEffect(()=>{
     let cancelled=false;const e=engine.current;if(!e)return;
     Promise.all(own.map(p=>p?tonePhoto(p):null)).then(photos=>{
       if(cancelled)return;
       for(let i=0;i<4;i++){const source=photos[i]||photos.find(Boolean);e.setLayer('p'+(i+1),cropPhoto(source,[.74,.67,.7,.68][i]));}
+      e.setLayer('p4back',cropPhoto(photos[3]||photos.find(Boolean),.68));
       e.setLayer('pbook1',cropPhoto(photos[0]||photos.find(Boolean),.85));e.setLayer('pbook2',cropPhoto(photos[1]||photos[0]||photos.find(Boolean),.85));
       if(video.current?.readyState>=2)e.draw(video.current.currentTime);
     });return()=>{cancelled=true;};

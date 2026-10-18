@@ -26,3 +26,7 @@ The separate `pearlFilm.css` contains only this design's framing overrides. The 
 ## Local review
 
 `pearl-review.html` is a Vite-only review entry, not a production build input. Its four numbered test pictures make drift visible. The time buttons pause/seek the film for inspection. It also opens the existing Studio's photo tool for local review. No account or database write is needed. Use the real `?cinema=pearl-promise` route for normal playback and RSVP navigation checks.
+
+## Photo coverage correction
+
+Portrait replacements remain opaque through rotations and page turns. The briefly exposed second face of the lowest hinged frame has its own tracked surface using photo 4. Previously faded or missing frames now have continuous coverage. The book-to-beach dissolve blends the replacement directly into a clean beach still, instead of fading it over the original book illustration. The video itself remains unchanged, with its original checksum. The regression test checks all four portrait slots in every gallery frame and the secondary face.
