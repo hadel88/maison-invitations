@@ -44,7 +44,7 @@ void main(){
   gl_FragColor=vec4(color,1.);
 }`;
 
-export function createCurtainRenderer(canvas, { onComplete, onError } = {}) {
+export function createCurtainRenderer(canvas, { onComplete, onError, texturePath = '/craft-ivory-curtains.webp', openingDelay = 3.3 } = {}) {
   const gl = canvas.getContext('webgl', { alpha: true, antialias: true, premultipliedAlpha: false });
   if (!gl) throw Error('WebGL unavailable');
   const program = gl.createProgram();
@@ -81,17 +81,17 @@ export function createCurtainRenderer(canvas, { onComplete, onError } = {}) {
     gl.bindTexture(gl.TEXTURE_2D, texture); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, photo); draw();
   };
-  photo.src = '/craft-ivory-curtains.webp';
+  photo.src = texturePath;
   gl.enable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE); gl.clearColor(0, 0, 0, 0);
   function leaf(side) {
     let k = 0;
     for (let j = 0; j <= rows; j++) for (let i = 0; i <= columns; i++) {
       const u = i / columns, v = j / rows;
-      const p = curtainPoint(u, v, side, elapsed, width, height);
-      const a = curtainPoint(u + .0005, v, side, elapsed, width, height);
-      const b = curtainPoint(u, Math.min(1, v + .0005), side, elapsed, width, height);
+      const p = curtainPoint(u, v, side, elapsed + 3.3 - openingDelay, width, height);
+      const a = curtainPoint(u + .0005, v, side, elapsed + 3.3 - openingDelay, width, height);
+      const b = curtainPoint(u, Math.min(1, v + .0005), side, elapsed + 3.3 - openingDelay, width, height);
       // Use a backwards difference on the lower hem to avoid a zero normal.
-      if (v === 1) { const prev = curtainPoint(u, v - .0005, side, elapsed, width, height); for (let n = 0; n < 3; n++) b[n] = p[n] + p[n] - prev[n]; }
+      if (v === 1) { const prev = curtainPoint(u, v - .0005, side, elapsed + 3.3 - openingDelay, width, height); for (let n = 0; n < 3; n++) b[n] = p[n] + p[n] - prev[n]; }
       const ax = a[0] - p[0], ay = a[1] - p[1], az = a[2] - p[2];
       const bx = b[0] - p[0], by = b[1] - p[1], bz = b[2] - p[2];
       vertices[k++] = p[0]; vertices[k++] = p[1]; vertices[k++] = p[2];
@@ -103,7 +103,7 @@ export function createCurtainRenderer(canvas, { onComplete, onError } = {}) {
   function draw() {
     if (disposed) return;
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); leaf(-1); leaf(1);
-    canvas.dataset.phase = !running ? 'closed' : elapsed < 3.3 ? 'cover' : elapsed < 5.3 ? 'gathering' : elapsed < CURTAIN_END ? 'settling' : 'open';
+    canvas.dataset.phase = !running ? 'closed' : elapsed < openingDelay ? 'cover' : elapsed < openingDelay + 2 ? 'gathering' : elapsed < openingDelay + 5.5 ? 'settling' : 'open';
   }
   function resize() {
     const rect = canvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 1.75);
@@ -114,9 +114,9 @@ export function createCurtainRenderer(canvas, { onComplete, onError } = {}) {
   function frame(now) {
     if (disposed || !running) return;
     elapsed += Math.min((now - last) / 1000, .06); last = now;
-    if (reduced) elapsed = CURTAIN_END;
+    if (reduced) elapsed = openingDelay + 5.5;
     draw();
-    if (elapsed >= CURTAIN_END) { if (!done) { done = true; onComplete?.(); } return; }
+    if (elapsed >= openingDelay + 5.5) { if (!done) { done = true; onComplete?.(); } return; }
     raf = requestAnimationFrame(frame);
   }
   const observer = new ResizeObserver(resize); observer.observe(canvas); resize();

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { giftPanelPoint, diplomaPoint, celebrationPhases, CELEBRATION_END } from '../src/celebrationCanvas.js';
+import { giftPanelPoint, birthdayCakePlacement, diplomaPoint, celebrationPhases, CELEBRATION_END } from '../src/celebrationCanvas.js';
 import { cinemaThemes, cinemaEvent } from '../src/cinemaThemes.js';
 
 test('the gift panels open around their fixed bottom edges after the lid releases', () => {
@@ -39,4 +39,24 @@ test('the birthday design creates a birthday event with a birthday schedule and 
   assert.ok(event.timeline.some(t => /candles/i.test(t.title)));
   assert.ok(event.rsvpDeadline < event.date);
   assert.equal(event.worldTheme, 'midnight');
+});
+
+
+test('the complete birthday cake fits below the closed lid and only grows after the panels open', () => {
+  const closed=birthdayCakePlacement(0);
+  assert.ok(closed.y+closed.height/2<.8);
+  assert.ok(closed.y-closed.height/2>-.8);
+  assert.deepEqual(birthdayCakePlacement(2.8),closed);
+  assert.ok(celebrationPhases(2.8).panels>.5);
+  assert.equal(birthdayCakePlacement(6.2).height,closed.height*2);
+  assert.equal(birthdayCakePlacement(6.2).reveal,1);
+});
+
+test('the crimson graduation curtain is an additional theme with graduation content', () => {
+  const theme=cinemaThemes.find(t=>t.id==='graduation-curtain'),event=cinemaEvent(theme);
+  assert.equal(theme.motif,'curtain');
+  assert.equal(theme.cover,'graduation-burgundy-curtain');
+  assert.equal(event.occasion,'Graduation');
+  assert.ok(event.timeline.some(t=>/graduate/i.test(t.title)));
+  assert.ok(cinemaThemes.some(t=>t.id==='graduation-flight'));
 });

@@ -21,6 +21,12 @@ export function diplomaPoint(u,v,t) {
   else{const a=(s-laid)/r;y=1.45-laid-r*Math.sin(a);z=r*(1-Math.cos(a));}
   return[(u-.5)*2.65,y+p.leave*5,z-.25];
 }
+// The entire cake starts below the lid and within the box. It grows only as
+// the panels unfold, so the reveal comes from the package rather than the room.
+export function birthdayCakePlacement(t) {
+  const reveal = celebrationEase((t - 2.8) / 2.6);
+  return { height: 1.45 * (1 + reveal), y: -.025 - reveal * .65, reveal };
+}
 const add=(a,b)=>a.map((n,i)=>n+b[i]);
 function rotate(p,rx=0,ry=0,rz=0){let[x,y,z]=p;[y,z]=[y*Math.cos(rx)-z*Math.sin(rx),y*Math.sin(rx)+z*Math.cos(rx)];[x,z]=[x*Math.cos(ry)+z*Math.sin(ry),-x*Math.sin(ry)+z*Math.cos(ry)];return[x*Math.cos(rz)-y*Math.sin(rz),x*Math.sin(rz)+y*Math.cos(rz),z];}
 
@@ -30,7 +36,9 @@ export function createCelebrationCanvas(canvas,{kind='birthday',names='',year='2
   const ctx=canvas.getContext('2d',{alpha:true});if(!ctx)throw Error('Canvas unavailable');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let width=1,height=1,dpr=1,time=0,running=false,done=false,disposed=false,last=0,raf=0,faces=[];
-  const cloth=new Image(),paper=new Image();cloth.src='/birthday-cloth.webp';paper.src='/craft-cotton-paper.webp';
+  const cloth=new Image(),paper=new Image(),cake=new Image();cloth.src='/birthday-cloth.webp';paper.src='/craft-cotton-paper.webp';
+  if(kind==='birthday')cake.src='/birthday-cake-inside.webp';
+  cake.onload=()=>{if(!disposed&&!running)draw();};
   const diploma=document.createElement('canvas');diploma.width=720;diploma.height=900;
   const dc=diploma.getContext('2d');
   function writeDiploma(){
@@ -70,10 +78,11 @@ export function createCelebrationCanvas(canvas,{kind='birthday',names='',year='2
     const pts=f.points.map(project),cp=f.points.map(camera),a=cp[1].map((v,i)=>v-cp[0][i]),b=cp[2].map((v,i)=>v-cp[0][i]);
     const n=[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],length=Math.hypot(...n)||1;
     const light=.66+.34*Math.abs((n[0]*-.35+n[1]*.60+n[2]*.72)/length);
-    ctx.save();ctx.globalAlpha=f.alpha;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.fillStyle=f.color;ctx.fill();
+    ctx.save();ctx.globalAlpha=f.alpha;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();if(f.color){ctx.fillStyle=f.color;ctx.fill();}
     if(f.texture&&(f.texture.complete||f.texture===diploma)&&f.texture.width){
       for(let i=1;i<pts.length-1;i++)texturedTriangle(f.texture,[f.uv[0],f.uv[i],f.uv[i+1]],[pts[0].slice(0,2),pts[i].slice(0,2),pts[i+1].slice(0,2)]);
     }
+    if(!f.color){ctx.restore();return;}
     ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
     ctx.fillStyle=`rgba(0,0,0,${1-light})`;ctx.fill();ctx.strokeStyle='rgba(255,224,170,.09)';ctx.lineWidth=.65;ctx.stroke();ctx.restore();
   }
@@ -101,6 +110,13 @@ export function createCelebrationCanvas(canvas,{kind='birthday',names='',year='2
       const band=[[-.13,1.005,-1.075],[.13,1.005,-1.075],[.13,1.005,1.075],[-.13,1.005,1.075]].map(transform);face(band,'#e7bb60',null,null,1-p.ribbon);
     }
     ribbon();
+  }
+  function birthdayCake(){
+    if(!cake.complete||!cake.naturalWidth)return;
+    const placement=birthdayCakePlacement(time),h=placement.height,w=h*cake.naturalWidth/cake.naturalHeight;
+    // Face the camera while retaining depth sorting against all four box walls.
+    const vertex=(x,y)=>add(rotate(rotate([x,y,0],0,-.36),-.32),[0,placement.y,0]);
+    face([vertex(-w/2,h/2),vertex(w/2,h/2),vertex(w/2,-h/2),vertex(-w/2,-h/2)],null,cake);
   }
   function graduation(){
     const toss=celebrationEase((time-.75)/2.6),leave=celebrationEase((time-2.6)/1.35);
@@ -136,12 +152,17 @@ export function createCelebrationCanvas(canvas,{kind='birthday',names='',year='2
   function draw(){
     if(disposed)return;ctx.clearRect(0,0,width,height);faces=[];
     ctx.save();ctx.globalAlpha=1-celebrationEase((time-3.2)/2);const g=ctx.createRadialGradient(width*.5,height*.76,0,width*.5,height*.76,width*.38);g.addColorStop(0,'#0006');g.addColorStop(1,'#0000');ctx.fillStyle=g;ctx.fillRect(0,height*.63,width,height*.30);ctx.restore();
-    if(kind==='birthday')gift();else graduation();
+    if(kind==='birthday'){
+      const placement=birthdayCakePlacement(time),bottom=project([0,placement.y,0]),scale=Math.min(width*.255,height*.17);
+      ctx.save();ctx.globalAlpha=placement.reveal*.42;ctx.filter='blur(9px)';ctx.fillStyle='#180710';ctx.beginPath();ctx.ellipse(bottom[0],bottom[1]+placement.height*scale/2,placement.height*scale*.32,10,0,0,Math.PI*2);ctx.fill();ctx.restore();
+      gift();birthdayCake();
+      canvas.dataset.cake=time<2.8?'inside':time<5.4?'unwrapping':'presented';
+    }else graduation();
     faces.sort((a,b)=>a.points.reduce((s,p)=>s+camera(p)[2],0)/a.points.length-b.points.reduce((s,p)=>s+camera(p)[2],0)/b.points.length);faces.forEach(renderFace);confetti();
     canvas.dataset.phase=!running?'closed':time<1.35?'release':time<4.2?'transform':time<CELEBRATION_END?'reveal':'open';
   }
   function frame(now){if(disposed||!running)return;time+=Math.min((now-last)/1000,.05);last=now;if(reduced)time=CELEBRATION_END;draw();if(time>=CELEBRATION_END&&!done){done=true;onComplete?.();}if(!reduced)raf=requestAnimationFrame(frame);}
   function resize(){const r=canvas.getBoundingClientRect();width=r.width;height=r.height;dpr=Math.min(devicePixelRatio||1,1.75);canvas.width=Math.max(1,Math.round(width*dpr));canvas.height=Math.max(1,Math.round(height*dpr));ctx.setTransform(dpr,0,0,dpr,0,0);draw();}
   const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
-  return{open(){if(running)return;running=true;last=performance.now();raf=requestAnimationFrame(frame);},reset(){cancelAnimationFrame(raf);running=false;time=0;done=false;draw();},dispose(){disposed=true;cancelAnimationFrame(raf);observer.disconnect();paper.onload=null;cloth.onload=null;}};
+  return{open(){if(running)return;running=true;last=performance.now();raf=requestAnimationFrame(frame);},reset(){cancelAnimationFrame(raf);running=false;time=0;done=false;draw();},dispose(){disposed=true;cancelAnimationFrame(raf);observer.disconnect();paper.onload=null;cloth.onload=null;cake.onload=null;}};
 }

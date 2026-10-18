@@ -137,7 +137,7 @@ export function GuestExperience({
     }
   }
   return (
-    <div className="invitation-screen"><div className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : event.scene === "birthday-wish" ? "cinema-birthday " : event.scene === "graduation-flight" ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
+    <div className="invitation-screen"><div className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
       <div className="guest-controls">
         <a href="/" className="brand">
           maison
@@ -175,7 +175,7 @@ export function GuestExperience({
           {crafted ? <CraftWelcome event={event} lang={lang} /> : <p className="guest-message">{event.message}</p>}
           <section className="event-details">
             <span className="eyebrow">{c.details}</span>
-            <h2>{crafted ? craftWords(lang).details : ['birthday-wish','graduation-flight'].includes(event.scene) ? ({en:'Let’s celebrate.',de:'Wir feiern!',fr:'Célébrons ensemble.'}[lang] || 'Let’s celebrate.') : 'A day to remember.'}</h2>
+            <h2>{crafted ? craftWords(lang).details : ['birthday-wish','graduation-flight','graduation-curtain'].includes(event.scene) ? ({en:'Let’s celebrate.',de:'Wir feiern!',fr:'Célébrons ensemble.'}[lang] || 'Let’s celebrate.') : 'A day to remember.'}</h2>
             <div>
               <CalendarDays />
               <span>

@@ -53,7 +53,7 @@
 
 /* The birthday now opens as a small physical gift, not a full-screen book cover. */
 .birthday-stage { background: radial-gradient(ellipse at 50% 50%, #74334a, #321b31 72%); }
-.birthday-night { background-image: url('/birthday-party-v2.webp'); opacity: 0; transition: opacity 2s 1.2s, transform 8s ease; }
+.birthday-night { background-image: url('/birthday-party-empty.webp'); opacity: 0; transition: opacity 2s 1.2s, transform 8s ease; }
 .birthday-night-shade { opacity: 0; transition: opacity 2s 1.2s; }
 .birthday-opening .birthday-night, .birthday-opening .birthday-night-shade { opacity: 1; }
 .birthday-cover-copy { top: 11%; }
@@ -77,3 +77,19 @@
 .graduation-poster-title { top: 12%; }
 .birthday-poster-gift { position: absolute; top: 52%; left: 0; right: 0; text-align: center; font: 70px Georgia; color: #debd78; }
 @media(min-width:1101px) { .atelier-three:has(.poster-graduation) { grid-template-columns: repeat(3,minmax(0,1fr)); max-width: 1160px; } }
+
+/* A second graduation opening: closed, full-height velvet becomes gathered cloth. */
+.graduation-curtain-stage { background: #27111b; }
+.graduation-curtain-stage .birthday-cover-copy { top: 20%; }
+.graduation-curtain-stage .birthday-cover-copy h2 { text-shadow: 0 3px 15px #1d0009; }
+.graduation-curtain-stage .birthday-seal { top: 67%; background: #320a18a6; }
+.graduation-curtain-stage .birthday-copy { left: 18%; right: 18%; transition-delay: 2.3s; }
+.graduation-curtain-stage .birthday-copy h1 { font-size: clamp(36px,6cqh,54px); }
+.graduation-curtain-stage .birthday-night { opacity: 1; }
+.graduation-curtain-stage .birthday-edition { color: #e7c092; }
+.graduation-curtain-fallback { position: absolute; inset: 0; z-index: 8; pointer-events: none; overflow: hidden; display: flex; }
+.graduation-curtain-fallback span { width: 50%; height: 100%; background: url('/graduation-burgundy-curtain.webp') left center / 200% 100%; transition: transform 4.8s .25s cubic-bezier(.45,0,.2,1); }
+.graduation-curtain-fallback span + span { background-position: right center; }
+.birthday-opening .graduation-curtain-fallback span { transform: translateX(-88%); }
+.birthday-opening .graduation-curtain-fallback span + span { transform: translateX(88%); }
+@media(prefers-reduced-motion:reduce) { .graduation-curtain-fallback span { transition: none; } }
