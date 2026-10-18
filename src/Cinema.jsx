@@ -11,6 +11,7 @@ import {BirthdayStage} from './BirthdayInvitation';
 import {FilmStage} from './FilmInvitation';
 import {StoryStage} from './StoryInvitation';
 import {PearlStage} from './PearlInvitation';
+import {BabyStage} from './BabyInvitation';
 import {createEnvelopeRenderer} from './envelopeGL';
 const words={en:{open:'Open your invitation',touch:'Touch to open',scroll:'Scroll to discover',invited:'TOGETHER WITH OUR FAMILIES',celebrate:'invite you to celebrate our wedding',replay:'Replay opening'},de:{open:'Einladung öffnen',touch:'Zum Öffnen berühren',scroll:'Nach unten entdecken',invited:'GEMEINSAM MIT UNSEREN FAMILIEN',celebrate:'laden wir euch zu unserer Hochzeit ein',replay:'Erneut öffnen'},fr:{open:'Ouvrir votre invitation',touch:'Touchez pour ouvrir',scroll:'Faites défiler pour découvrir',invited:'ENTOURÉS DE NOS FAMILLES',celebrate:'nous vous invitons à célébrer notre mariage',replay:'Revoir l’ouverture'}};
 export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='en',preview=false}){
@@ -23,6 +24,7 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
  const names=event.names.split(/\s*&\s*/);
  const font=ensureFont(event.font);
  if(theme.kind==='birthday'||theme.occasion==='Graduation')return <BirthdayStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>;
+ if(theme.kind==='baby-film')return <BabyStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang}/>;
  if(theme.kind==='pearl')return <PearlStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang} preview={preview}/>;
  if(theme.kind==='story')return <StoryStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang} preview={preview}/>;
  if(theme.kind==='film')return <FilmStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang} preview={preview}/>;

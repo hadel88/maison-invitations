@@ -117,7 +117,7 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
     }
     const w = image.width || image.naturalWidth, h = image.height || image.naturalHeight;
     const canvas = document.createElement("canvas");
-    const scale = Math.min(1, (key === "photo" && scene.kind !== "film" && scene.kind !== "story" && scene.kind !== "pearl" ? 1100 : 900) / Math.max(w, h * 0.8));
+    const scale = Math.min(1, (key === "photo" && scene.kind !== "film" && scene.kind !== "story" && scene.kind !== "pearl" && scene.kind !== "baby-film" ? 1100 : 900) / Math.max(w, h * 0.8));
     canvas.width = Math.round(w * scale);
     canvas.height = Math.round(h * scale);
     canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
@@ -293,11 +293,11 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
         </div>
       </>
     ),
-    photo: scene.kind === "film" || scene.kind === "story" || scene.kind === "pearl" ? (
+    photo: scene.kind === "film" || scene.kind === "story" || scene.kind === "pearl" || scene.kind === "baby-film" ? (
       <>
-        <p className="st-lead">{scene.kind === "pearl" ? "Your photos replace both pictures in the opening book and the four floating frames. Photo 1 fills the right book page, Photo 2 the left. Add up to four portrait photos." : scene.kind === "story" ? "Five mirrors line the hall the couple walks through. Your photos appear in them as they pass. Portrait photos look best." : "Four portraits stand in the ballroom, in two pairs. Your photos replace them as the camera walks past. Portrait photos look best."}</p>
+        <p className="st-lead">{scene.kind === "baby-film" ? "Add up to four memories. They appear in the golden forest frames, with a gentle photo sequence in the main frame. Portrait photos look best." : scene.kind === "pearl" ? "Your photos replace both pictures in the opening book and the four floating frames. Photo 1 fills the right book page, Photo 2 the left. Add up to four portrait photos." : scene.kind === "story" ? "Five mirrors line the hall the couple walks through. Your photos appear in them as they pass. Portrait photos look best." : "Four portraits stand in the ballroom, in two pairs. Your photos replace them as the camera walks past. Portrait photos look best."}</p>
         <div className="st-film-photos">
-          {(scene.kind === "pearl" ? [["photo", "Book right & frame 1"], ["photo2", "Book left & frame 2"], ["photo3", "Floating frame 3"], ["photo4", "Floating frame 4"]] : scene.kind === "story" ? [["photo", "Mirror 1 & 5"], ["photo2", "Mirror 2"], ["photo3", "Mirror 3"], ["photo4", "Mirror 4"]] : [["photo", "1st pair · left"], ["photo2", "1st pair · right"], ["photo3", "2nd pair · left"], ["photo4", "2nd pair · right"]]).map(([key, label]) => (
+          {(scene.kind === "baby-film" ? [["photo", "Forest memory 1"], ["photo2", "Forest memory 2"], ["photo3", "Forest memory 3"], ["photo4", "Forest memory 4"]] : scene.kind === "pearl" ? [["photo", "Book right & frame 1"], ["photo2", "Book left & frame 2"], ["photo3", "Floating frame 3"], ["photo4", "Floating frame 4"]] : scene.kind === "story" ? [["photo", "Mirror 1 & 5"], ["photo2", "Mirror 2"], ["photo3", "Mirror 3"], ["photo4", "Mirror 4"]] : [["photo", "1st pair · left"], ["photo2", "1st pair · right"], ["photo3", "2nd pair · left"], ["photo4", "2nd pair · right"]]).map(([key, label]) => (
             <div key={key} className="st-film-photo">
               <div className="st-film-gold">{event[key] ? <img src={event[key]} alt={label} /> : <span>{label}</span>}</div>
               <label className="field">
@@ -313,7 +313,7 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
           ))}
         </div>
         {error && <p className="error" role="alert">{error}</p>}
-        <small className="st-film-note">Any photo from your phone or computer, resized automatically. Fewer than four is fine: a missing frame uses one of your other photos. {scene.kind === "pearl" ? "With none, the film keeps its sample pictures." : "With none, the portraits are softly blurred."}</small>
+        <small className="st-film-note">Any photo from your phone or computer, resized automatically. Fewer than four is fine: a missing frame uses one of your other photos. {scene.kind === "baby-film" ? "With none, the frames keep their original golden butterflies." : scene.kind === "pearl" ? "With none, the film keeps its sample pictures." : "With none, the portraits are softly blurred."}</small>
       </>
     ) : (
       <>

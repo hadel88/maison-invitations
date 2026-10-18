@@ -1,0 +1,28 @@
+/* A Little Wonder owns its framing. The two existing film designs are untouched. */
+.baby-stage{position:relative;height:100cqh;min-height:500px;overflow:hidden;overflow:clip;isolation:isolate;background:#596443;color:#4d5b38}
+.cinema-guest:has(.baby-stage){overflow-anchor:none}
+.baby-backdrop{position:absolute;inset:-35px;background:center/cover no-repeat;filter:blur(24px) brightness(.76);transform:scale(1.1)}
+.baby-film-frame{position:absolute;height:100%;aspect-ratio:9/16;left:50%;top:50%;transform:translate(-50%,-50%)}
+.baby-film-frame>video,.baby-still,.baby-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:fill}
+.baby-still{z-index:1;pointer-events:none}.baby-canvas{z-index:2;pointer-events:none}
+.baby-end-anchor{position:absolute;left:32.2%;top:26.4%;width:32.4%;aspect-ratio:5/7;pointer-events:none}
+.baby-welcome{background:linear-gradient(#46373288,transparent 30%,transparent 62%,#3c2f2788)}
+.baby-welcome .film-welcome-top h1{font-size:clamp(36px,6.6cqh,60px)}
+.baby-skip{position:absolute;z-index:8;bottom:max(18px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:11px;padding:10px 15px;border:1px solid #fff7e955;background:#342b2588;color:#fff6e6;border-radius:30px;cursor:pointer;backdrop-filter:blur(5px)}
+.baby-present{gap:2cqh;padding-top:65px;padding-bottom:20px}
+.baby-present:before{background:radial-gradient(ellipse at 50% 45%,#3e282334,#3e2823a8 90%)}
+.baby-present .film-ask p{color:#fff5e5}
+.baby-present .film-card-big{width:min(80cqw,calc((100cqh - 250px)*5/7));background:radial-gradient(ellipse at 30% 20%,#fffdf8,#f8eee3 65%,#eddbc4)}
+.baby-error{font-size:11px;line-height:1.4;margin:0;max-width:85%;color:#fff5e6;text-align:center}
+.baby-stage button:focus-visible{outline:2px solid #fff4bf;outline-offset:4px}
+@media(max-height:650px){.baby-present{padding-top:50px;gap:10px}.baby-present .film-card-big{width:min(78cqw,calc((100cqh - 225px)*5/7))}.baby-present .film-ask p{font-size:20px}.baby-present .film-ask button{padding:10px 15px}}
+@media(prefers-reduced-motion:reduce){.baby-stage *{animation:none!important;transition:none!important}}
+
+.baby-card-face{gap:2cqw;color:#4d5b38}
+.baby-card-spark{font:10cqw/1 Georgia;color:#ae8945}
+.baby-card-welcome{font:6.3cqw/1.2 Georgia,serif;margin:1cqw 0;text-wrap:balance;color:#4d5b38}
+.baby-card-join{font:italic 3.6cqw Georgia,serif;margin-top:1cqw}
+.baby-card-face .film-card-names{font-size:10cqw;color:#4d5b38}
+.baby-card-face .film-card-line{font-size:3.8cqw;margin-top:3cqw}
+.baby-card-face .film-card-date{font-size:3.7cqw}
+.baby-present .film-card-big{background:linear-gradient(145deg,#fff9e8,#e9dec1);box-shadow:inset 0 0 0 1.3cqw #fff9e8,inset 0 0 0 1.7cqw #bc9d59,inset 0 0 0 2.5cqw #fff9e8,inset 0 0 0 2.7cqw #bc9d59,0 8px 32px #14210c55}
