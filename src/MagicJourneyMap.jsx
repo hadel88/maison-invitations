@@ -39,7 +39,7 @@ function scenery(canvas,{birthday,theme,stages}) {
 export function MagicJourneyMap({world,progress,onAction,theme='garden',children}) {
   const canvas=useRef(null),birthday=world.occasion==='Birthday',stages=progress.stages||[],state=stages.map(Boolean).join(',');
   useEffect(()=>scenery(canvas.current,{birthday,theme,stages}),[birthday,theme,state]);
-  return <div className={'journey-map magic-journey-map '+(birthday?'magic-map-birthday':'magic-map-wedding')+' theme-map-'+theme} aria-label={world.occasion+' fairytale journey map'}>
+  return <><div className="magic-journey-heading">{children || <div className="magic-map-heading"><span>{world.eyebrow}</span><strong>{world.name}</strong></div>}</div><div className={'journey-map magic-journey-map '+(birthday?'magic-map-birthday':'magic-map-wedding')+' theme-map-'+theme} aria-label={world.occasion+' fairytale journey map'}>
     <div className="magic-map-scroll" tabIndex={0} aria-label="Explore the five chapters of your journey">
       <div className="magic-map-scene">
         <canvas ref={canvas} className="magic-map-canvas" aria-hidden="true" />
@@ -49,8 +49,7 @@ export function MagicJourneyMap({world,progress,onAction,theme='garden',children
         </button>)}
       </div>
     </div>
-    {children || <div className="magic-map-heading"><span>{world.eyebrow}</span><strong>{world.name}</strong></div>}
     <span className="magic-map-caption">YOUR STORY UNFOLDS, ONE BEAUTIFUL STEP AT A TIME</span>
     <span className="magic-map-pan-hint">Swipe to explore all five chapters <ChevronRight size={12}/></span>
-  </div>;
+  </div></>;
 }

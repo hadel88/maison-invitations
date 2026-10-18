@@ -43,6 +43,7 @@ import "./app.css";
 import { occasionFor } from "./worlds";
 import { CinemaCollection } from "./Cinema";
 import { RoyalHero, ExpertsPage } from "./RoyalHub";
+import { HomeOccasions } from "./HomeOccasions";
 import { cinemaThemes, cinemaEvent } from "./cinemaThemes";
 import { InviteArt, Modal, Field } from "./ui";
 import HomeSections from "./Home";
@@ -358,6 +359,13 @@ function App() {
               onExperts={() => show("experts")}
               onExperience={() => setExperience({ ...firstEvent(), worldTheme })}
             />
+            <HomeOccasions lang={lang} onSelect={(occasion) => {
+              if (occasion !== "All designs") setWorldOccasion(occasion);
+              setFilter(occasion);
+              setSearch("");
+              setFavOnly(false);
+              show("gallery");
+            }} />
             <div id="designs" />
             <CinemaCollection
               onPreview={setExperience}

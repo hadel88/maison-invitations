@@ -603,7 +603,6 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
         <JourneyMap world={worldFor(occasion)} progress={progress} onAction={mapAction} theme={c.worldTheme || "midnight"}>
           {mapInfo}
         </JourneyMap>
-        <div className="ev-map-info-mobile">{mapInfo}</div>
         <div className="ev-actions">
           <button className="ev-icon-btn" disabled={!invite.published} onClick={() => onShare(invite)} title={invite.published ? "Share link" : "Publish first to share"}>
             <ArrowUpRight size={17} /> <span>Share link</span>

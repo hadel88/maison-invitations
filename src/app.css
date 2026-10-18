@@ -1448,17 +1448,36 @@
   .ev-hero .journey-map { min-height: 0; display: block; height: 690px; }
 }
 
-/* A single illustrated background plate, including its castle and floral frame. */
+/* Original proportions at the top and foot; plain gold sides extend with content. */
 .ev-card {
+  --castle-art: url('/dashboard-castle-background-wide.webp');
   max-width: 1220px;
-  padding: var(--castle-top,210px) clamp(26px,6.5%,80px) var(--castle-bottom,90px);
+  padding: var(--castle-top,160px) clamp(20px,4%,50px) var(--castle-bottom,70px);
   overflow: visible;
-  border: 0;
+  border: 1px solid #bd9c6580;
   border-image: none;
-  border-radius: 0;
-  background: #faf0df url('/dashboard-castle-background-wide.webp') center / 100% 100% no-repeat;
-  box-shadow: none;
+  border-radius: 16px;
+  background: linear-gradient(90deg,#b79b6040 0,transparent 3px,transparent calc(100% - 3px),#b79b6040),linear-gradient(180deg,#fbf1df,#fff9ed);
+  box-shadow: inset 0 0 0 4px #fff6e799;
   isolation: isolate;
 }
-@media(max-width:800px) { .ev-card { padding: var(--castle-top,140px) 6.5% var(--castle-bottom,65px); background-image: url('/dashboard-castle-background.webp'); } }
-@media(max-width:520px) { .ev-card { padding: var(--castle-top,130px) 7% var(--castle-bottom,65px); } }
+.ev-card::before,.ev-card::after { content: ''; position: absolute; left: 0; right: 0; pointer-events: none; z-index: -1; background-image: var(--castle-art); background-size: 100% auto; background-repeat: no-repeat; }
+.ev-card::before { top: 0; height: var(--castle-top,160px); background-position: center top; border-radius: 15px 15px 0 0; mask-image: linear-gradient(#000 88%,transparent); }
+.ev-card::after { bottom: 0; height: var(--castle-bottom,70px); background-position: center bottom; border-radius: 0 0 15px 15px; mask-image: linear-gradient(transparent,#000 22%); }
+.ev-card .ev-head { margin-bottom: 10px; }
+.ev-card .ev-stats { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0; margin: 12px 0 16px; padding: 0; }
+.ev-card .ev-stat { min-width: 0; padding: 7px 4px; gap: 4px; }
+.ev-card .ev-stat:not(:last-child) { border-right: 1px solid var(--ev-line); }
+.ev-card .ev-stat strong { font-size: 29px; line-height: 1.1; }
+.ev-card .ev-stat span { font-size: 11px; line-height: 1.3; white-space: nowrap; }
+@media(max-width:800px) {
+ .ev-card { --castle-art: url('/dashboard-castle-background.webp'); padding: var(--castle-top,90px) 20px var(--castle-bottom,48px); }
+}
+@media(max-width:520px) {
+ .ev-card { padding-left: 14px; padding-right: 14px; }
+ .ev-card .ev-head h2 { font-size: 28px; }
+ .ev-card .ev-head p { font-size: 14px; }
+ .ev-card .ev-stats { margin: 10px 0 14px; }
+ .ev-card .ev-stat strong { font-size: 24px; }
+ .ev-card .ev-stat span { font-size: 10px; }
+}
