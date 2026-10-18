@@ -116,6 +116,7 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
     setEvent((e) => ({
       ...e,
       scene: x.id,
+      occasion: x.occasion,
       // keep the host's own words; only swap the sample text of the old design
       names: e.names === scene.names ? x.names : e.names,
       subtitle: e.subtitle === scene.line ? x.line : e.subtitle,
@@ -381,7 +382,7 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
           {!user && <div className="small-note">Explore freely. You’ll sign in when you save or publish.</div>}
         </section>
         <div className="st-stage">
-          <div className="st-card" style={{ backgroundImage: `url(${small(scene.cover)})` }}>
+          <div className={"st-card" + (scene.kind === "birthday" ? " st-card-birthday" : "")} style={{ backgroundImage: `url(${small(scene.cover)})` }}>
             <div className="st-card-text" style={{ fontFamily: font.family }}>
               <span className="st-card-over">You’re invited</span>
               <h3>{event.names}</h3>
