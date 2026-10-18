@@ -18,4 +18,18 @@ test('the second frame photo must be an uploaded image like the first', () => {
   assert.doesNotThrow(() => checkEvent({ ...base, photo2: '' }));
   assert.throws(() => checkEvent({ ...base, photo2: 'https://example.com/tracker.png' }), /photo/);
   assert.throws(() => checkEvent({ ...base, photo2: 42 }), /photo/);
+  assert.doesNotThrow(() => checkEvent({ ...base, photo: img, photo2: img, photo3: img, photo4: img }));
+  assert.throws(() => checkEvent({ ...base, photo4: 'javascript:alert(1)' }), /photo/);
+});
+
+test('Once Upon a Castle ships its film, stills and tracked surfaces', async () => {
+  const t = cinemaThemes.find((x) => x.id === 'castle-story');
+  assert.equal(t?.kind, 'story');
+  for (const f of ['story-film.mp4', 'story-film.webm', 'story-film-end.webp', 'story-film-poster.webp', t.cover + '.webp', t.cover + '-sm.webp'])
+    assert.ok(existsSync(new URL('../public/' + f, import.meta.url)), f + ' is missing');
+  const { default: data } = await import('../src/storyFilm.json', { with: { type: 'json' } });
+  assert.equal(data.fps, 30);
+  const items = data.frames.flat();
+  assert.ok(items.some((x) => x[0] === 0) && items.some((x) => x[1] === 'card') && items.some((x) => x[1] === 'letter'));
+  for (const x of items) assert.equal(x.length, 12);
 });

@@ -137,7 +137,7 @@ export function GuestExperience({
     }
   }
   return (
-    <div className="invitation-screen"><div className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : event.scene === "castle-gates" ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
+    <div className="invitation-screen"><div className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : ["castle-gates","castle-story","pearl-promise"].includes(event.scene) ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
       <div className="guest-controls">
         <a href="/" className="brand">
           maison

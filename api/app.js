@@ -91,7 +91,7 @@ export function checkEvent(c) {
     throw Object.assign(new Error("Invalid timezone"), { status: 400 });
   }
   const dataImage = (v) => !v || (typeof v === "string" && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v));
-  if (!dataImage(c.photo) || !dataImage(c.photo2))
+  if (![c.photo, c.photo2, c.photo3, c.photo4].every(dataImage))
     throw Object.assign(
       new Error("Upload a JPG, PNG or WebP photo using the editor."),
       { status: 400 },
@@ -104,7 +104,7 @@ export function checkEvent(c) {
     !text(c.font, 20)
   )
     throw Object.assign(new Error("Please check the programme and gift list."), { status: 400 });
-  if (JSON.stringify(c).length > 1400000)
+  if (JSON.stringify(c).length > 2400000)
     throw Object.assign(new Error("Please choose a smaller photo."), {
       status: 400,
     });

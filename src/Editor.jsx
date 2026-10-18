@@ -94,23 +94,36 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
       setSaving(false);
     }
   }
+  // Phone photos are often large or HEIC: accept any image the browser can open, then shrink it to a small JPEG.
   async function photo(file, key = "photo") {
     if (!file) return;
-    if (
-      !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
-      file.size > 8000000
-    ) {
-      setError("Choose a JPG, PNG or WebP photo under 8 MB.");
+    setError("");
+    if ((file.type && !file.type.startsWith("image/")) || file.size > 30000000) {
+      setError("Choose a photo (JPG, PNG, WebP or HEIC) under 30 MB.");
       return;
     }
-    const image = await createImageBitmap(file);
+    let image, url;
+    try {
+      image = await createImageBitmap(file);
+    } catch {
+      try {
+        url = URL.createObjectURL(file);
+        image = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
+      } catch {
+        if (url) URL.revokeObjectURL(url);
+        setError("This photo could not be opened here. Please choose a JPG or PNG (on iPhone: Settings → Camera → Formats → Most Compatible).");
+        return;
+      }
+    }
+    const w = image.width || image.naturalWidth, h = image.height || image.naturalHeight;
     const canvas = document.createElement("canvas");
-    const scale = Math.min(1, 1100 / image.width);
-    canvas.width = image.width * scale;
-    canvas.height = image.height * scale;
+    const scale = Math.min(1, (key === "photo" && scene.kind !== "film" && scene.kind !== "story" && scene.kind !== "pearl" ? 1100 : 900) / Math.max(w, h * 0.8));
+    canvas.width = Math.round(w * scale);
+    canvas.height = Math.round(h * scale);
     canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
-    update(key, canvas.toDataURL("image/jpeg", key === "photo" ? 0.72 : 0.7));
-    image.close();
+    update(key, canvas.toDataURL("image/jpeg", 0.72));
+    image.close?.();
+    if (url) URL.revokeObjectURL(url);
   }
   const scene = sceneFor(event);
   const choose = (x) =>
@@ -280,16 +293,16 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
         </div>
       </>
     ),
-    photo: scene.kind === "film" ? (
+    photo: scene.kind === "film" || scene.kind === "story" || scene.kind === "pearl" ? (
       <>
-        <p className="st-lead">Two photos float through the ballroom in gold frames before your card rises from the envelope. Portrait photos look best.</p>
+        <p className="st-lead">{scene.kind === "pearl" ? "Your photos replace both pictures in the opening book and the four floating frames. Photo 1 fills the right book page, Photo 2 the left. Add up to four portrait photos." : scene.kind === "story" ? "Five mirrors line the hall the couple walks through. Your photos appear in them as they pass. Portrait photos look best." : "Four portraits stand in the ballroom, in two pairs. Your photos replace them as the camera walks past. Portrait photos look best."}</p>
         <div className="st-film-photos">
-          {[["photo", "Left frame"], ["photo2", "Right frame"]].map(([key, label]) => (
+          {(scene.kind === "pearl" ? [["photo", "Book right & frame 1"], ["photo2", "Book left & frame 2"], ["photo3", "Floating frame 3"], ["photo4", "Floating frame 4"]] : scene.kind === "story" ? [["photo", "Mirror 1 & 5"], ["photo2", "Mirror 2"], ["photo3", "Mirror 3"], ["photo4", "Mirror 4"]] : [["photo", "1st pair · left"], ["photo2", "1st pair · right"], ["photo3", "2nd pair · left"], ["photo4", "2nd pair · right"]]).map(([key, label]) => (
             <div key={key} className="st-film-photo">
               <div className="st-film-gold">{event[key] ? <img src={event[key]} alt={label} /> : <span>{label}</span>}</div>
               <label className="field">
-                {event[key] ? "Choose another photo" : label + " (optional)"}
-                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => photo(e.target.files[0], key)} />
+                {event[key] ? label + " · change" : label + " (optional)"}
+                <input type="file" accept="image/*" onChange={(e) => { photo(e.target.files[0], key); e.target.value = ""; }} />
               </label>
               {event[key] && (
                 <button className="text-link" onClick={() => update(key, "")}>
@@ -299,7 +312,8 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
             </div>
           ))}
         </div>
-        <small className="st-film-note">JPG, PNG or WebP, resized automatically. With one photo, it floats alone above the envelope; with none, the card rises straight away.</small>
+        {error && <p className="error" role="alert">{error}</p>}
+        <small className="st-film-note">Any photo from your phone or computer, resized automatically. Fewer than four is fine: a missing frame uses one of your other photos. {scene.kind === "pearl" ? "With none, the film keeps its sample pictures." : "With none, the portraits are softly blurred."}</small>
       </>
     ) : (
       <>
@@ -307,7 +321,7 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
         {event.photo && <img className="st-photo" src={event.photo} alt="Your photo" />}
         <label className="field">
           {event.photo ? "Choose another photo" : "Your photo (optional)"}
-          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => photo(e.target.files[0])} />
+          <input type="file" accept="image/*" onChange={(e) => { photo(e.target.files[0]); e.target.value = ""; }} />
           <small>JPG, PNG or WebP, resized automatically.</small>
         </label>
         {event.photo && (

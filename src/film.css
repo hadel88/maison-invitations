@@ -29,7 +29,7 @@
 /* presented card and the question */
 .film-present{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2svh;padding:70px 18px 24px;box-sizing:border-box}
 .film-present:before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,#1a110a55,#1a110ab3 75%);opacity:0;animation:film-fade 1.2s .1s forwards;z-index:-1}
-.film-card-big{width:min(80vw,360px,calc((100svh - 260px) * 5 / 7));transition:transform 1.2s cubic-bezier(.3,.1,.2,1);transform-origin:center;flex:none}
+.film-card-big{width:min(86vw,420px,calc((100svh - 230px) * 5 / 7));transition:transform 1.2s cubic-bezier(.3,.1,.2,1);transform-origin:center;flex:none}
 .film-ask{text-align:center;color:#fff4dd;opacity:0;transform:translateY(12px);transition:opacity .9s,transform .9s;pointer-events:none}
 .film-ask[aria-hidden=false]{opacity:1;transform:none;pointer-events:auto}
 .film-ask p{font:italic clamp(21px,3.2svh,28px)/1.2 'Cormorant Garamond',Georgia,serif;margin:0 0 12px;text-shadow:0 2px 14px #000c}
@@ -57,6 +57,7 @@
 @keyframes film-gold-right{0%{opacity:0;transform:translate(-70%,-45%) scale(.4)}22%{opacity:1;transform:translate(-50%,-50%) scale(1)}68%{opacity:1;transform:translate(-48%,-51%) scale(1.07)}100%{opacity:0;transform:translate(90%,-40%) scale(2.3)}}
 @keyframes film-gold-up{0%{opacity:0;transform:translate(-50%,-40%) scale(.4)}22%{opacity:1;transform:translate(-50%,-50%) scale(1)}68%{opacity:1;transform:translate(-50%,-52%) scale(1.07)}100%{opacity:0;transform:translate(-50%,-150%) scale(2.3)}}
 
+.film-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;transition:opacity .15s}
 /* falling petals once the film has played */
 .film-petals{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
 .film-petals i{position:absolute;top:-20px;width:9px;height:7px;border-radius:60% 40% 60% 40%;background:#f6d4d6;box-shadow:inset -1px -1px 2px #d9a3a8;opacity:.85;animation:film-petal linear infinite}
@@ -91,3 +92,16 @@
 .st-film-gold{aspect-ratio:4/5;padding:8%;border-radius:3px;background:linear-gradient(135deg,#6b4511 0%,#f7dc8e 13%,#a9772a 27%,#fff0b5 41%,#b9852e 57%,#f1cf78 73%,#8a5d1a 88%,#5c3a0d 100%);box-shadow:0 8px 20px #0003,inset 0 0 0 2px #8a5d1a}
 .st-film-gold img,.st-film-gold span{width:100%;height:100%;display:grid;place-items:center;object-fit:cover;background:#2a1f14;color:#e9d3a3;font:italic 13px Georgia;box-shadow:0 0 0 2px #e8c672}
 .st-film-note{display:block;margin-top:10px;color:#857563;font-size:11px;line-height:1.5}
+
+/* wide stages (not narrow previews): show the film larger (a little of the ceiling and floor is cropped) instead of a thin strip */
+.film-stage{container-type:size}
+@container (min-aspect-ratio: 3/4){.film-frame{height:132%}}
+@container (min-aspect-ratio: 5/4){.film-frame{height:150%}}
+
+/* Once Upon a Castle: the film file carries a matte band below the picture, so the video is 150% tall and clipped */
+.story-frame{overflow:hidden}
+.story-video{position:absolute;left:0;top:0;width:100%;height:150%;object-fit:fill;display:block;background:#2a1c14}
+.story-still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;transition:opacity .2s;pointer-events:none}
+.story-stage .film-canvas{z-index:2}
+.story-end-card{position:absolute;aspect-ratio:5/7;pointer-events:none}
+.story-welcome{background:linear-gradient(#3a1f2a55,transparent 35%,transparent 60%,#2a161066)}
