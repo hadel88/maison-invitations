@@ -28,6 +28,7 @@ const withPackage = (record) => ({
   package: record.content.package || (record.id ? "journey" : "invitation"),
 });
 import { cinemaThemes, sceneFor } from "./cinemaThemes";
+import "./film.css";
 import { worldThemes, eventWorlds, occasionFor } from "./worlds";
 import { templates } from "./catalog";
 
@@ -93,7 +94,7 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
       setSaving(false);
     }
   }
-  async function photo(file) {
+  async function photo(file, key = "photo") {
     if (!file) return;
     if (
       !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
@@ -108,7 +109,7 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
     canvas.width = image.width * scale;
     canvas.height = image.height * scale;
     canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
-    update("photo", canvas.toDataURL("image/jpeg", 0.72));
+    update(key, canvas.toDataURL("image/jpeg", key === "photo" ? 0.72 : 0.7));
     image.close();
   }
   const scene = sceneFor(event);
@@ -279,7 +280,28 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
         </div>
       </>
     ),
-    photo: (
+    photo: scene.kind === "film" ? (
+      <>
+        <p className="st-lead">Two photos float through the ballroom in gold frames before your card rises from the envelope. Portrait photos look best.</p>
+        <div className="st-film-photos">
+          {[["photo", "Left frame"], ["photo2", "Right frame"]].map(([key, label]) => (
+            <div key={key} className="st-film-photo">
+              <div className="st-film-gold">{event[key] ? <img src={event[key]} alt={label} /> : <span>{label}</span>}</div>
+              <label className="field">
+                {event[key] ? "Choose another photo" : label + " (optional)"}
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => photo(e.target.files[0], key)} />
+              </label>
+              {event[key] && (
+                <button className="text-link" onClick={() => update(key, "")}>
+                  Remove <X size={14} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <small className="st-film-note">JPG, PNG or WebP, resized automatically. With one photo, it floats alone above the envelope; with none, the card rises straight away.</small>
+      </>
+    ) : (
       <>
         <p className="st-lead">A photo of you, shown on the details page of your invitation.</p>
         {event.photo && <img className="st-photo" src={event.photo} alt="Your photo" />}

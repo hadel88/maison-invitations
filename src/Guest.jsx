@@ -137,7 +137,7 @@ export function GuestExperience({
     }
   }
   return (
-    <div className="invitation-screen"><div className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
+    <div className="invitation-screen"><div className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : event.scene === "castle-gates" ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
       <div className="guest-controls">
         <a href="/" className="brand">
           maison
@@ -168,7 +168,7 @@ export function GuestExperience({
           DESIGN PREVIEW · Responses here are a demonstration
         </span>
       )}
-      <CinemaStage event={event} guest={guest} opened={opened} onOpen={()=>setOpened(true)} onReplay={()=>setOpened(false)} lang={lang} preview={preview}/>
+      <CinemaStage event={event} guest={guest} opened={opened} onOpen={()=>setOpened(true)} onReplay={()=>setOpened(false)} onAnswer={(r)=>{if(r){setResponse(r);setSaved(false);}setTimeout(()=>document.querySelector('.cinema-detail-sheet .rsvp')?.scrollIntoView({behavior:'smooth',block:'start'}),60)}} lang={lang} preview={preview}/>
       {opened && (
         <div className="cinema-detail-sheet" aria-label="Invitation details and RSVP">
         <div className="opened-invite">

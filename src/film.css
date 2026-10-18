@@ -1,0 +1,93 @@
+/* The Castle Gates — a film invitation. All envelope positions are % of the 720 × 1280 film frame. */
+.film-stage{position:relative;height:100svh;min-height:560px;overflow:hidden;isolation:isolate;background:#1d1510;color:#3d3022}
+.film-backdrop{position:absolute;inset:-40px;background:center/cover no-repeat;filter:blur(28px) brightness(.55) saturate(1.1);transform:scale(1.1)}
+.film-frame{position:absolute;left:50%;top:50%;height:100%;aspect-ratio:9/16;transform:translate(-50%,-50%);transition:transform 7s cubic-bezier(.2,.6,.2,1);will-change:transform;box-shadow:0 0 90px #0009}
+.film-stage:not(.film-is-idle):not(.film-is-playing) .film-frame{transform:translate(-50%,-50%) scale(1.05)}
+.film-video,.film-end{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#1d1510}
+.film-end{transition:opacity .2s;pointer-events:none}
+.film-slot{position:absolute;left:28.889%;width:43.611%;top:0;height:58.828%;overflow:hidden;pointer-events:none;z-index:2;opacity:0;transition:opacity .25s}
+.film-stage:not(.film-is-idle):not(.film-is-playing) .film-slot{opacity:1}
+.film-pocket{position:absolute;left:26.389%;top:43.75%;width:48.611%;height:15.625%;z-index:3;pointer-events:none;opacity:0;transition:opacity .25s}
+.film-stage:not(.film-is-idle):not(.film-is-playing) .film-pocket{opacity:1}
+
+/* the card: one design that scales with its own width */
+.film-card{container-type:inline-size;aspect-ratio:5/7;background:radial-gradient(ellipse at 30% 20%,#fffdf8,#f8f1e3 60%,#efe3cc);box-shadow:inset 0 0 0 1.4cqw #fbf7ee,inset 0 0 0 1.8cqw #c49a4e,inset 0 0 0 2.6cqw #fbf7ee,inset 0 0 0 2.85cqw #d8b46a,0 1.5cqw 5cqw #3a271033;border-radius:.8cqw;color:#4a3a28}
+.film-card-small{position:absolute;left:14.968%;width:68.47%;top:76.36%;transform:translateY(0);transition:transform 1.9s cubic-bezier(.45,.05,.25,1)}
+.film-is-rise .film-card-small{transform:translateY(-112%)}
+.film-card-face{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:9cqw 9cqw;box-sizing:border-box;gap:1.6cqw}
+.film-card-monogram{font:italic 11cqw/1 'Cormorant Garamond',Georgia,serif;color:#b48a3c;letter-spacing:.04em;background:linear-gradient(135deg,#8a6420,#e4c27a 45%,#a77a2e 70%,#d9b562);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2cqw}
+.film-card-over{font-size:2.6cqw;letter-spacing:.24em;color:#9a8058}
+.film-card-names{font-weight:400;font-size:12.5cqw;line-height:1.08;margin:1cqw 0;color:#4a3926;text-wrap:balance;overflow-wrap:anywhere}
+.film-card-names em{display:block;font-size:.55em;font-style:italic;color:#b48a3c;line-height:1.1}
+.film-card-names span{display:block}
+.film-card-line{font:italic 4.4cqw/1.45 'Cormorant Garamond',Georgia,serif;color:#6e5a43;margin:0 0 1cqw;max-width:90%}
+.film-card-rule{width:24cqw;height:1px;background:linear-gradient(90deg,transparent,#c49a4e,transparent);margin:1.5cqw 0}
+.film-card-date{font-size:3.5cqw;letter-spacing:.08em;text-transform:uppercase;color:#5d4a33;margin:0}
+.film-card-venue{font:italic 5cqw/1.3 'Cormorant Garamond',Georgia,serif;margin:1cqw 0 0;color:#4a3a28}
+.film-card-address{font-size:3cqw;color:#8b7558;margin:0}
+
+/* presented card and the question */
+.film-present{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2svh;padding:70px 18px 24px;box-sizing:border-box}
+.film-present:before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,#1a110a55,#1a110ab3 75%);opacity:0;animation:film-fade 1.2s .1s forwards;z-index:-1}
+.film-card-big{width:min(80vw,360px,calc((100svh - 260px) * 5 / 7));transition:transform 1.2s cubic-bezier(.3,.1,.2,1);transform-origin:center;flex:none}
+.film-ask{text-align:center;color:#fff4dd;opacity:0;transform:translateY(12px);transition:opacity .9s,transform .9s;pointer-events:none}
+.film-ask[aria-hidden=false]{opacity:1;transform:none;pointer-events:auto}
+.film-ask p{font:italic clamp(21px,3.2svh,28px)/1.2 'Cormorant Garamond',Georgia,serif;margin:0 0 12px;text-shadow:0 2px 14px #000c}
+.film-ask>div{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.film-ask button{cursor:pointer;font:500 14px/1 inherit;border-radius:999px;padding:13px 20px;display:inline-flex;align-items:center;gap:8px}
+.film-yes{background:linear-gradient(105deg,#b8893a,#f3d892 50%,#c99c4b);color:#3a2812;border:0;box-shadow:0 6px 20px #0006}
+.film-no{background:#1e140c88;color:#fff1d8;border:1px solid #fff3d655;backdrop-filter:blur(6px)}
+.film-ask .film-more{background:none;border:0;color:#f3e3c4cc;font-size:12px;padding:12px 6px 0;text-decoration:underline;text-underline-offset:4px}
+
+/* the couple's photos in gold frames: they float in, then rush past like the film's gallery */
+.film-photos{position:absolute;inset:0;z-index:5;pointer-events:none}
+.film-gold{position:absolute;margin:0;top:26%;width:min(40vw,20svh);aspect-ratio:4/5;padding:2.6%;box-sizing:border-box;opacity:0;transform:translate(-50%,-50%) scale(.4);border-radius:3px;
+ background:linear-gradient(135deg,#6b4511 0%,#f7dc8e 13%,#a9772a 27%,#fff0b5 41%,#b9852e 57%,#f1cf78 73%,#8a5d1a 88%,#5c3a0d 100%);
+ box-shadow:0 22px 45px #0008,inset 0 0 0 1px #fff6cf,inset 0 0 0 3px #8a5d1a,inset 0 0 0 4px #f5d98a,inset 0 0 10px 4px #5c3a0d88}
+.film-gold:before{content:'';position:absolute;inset:6%;border:1px solid #fff1b866;box-shadow:inset 0 0 0 2px #7a5214aa;border-radius:2px;pointer-events:none}
+.film-gold-inner{position:relative;width:100%;height:100%;overflow:hidden;background:#2a1f14;box-shadow:0 0 0 2px #e8c672,0 0 0 4px #6d4710,inset 0 0 16px #000a}
+.film-gold-inner img{width:100%;height:100%;object-fit:cover;display:block}
+.film-gold-inner span{position:absolute;inset:0;display:grid;place-items:center;font:italic 15px 'Cormorant Garamond',Georgia,serif;color:#e9d3a3;background:radial-gradient(#3b2d1e,#21180f)}
+.film-gold-0{left:calc(50% - min(25vw,13svh))}.film-gold-1{left:calc(50% + min(25vw,13svh))}
+.film-photos-1 .film-gold-0{left:50%;top:24%;width:min(46vw,23svh)}
+.film-stage.film-is-photos .film-gold-0{animation:film-gold-left 4.3s cubic-bezier(.35,.1,.3,1) forwards}
+.film-stage.film-is-photos .film-gold-1{animation:film-gold-right 4.3s cubic-bezier(.35,.1,.3,1) .15s forwards}
+.film-stage.film-is-photos .film-photos-1 .film-gold-0{animation-name:film-gold-up}
+@keyframes film-gold-left{0%{opacity:0;transform:translate(-30%,-45%) scale(.4)}22%{opacity:1;transform:translate(-50%,-50%) scale(1)}68%{opacity:1;transform:translate(-52%,-51%) scale(1.07)}100%{opacity:0;transform:translate(-190%,-40%) scale(2.3)}}
+@keyframes film-gold-right{0%{opacity:0;transform:translate(-70%,-45%) scale(.4)}22%{opacity:1;transform:translate(-50%,-50%) scale(1)}68%{opacity:1;transform:translate(-48%,-51%) scale(1.07)}100%{opacity:0;transform:translate(90%,-40%) scale(2.3)}}
+@keyframes film-gold-up{0%{opacity:0;transform:translate(-50%,-40%) scale(.4)}22%{opacity:1;transform:translate(-50%,-50%) scale(1)}68%{opacity:1;transform:translate(-50%,-52%) scale(1.07)}100%{opacity:0;transform:translate(-50%,-150%) scale(2.3)}}
+
+/* falling petals once the film has played */
+.film-petals{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
+.film-petals i{position:absolute;top:-20px;width:9px;height:7px;border-radius:60% 40% 60% 40%;background:#f6d4d6;box-shadow:inset -1px -1px 2px #d9a3a8;opacity:.85;animation:film-petal linear infinite}
+@keyframes film-petal{0%{transform:translate(0,-20px) rotate(0)}100%{transform:translate(70px,110svh) rotate(520deg)}}
+@keyframes film-fade{to{opacity:1}}
+
+/* welcome: before the film plays */
+.film-welcome{position:absolute;inset:0;z-index:7;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:78px 20px max(28px,env(safe-area-inset-bottom));pointer-events:none;background:linear-gradient(#1a0f1a66,transparent 30%,transparent 62%,#120a0899)}
+.film-welcome-top{text-align:center;color:#fff6e6;text-shadow:0 2px 16px #000b}
+.film-welcome-top>span{font-size:10px;letter-spacing:.24em;opacity:.9}
+.film-welcome-top h1{font-weight:400;font-size:clamp(40px,7svh,64px);line-height:1.05;margin:10px 0 0}
+.film-welcome-top h1 em{display:block;font-size:.5em;opacity:.85}
+.film-welcome-top h1 span{display:block}
+.film-open{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:12px;background:none;border:0;cursor:pointer;margin-bottom:5svh}
+.film-open-seal{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;font:italic 26px 'Cormorant Garamond',Georgia,serif;color:#5b3d14;background:conic-gradient(from 30deg,#a0783f,#ffe4ac,#b58a48,#f0d397,#8c6330,#fbe4b3,#a0783f);box-shadow:0 6px 26px #000a,0 0 40px #f2c76a55,inset 0 0 0 4px #ffffff22,inset 0 0 0 6px #7c5a2a;animation:film-breathe 2.6s ease-in-out infinite}
+.film-open-text{font:italic 17px 'Cormorant Garamond',Georgia,serif;color:#fff2da;text-shadow:0 2px 10px #000}
+@keyframes film-breathe{50%{transform:scale(1.07);box-shadow:0 6px 30px #000a,0 0 60px #f2c76a88,inset 0 0 0 4px #ffffff22,inset 0 0 0 6px #7c5a2a}}
+.film-replay{position:absolute;z-index:8;right:18px;bottom:max(18px,env(safe-area-inset-bottom));width:36px;height:36px;border-radius:50%;display:grid;place-items:center;border:1px solid #ffffff44;background:#1e140c88;color:#fff3dd;cursor:pointer}
+.cinema-guest .film-stage~.cinema-detail-sheet{scroll-margin-top:0}
+
+@media(prefers-reduced-motion:reduce){.film-stage *{animation:none!important;transition:none!important}.film-petals{display:none}}
+
+/* collection poster */
+.film-poster-title{position:absolute;left:0;right:0;top:9%;text-align:center;font:400 clamp(26px,2.6vw,34px)/1.1 'Cormorant Garamond',Georgia,serif;color:#fff6e4;text-shadow:0 2px 14px #000c}
+.film-poster-title small{display:block;font-size:9px;line-height:1;letter-spacing:.24em;margin-bottom:10px;opacity:.9}
+/* guest page chrome over the film */
+.cinema-film .guest-controls .brand{color:#fff3dd;text-shadow:0 2px 10px #0008}
+.cinema-film .guest-controls select,.cinema-film .guest-controls button{background:#1e140c88;color:#fff3dd;border-color:#ffffff33}
+/* studio: two gold frames to fill */
+.st-film-photos{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+.st-film-photo{display:flex;flex-direction:column;gap:8px}
+.st-film-gold{aspect-ratio:4/5;padding:8%;border-radius:3px;background:linear-gradient(135deg,#6b4511 0%,#f7dc8e 13%,#a9772a 27%,#fff0b5 41%,#b9852e 57%,#f1cf78 73%,#8a5d1a 88%,#5c3a0d 100%);box-shadow:0 8px 20px #0003,inset 0 0 0 2px #8a5d1a}
+.st-film-gold img,.st-film-gold span{width:100%;height:100%;display:grid;place-items:center;object-fit:cover;background:#2a1f14;color:#e9d3a3;font:italic 13px Georgia;box-shadow:0 0 0 2px #e8c672}
+.st-film-note{display:block;margin-top:10px;color:#857563;font-size:11px;line-height:1.5}

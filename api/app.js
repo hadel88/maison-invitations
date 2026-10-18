@@ -68,7 +68,7 @@ function bodyOf(req) {
     throw Object.assign(new Error("Invalid JSON"), { status: 400 });
   }
 }
-function checkEvent(c) {
+export function checkEvent(c) {
   const validDate = (v) =>
     /^\d{4}-\d{2}-\d{2}$/.test(v) &&
     new Date(v + "T12:00:00Z").toISOString().slice(0, 10) === v;
@@ -90,10 +90,8 @@ function checkEvent(c) {
   } catch {
     throw Object.assign(new Error("Invalid timezone"), { status: 400 });
   }
-  if (
-    c.photo &&
-    !/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(c.photo)
-  )
+  const dataImage = (v) => !v || (typeof v === "string" && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v));
+  if (!dataImage(c.photo) || !dataImage(c.photo2))
     throw Object.assign(
       new Error("Upload a JPG, PNG or WebP photo using the editor."),
       { status: 400 },
