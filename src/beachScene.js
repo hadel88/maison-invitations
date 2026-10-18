@@ -70,6 +70,40 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
   mesh(heartGeometry,rose,heart);heart.scale.setScalar(.67);
   const heartRim=mesh(heartGeometry,gold,heart,0,0,-.06);heartRim.scale.setScalar(1.06);
   const heartHalo=mesh(new THREE.TorusGeometry(1.1,.012,8,90),gold,heart,0,.12,-.08);heartHalo.rotation.y=.3;
+  const memoryCamera=new THREE.Group();memoryCamera.position.set(-1.35,1.5,-10);memoryCamera.rotation.y=.22;scene.add(memoryCamera);
+  const leather=new THREE.MeshStandardMaterial({color:'#372d29',roughness:.82});
+  mesh(rounded(.85,.57,.3),leather,memoryCamera);
+  mesh(rounded(.92,.08,.35),gold,memoryCamera,0,.25);
+  mesh(rounded(.92,.08,.35),gold,memoryCamera,0,-.25);
+  const lens=mesh(new THREE.CylinderGeometry(.2,.24,.22,32),gold,memoryCamera,0,0,.24);lens.rotation.x=Math.PI/2;
+  const glass=mesh(new THREE.CylinderGeometry(.16,.16,.025,32),new THREE.MeshPhysicalMaterial({color:'#16424d',metalness:.6,roughness:.08}),memoryCamera,0,0,.365);glass.rotation.x=Math.PI/2;
+  mesh(rounded(.21,.15,.05),ivory,memoryCamera,.29,.15,.18);
+  mesh(new THREE.CylinderGeometry(.055,.055,.06,12),gold,memoryCamera,.27,.32);
+  const cameraPlinth=mesh(new THREE.CylinderGeometry(.4,.48,1.15,32),ivory,scene,-1.35,.575,-10);
+  const memories=new THREE.Group();memories.visible=false;scene.add(memories);
+  const photoMaterials=[],photoTextures=[];let photoVersion=0;
+  for(let i=0;i<4;i++){
+    const frame=new THREE.Group();frame.position.set(1+i*2.4,2.1,-16.5-Math.abs(i-1)*.6);frame.rotation.y=(1-i)*.1;memories.add(frame);
+    mesh(rounded(2.12,1.75,.06,.02),ivory,frame);
+    const photoMaterial=new THREE.MeshBasicMaterial({color:'#dfbd99',side:THREE.DoubleSide});photoMaterials.push(photoMaterial);
+    mesh(new THREE.PlaneGeometry(1.94,1.38),photoMaterial,frame,0,.1,.04);
+    mesh(new THREE.CylinderGeometry(.009,.009,1.2,6),gold,frame,0,1.45,-.02);
+    mesh(rounded(.09,.22,.08,.01),gold,frame,0,.86,.07);
+  }
+  mesh(new THREE.CylinderGeometry(.03,.03,9.6,10),gold,memories,4.6,5,-17).rotation.z=Math.PI/2;
+  for(const x of[-.2,9.4])mesh(new THREE.CylinderGeometry(.035,.055,5,10),gold,memories,x,2.5,-17);
+  const flash=new THREE.PointLight('#fff5e5',0,10);flash.position.set(-1.35,1.5,-9.4);scene.add(flash);
+  function setPhotos(urls){
+    const version=++photoVersion;
+    urls.forEach((url,i)=>new THREE.TextureLoader().load(url,texture=>{
+      if(disposed||version!==photoVersion){texture.dispose();return;}
+      texture.colorSpace=THREE.SRGBColorSpace;
+      const ratio=texture.image.width/texture.image.height,target=1.94/1.38;
+      texture.repeat.set(Math.min(1,target/ratio),Math.min(1,ratio/target));texture.offset.set((1-texture.repeat.x)/2,(1-texture.repeat.y)/2);
+      photoTextures[i]?.dispose();photoTextures[i]=texture;photoMaterials[i].map=texture;photoMaterials[i].color.set('#ffffff');photoMaterials[i].needsUpdate=true;
+    }));
+    for(let i=urls.length;i<4;i++){photoTextures[i]?.dispose();photoTextures[i]=null;photoMaterials[i].map=null;photoMaterials[i].color.set('#dfbd99');photoMaterials[i].needsUpdate=true;}
+  }
   const box=new THREE.Group();box.position.set(3.4,1.1,-15);scene.add(box);
   mesh(rounded(2,.75,1.65,.13),velvet,box);
   mesh(rounded(1.84,.08,1.48,.05),gold,box,0,.38,0);
@@ -108,6 +142,28 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
   flowers.castShadow=true;arch.add(flowers,leaves);
   const archHit=mesh(new THREE.PlaneGeometry(4.6,5.1),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),arch,0,2.5,0);
   archHit.castShadow=false;archHit.receiveShadow=false;
+  // Event information is printed onto a lit paper object within the arch.
+  const invitation=new THREE.Group();invitation.position.set(0,2.45,-24.65);invitation.visible=false;scene.add(invitation);
+  mesh(rounded(2.83,3.9,.06,.05),gold,invitation);
+  const invitationCanvas=document.createElement('canvas');invitationCanvas.width=1024;invitationCanvas.height=1536;
+  const invitationTexture=new THREE.CanvasTexture(invitationCanvas);invitationTexture.colorSpace=THREE.SRGBColorSpace;textures.push(invitationTexture);
+  mesh(new THREE.PlaneGeometry(2.73,3.78),new THREE.MeshStandardMaterial({map:invitationTexture,roughness:.92}),invitation,0,0,.04);
+  function setEvent(event){
+    const ctx=invitationCanvas.getContext('2d');ctx.fillStyle='#fff4df';ctx.fillRect(0,0,1024,1536);
+    ctx.strokeStyle='#c5a16b';ctx.lineWidth=2;ctx.strokeRect(40,40,944,1456);ctx.textAlign='center';
+    ctx.fillStyle='#8c7055';ctx.font='25px Georgia';ctx.fillText('TOGETHER WITH THEIR FAMILIES',512,205);
+    function lines(text,y,font,maxWidth,lineHeight){
+      ctx.font=font;const words=text.split(/\s+/);let line='',row=0;
+      for(const word of words){const next=line?line+' '+word:word;if(ctx.measureText(next).width>maxWidth&&line){ctx.fillText(line,512,y+row++*lineHeight,maxWidth);line=word;}else line=next;}
+      if(line)ctx.fillText(line,512,y+row*lineHeight,maxWidth);
+    }
+    ctx.fillStyle='#70474b';const nameSize=Math.max(66,142-Math.max(0,event.names.length-20)*2);lines(event.names,420,`${nameSize}px Georgia`,830,nameSize*1.08);
+    ctx.fillStyle='#7c6451';lines('Joyfully invite you to celebrate their wedding by the sea.',760,'italic 41px Georgia',790,60);
+    ctx.strokeStyle='#cfb782';ctx.beginPath();ctx.moveTo(410,925);ctx.lineTo(614,925);ctx.stroke();
+    ctx.font='36px Georgia';ctx.fillText(event.dateLabel,512,1035,820);ctx.font='italic 38px Georgia';ctx.fillText(event.time+' · As the sun meets the sea',512,1110,820);
+    lines(event.venue,1230,'38px Georgia',800,52);ctx.font='italic 27px Georgia';ctx.fillText('A new chapter. With you beside us.',512,1410);
+    invitationTexture.needsUpdate=true;
+  }
   const lanternMaterial=new THREE.MeshStandardMaterial({color:'#fff0c5',emissive:'#ffb95e',emissiveIntensity:2,roughness:.35});
   for(let i=0;i<16;i++){
     const x=i%2?-2.8:2.8,z=3-Math.floor(i/2)*4;
@@ -155,9 +211,14 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
     const oldSandMaterial=sand.material;sand.material=new THREE.ShadowMaterial({color:'#4a2d22',opacity:.22});oldSandMaterial.dispose();
     const generator=new THREE.PMREMGenerator(renderer),nextEnvironment=generator.fromEquirectangular(texture);generator.dispose();environment.dispose();environment=nextEnvironment;scene.environment=environment.texture;
   },undefined,()=>{});
+  backdropLoader.load('/beach-story-memories.webp',texture=>{
+    if(disposed){texture.dispose();return;}
+    texture.colorSpace=THREE.SRGBColorSpace;textures.push(texture);
+    for(let i=0;i<4;i++)if(!photoMaterials[i].map){const crop=texture.clone();crop.repeat.set(.5,.71);crop.offset.set(i%2===1?0:.5,.145);crop.needsUpdate=true;textures.push(crop);photoMaterials[i].map=crop;photoMaterials[i].color.set('#ffffff');photoMaterials[i].needsUpdate=true;}
+  },undefined,()=>{});
   backdropLoader.load('/craft-cotton-paper.webp',texture=>{if(disposed){texture.dispose();return;}texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(3,3);velvet.bumpMap=texture;velvet.bumpScale=.035;velvet.needsUpdate=true;textures.push(texture);},undefined,()=>{});
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function visible(){doors.visible=true;heart.visible=chapter<=1;box.visible=true;arch.visible=true;ring.visible=chapter>=3;}
+  function visible(){doors.visible=true;heart.visible=chapter<=1;memoryCamera.visible=chapter<=2;cameraPlinth.visible=chapter<=2;memories.visible=chapter>=2;box.visible=true;arch.visible=true;invitation.visible=chapter>=4;ring.visible=chapter>=3;}
   visible();
   function resize(){const r=host.getBoundingClientRect();camera.aspect=r.width/Math.max(r.height,1);camera.updateProjectionMatrix();baseZ=Math.max(9.3,6.8/camera.aspect);renderer.setSize(r.width,r.height,false);fitBackdrop();}
   const observer=new ResizeObserver(resize);observer.observe(host);resize();
@@ -166,7 +227,8 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
     if(!document.hidden){
       elapsedTime+=dt;const t=reduced?0:elapsedTime;
       const distance=Math.max(8,baseZ*.62);
-      const poses=[[2.9,baseZ,2.6,0,0],[2.6,-10+distance,2.4,-10,0],[2.35,-15+distance*.9,1.65,-15,3.4],[2.9,-25+baseZ*.95,2.6,-25,0],[2.9,-25+baseZ*.9,2.6,-25,0]],view=[...poses[Math.min(chapter,4)]];
+      const archFov=Math.min(102,Math.max(60,2*Math.atan(4.8/(11*camera.aspect))*180/Math.PI));let viewFov=chapter>=3?archFov:42;
+      const poses=[[2.9,baseZ,2.6,0,0],[2.6,-10+distance,2.4,-10,0],[2.35,-15+distance*.9,1.65,-15,3.4],[2.9,-19.5,2.6,-25,0],[2.9,-19.8,2.6,-25,0]],view=[...poses[Math.min(chapter,4)]];
       heart.position.y=2.4+Math.sin(t*1.4)*.12;heart.rotation.y=Math.sin(t*.65)*.22;
       particles.rotation.y=t*.025;particles.position.y=Math.sin(t*.3)*.07;
       const positions=waterGeometry.attributes.position.array;if(water.visible)for(let i=0;i<positions.length;i+=3)positions[i+1]=baseWater[i+1]+Math.sin(positions[i]*.5+t*.7)*.035+Math.cos(positions[i+2]*.8+t)*.018;if(water.visible)waterGeometry.attributes.position.needsUpdate=true;
@@ -175,27 +237,35 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
         const from=poses[action],to=poses[action+1];for(let i=0;i<5;i++)view[i]=from[i]+(to[i]-from[i])*p;
         if(action===0){const open=reduced?1:ease(Math.min(1,elapsed/3.2));pivots[0].rotation.y=-open*1.85;pivots[1].rotation.y=open*1.85;const travel=reduced?1:ease((elapsed-1.2)/5.3);for(let i=0;i<5;i++)view[i]=from[i]+(to[i]-from[i])*travel;}
         if(action===1){heart.position.x=-ease(p)*2.4;heart.rotation.y=p*.8;}
-        if(action===2){const close=[1.95,-15+distance*.7,1.65,-15,3.4],a=p<.65?from:close,b=p<.65?close:to,q=p<.65?ease(p/.65):ease((p-.65)/.35);for(let i=0;i<5;i++)view[i]=a[i]+(b[i]-a[i])*q;lid.rotation.x=-ease(Math.min(1,p*2.2))*1.65;ring.visible=true;ring.position.y=.56+ease(p)*.24;}
-        if(action===3){arch.scale.setScalar(1+Math.sin(p*Math.PI)*.035);particles.rotation.z=p*.16;}
+        if(action===2){viewFov=42+(archFov-42)*ease((p-.65)/.35);const close=[1.95,-15+distance*.7,1.65,-15,3.4],a=p<.65?from:close,b=p<.65?close:to,q=p<.65?ease(p/.65):ease((p-.65)/.35);for(let i=0;i<5;i++)view[i]=a[i]+(b[i]-a[i])*q;lid.rotation.x=-ease(Math.min(1,p*2.2))*1.65;ring.visible=true;ring.position.y=.56+ease(p)*.24;}
+        if(action===3){arch.scale.setScalar(1+Math.sin(p*Math.PI)*.035);particles.rotation.z=p*.16;invitation.visible=true;invitation.rotation.y=(1-p)*Math.PI*.45;invitation.position.y=2.45-(1-p)*1.2;}
         if(p>=1){const completed=done;chapter=action+1;action=-1;visible();heart.scale.setScalar(.67);box.scale.setScalar(1);arch.scale.setScalar(1);completed?.();}
       }
-      camera.position.set(view[4]+(reduced?0:Math.sin(t*.14)*.045),view[0],view[1]);camera.lookAt(view[4],view[2],view[3]);
+      if(action===1){flash.intensity=elapsed<.18?14*(1-elapsed/.18):0;memories.visible=elapsed>.2;}else flash.intensity=0;
+      lookX+=(lookTargetX-lookX)*Math.min(1,dt*7);lookY+=(lookTargetY-lookY)*Math.min(1,dt*7);
+      memories.children.forEach((frame,i)=>{frame.rotation.z=reduced?0:Math.sin(t*.7+i)*.018;});
+      if(Math.abs(camera.fov-viewFov)>.001){camera.fov=viewFov;camera.updateProjectionMatrix();}
+      camera.position.set(view[4]+(reduced?0:Math.sin(t*.14)*.045),view[0],view[1]);camera.lookAt(view[4]+lookX,view[2]+lookY,view[3]);
       renderer.render(scene,camera);
     }
     raf=requestAnimationFrame(draw);
   }
-  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let down=null;
-  function pointerDown(e){down=[e.clientX,e.clientY];}
+  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let down=null,previous=null,dragged=false,lookX=0,lookY=0,lookTargetX=0,lookTargetY=0;
+  function nudge(x,y){lookTargetX=THREE.MathUtils.clamp(lookTargetX+x,-5,5);lookTargetY=THREE.MathUtils.clamp(lookTargetY+y,-1.4,1.4);}
+  function pointerDown(e){down=[e.clientX,e.clientY];previous=down;dragged=false;renderer.domElement.setPointerCapture(e.pointerId);}
+  function pointerMove(e){if(!down||action>=0)return;if(Math.hypot(e.clientX-down[0],e.clientY-down[1])>8)dragged=true;if(dragged)nudge(-(e.clientX-previous[0])*.014,(e.clientY-previous[1])*.009);previous=[e.clientX,e.clientY];}
+  function pointerCancel(){down=null;previous=null;dragged=false;}
   function pointerUp(e){
-    if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>18)return;down=null;
+    if(!down)return;const wasDragged=dragged;pointerCancel();if(wasDragged)return;
     if(action>=0||chapter>=4)return;const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(pointer,camera);
-    if(raycaster.intersectObject([doors,heart,box,arch][chapter],true).length)onTap?.();
+    if(raycaster.intersectObject([doors,heart,box,arch][chapter],true).length||(chapter===1&&raycaster.intersectObject(memoryCamera,true).length))onTap?.();
   }
-  const lost=e=>{e.preventDefault();cancelAnimationFrame(raf);onError?.();};renderer.domElement.addEventListener('pointerdown',pointerDown);renderer.domElement.addEventListener('pointerup',pointerUp);renderer.domElement.addEventListener('webglcontextlost',lost);
+  const lost=e=>{e.preventDefault();cancelAnimationFrame(raf);onError?.();};renderer.domElement.addEventListener('pointerdown',pointerDown);renderer.domElement.addEventListener('pointermove',pointerMove);renderer.domElement.addEventListener('pointerup',pointerUp);renderer.domElement.addEventListener('pointercancel',pointerCancel);renderer.domElement.addEventListener('webglcontextlost',lost);
   raf=requestAnimationFrame(draw);onReady?.();
   return {
-    play(step,complete){if(disposed||action>=0||step!==chapter||step>3)return;action=step;elapsed=0;done=complete;},
-    reset(){chapter=0;action=-1;done=null;pivots.forEach(p=>p.rotation.y=0);lid.rotation.x=0;heart.position.x=0;heart.scale.setScalar(.67);box.scale.setScalar(1);box.rotation.y=0;arch.scale.setScalar(1);visible();},
-    dispose(){disposed=true;cancelAnimationFrame(raf);observer.disconnect();renderer.domElement.removeEventListener('pointerdown',pointerDown);renderer.domElement.removeEventListener('pointerup',pointerUp);renderer.domElement.removeEventListener('webglcontextlost',lost);const geometries=new Set(),materials=new Set();scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());environment.dispose();renderer.dispose();renderer.domElement.remove();},
+    setPhotos,setEvent,look:nudge,centre(){lookTargetX=lookTargetY=0;},
+    play(step,complete){if(disposed||action>=0||step!==chapter||step>3)return;lookTargetX=lookTargetY=0;action=step;elapsed=0;done=complete;},
+    reset(){lookX=lookY=lookTargetX=lookTargetY=0;flash.intensity=0;chapter=0;action=-1;done=null;pivots.forEach(p=>p.rotation.y=0);lid.rotation.x=0;heart.position.x=0;heart.scale.setScalar(.67);box.scale.setScalar(1);box.rotation.y=0;arch.scale.setScalar(1);visible();},
+    dispose(){disposed=true;cancelAnimationFrame(raf);observer.disconnect();renderer.domElement.removeEventListener('pointerdown',pointerDown);renderer.domElement.removeEventListener('pointermove',pointerMove);renderer.domElement.removeEventListener('pointercancel',pointerCancel);renderer.domElement.removeEventListener('pointerup',pointerUp);renderer.domElement.removeEventListener('webglcontextlost',lost);const geometries=new Set(),materials=new Set();scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());photoTextures.forEach(t=>t?.dispose());environment.dispose();renderer.dispose();renderer.domElement.remove();},
   };
 }
