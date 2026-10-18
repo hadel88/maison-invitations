@@ -62,13 +62,15 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
   for(const side of[-1,1]){mesh(rounded(.22,5.7,.34),gold,doors,side*2.18,2.8,.98);mesh(rounded(.45,.15,.55),gold,doors,side*2.18,.075,.98);}
   mesh(rounded(4.6,.2,.4),gold,doors,0,5.55,1);
   const doorHit=mesh(new THREE.PlaneGeometry(4.4,5.7),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),doors,0,2.8,1.3);doorHit.castShadow=false;doorHit.receiveShadow=false;
-  const heart=new THREE.Group();scene.add(heart);heart.position.set(0,2.4,.5);
+  // Every chapter occupies the same physical beach. The camera travels through
+  // the doorway, rather than replacing objects at the camera's focal point.
+  const heart=new THREE.Group();scene.add(heart);heart.position.set(0,2.4,-10);
   const heartShape=new THREE.Shape();heartShape.moveTo(0,-.85);heartShape.bezierCurveTo(-1.6,.1,-1.5,1.65,0,.8);heartShape.bezierCurveTo(1.5,1.65,1.6,.1,0,-.85);
   const heartGeometry=new THREE.ExtrudeGeometry(heartShape,{depth:.20,bevelEnabled:true,bevelSegments:5,steps:1,bevelSize:.12,bevelThickness:.12,curveSegments:32});
   mesh(heartGeometry,rose,heart);heart.scale.setScalar(.67);
   const heartRim=mesh(heartGeometry,gold,heart,0,0,-.06);heartRim.scale.setScalar(1.06);
   const heartHalo=mesh(new THREE.TorusGeometry(1.1,.012,8,90),gold,heart,0,.12,-.08);heartHalo.rotation.y=.3;
-  const box=new THREE.Group();box.position.set(0,1.1,.7);scene.add(box);
+  const box=new THREE.Group();box.position.set(1.6,1.1,-15);scene.add(box);
   mesh(rounded(2,.75,1.65,.13),velvet,box);
   mesh(rounded(1.84,.08,1.48,.05),gold,box,0,.38,0);
   mesh(rounded(1.72,.09,1.37,.05),velvet,box,0,.43,0);
@@ -81,7 +83,7 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
   const gemMaterial=new THREE.MeshPhysicalMaterial({color:'#fff6ec',metalness:0,roughness:.02,transmission:.65,thickness:.5,ior:2.4});
   const gem=mesh(new THREE.OctahedronGeometry(.19,0),gemMaterial,ring,0,.4,0);gem.rotation.z=Math.PI/4;
   for(const x of[-.12,.12])mesh(new THREE.CylinderGeometry(.012,.016,.13,8),gold,ring,x,.36,0);
-  const arch=new THREE.Group();arch.position.set(0,0,-.5);scene.add(arch);
+  const arch=new THREE.Group();arch.position.set(0,0,-25);scene.add(arch);
   const archPoints=[];for(let i=0;i<=56;i++){const a=i/56*Math.PI;archPoints.push(new THREE.Vector3(Math.cos(a)*2.05,1+Math.sin(a)*3.8,0));}
   for(const z of[-.12,.12]){const curve=new THREE.CatmullRomCurve3(archPoints.map(p=>p.clone().add(new THREE.Vector3(0,0,z))));mesh(new THREE.TubeGeometry(curve,80,.055,8,false),gold,arch);}
   for(const side of[-1,1]){mesh(new THREE.CylinderGeometry(.055,.055,1,12),gold,arch,side*2.05,.5,0);mesh(rounded(.55,.12,.55),ivory,arch,side*2.05,0,0);}
@@ -107,12 +109,40 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
   const archHit=mesh(new THREE.PlaneGeometry(4.6,5.1),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),arch,0,2.5,0);
   archHit.castShadow=false;archHit.receiveShadow=false;
   const lanternMaterial=new THREE.MeshStandardMaterial({color:'#fff0c5',emissive:'#ffb95e',emissiveIntensity:2,roughness:.35});
-  for(const x of[-2.8,2.8,-1.8,1.8]){
-    const lantern=new THREE.Group();lantern.position.set(x,.2,1);scene.add(lantern);
+  for(let i=0;i<16;i++){
+    const x=i%2?-2.8:2.8,z=3-Math.floor(i/2)*4;
+    const lantern=new THREE.Group();lantern.position.set(x,.2,z);scene.add(lantern);
     mesh(new THREE.CylinderGeometry(.13,.17,.34,12),lanternMaterial,lantern);
     mesh(new THREE.CylinderGeometry(.2,.2,.035,16),gold,lantern,0,-.18);
     mesh(new THREE.TorusGeometry(.18,.018,8,24),gold,lantern,0,.3,0);
   }
+  // A quiet stone threshold and columns anchor the entrance in real space.
+  const limestone=new THREE.MeshStandardMaterial({color:'#e8d2ae',roughness:.86,bumpMap:sandTexture,bumpScale:.025});
+  mesh(rounded(5.3,.12,2.1,.05),limestone,scene,0,-.04,1);
+  for(const side of[-1,1]){
+    const column=new THREE.Group();column.position.set(side*2.65,0,1);scene.add(column);
+    mesh(new THREE.CylinderGeometry(.23,.28,5.5,24),limestone,column,0,2.75);
+    for(const y of[.12,.3,5.3,5.5])mesh(rounded(.75,.12,.75),limestone,column,0,y);
+    for(let j=0;j<12;j++){
+      const angle=j/12*Math.PI*2;
+      mesh(new THREE.CylinderGeometry(.018,.018,4.7,6),limestone,column,Math.sin(angle)*.235,2.75,Math.cos(angle)*.235);
+    }
+    for(const y of[.4,5.15])mesh(new THREE.TorusGeometry(.25,.025,8,32),gold,column,0,y).rotation.x=Math.PI/2;
+  }
+  // Linen lining, inset grain, hinges and mouldings give the leaves thickness.
+  const grainCanvas=document.createElement('canvas');grainCanvas.width=grainCanvas.height=256;
+  const gc=grainCanvas.getContext('2d');gc.fillStyle='#b99a6b';gc.fillRect(0,0,256,256);
+  for(let i=0;i<350;i++){gc.strokeStyle=i%2?'#6d4c2c12':'#fff2d71a';gc.beginPath();gc.moveTo(i*.8,0);gc.bezierCurveTo(i*.8+Math.sin(i)*3,80,i*.8-2,180,i*.8,256);gc.stroke();}
+  const grain=new THREE.CanvasTexture(grainCanvas);grain.colorSpace=THREE.SRGBColorSpace;textures.push(grain);
+  for(const [i,pivot]of pivots.entries()){
+    const side=i===0?-1:1;
+    pivot.traverse(o=>{if(o.isMesh&&o.geometry.type==='RoundedBoxGeometry'){o.material=o.material.clone();o.material.bumpMap=grain;o.material.bumpScale=.018;}});
+    mesh(rounded(1.83,5.12,.04),limestone,pivot,-side*1.02,2.7,-.11);
+    for(const y of[.65,2.7,4.75])mesh(new THREE.CylinderGeometry(.055,.055,.28,12),gold,pivot,0,y,.02);
+  }
+  // The ring box rests on a plinth; it is not suspended in the air.
+  mesh(new THREE.CylinderGeometry(.72,.85,.72,48),limestone,scene,1.6,.36,-15);
+  mesh(new THREE.CylinderGeometry(.88,.88,.12,48),limestone,scene,1.6,.76,-15);
   const particlePositions=new Float32Array(64*3);for(let i=0;i<64;i++){particlePositions[i*3]=Math.sin(i*7.2)*4;particlePositions[i*3+1]=(i%17)/17*6;particlePositions[i*3+2]=Math.cos(i*11)*3;}
   const particleGeometry=new THREE.BufferGeometry();particleGeometry.setAttribute('position',new THREE.BufferAttribute(particlePositions,3));
   const particles=new THREE.Points(particleGeometry,new THREE.PointsMaterial({color:'#ffe5b5',size:.035,transparent:true,opacity:.75,depthWrite:false}));scene.add(particles);
@@ -127,7 +157,7 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
   },undefined,()=>{});
   backdropLoader.load('/craft-cotton-paper.webp',texture=>{if(disposed){texture.dispose();return;}texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(3,3);velvet.bumpMap=texture;velvet.bumpScale=.035;velvet.needsUpdate=true;textures.push(texture);},undefined,()=>{});
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function visible(){doors.visible=chapter===0;heart.visible=chapter===1;box.visible=chapter===2;arch.visible=chapter>=3;ring.visible=false;}
+  function visible(){doors.visible=true;heart.visible=chapter<=1;box.visible=true;arch.visible=true;ring.visible=chapter>=3;}
   visible();
   function resize(){const r=host.getBoundingClientRect();camera.aspect=r.width/Math.max(r.height,1);camera.updateProjectionMatrix();baseZ=Math.max(9.3,6.8/camera.aspect);renderer.setSize(r.width,r.height,false);fitBackdrop();}
   const observer=new ResizeObserver(resize);observer.observe(host);resize();
@@ -135,21 +165,21 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
     if(disposed)return;const dt=Math.min((now-last)/1000||0,.05);last=now;
     if(!document.hidden){
       elapsedTime+=dt;const t=reduced?0:elapsedTime;
-      const poses=[[2.9,baseZ,2.6],[2.8,baseZ*.9,2.4],[2.6,baseZ*.65,1.8],[2.9,baseZ*.95,2.6],[2.9,baseZ*.86,2.6]],view=[...poses[Math.min(chapter,4)]];
+      const distance=Math.max(8,baseZ*.62);
+      const poses=[[2.9,baseZ,2.6,0,0],[2.6,-10+distance,2.4,-10,0],[2.35,-15+distance*.9,1.65,-15,1.6],[2.9,-25+baseZ*.95,2.6,-25,0],[2.9,-25+baseZ*.9,2.6,-25,0]],view=[...poses[Math.min(chapter,4)]];
       heart.position.y=2.4+Math.sin(t*1.4)*.12;heart.rotation.y=Math.sin(t*.65)*.22;
       particles.rotation.y=t*.025;particles.position.y=Math.sin(t*.3)*.07;
       const positions=waterGeometry.attributes.position.array;if(water.visible)for(let i=0;i<positions.length;i+=3)positions[i+1]=baseWater[i+1]+Math.sin(positions[i]*.5+t*.7)*.035+Math.cos(positions[i+2]*.8+t)*.018;if(water.visible)waterGeometry.attributes.position.needsUpdate=true;
       if(action>=0){
-        elapsed+=dt;const duration=[2.8,1.8,3.4,2.5][action],p=reduced?1:ease(elapsed/duration);
-        const from=poses[action],to=poses[action+1];for(let i=0;i<3;i++)view[i]=from[i]+(to[i]-from[i])*p;
-        if(action===2){const close=[2.4,baseZ*.55,1.6],a=p<.68?from:close,b=p<.68?close:to,q=p<.68?ease(p/.68):ease((p-.68)/.32);for(let i=0;i<3;i++)view[i]=a[i]+(b[i]-a[i])*q;}
-        if(action===0){pivots[0].rotation.y=-p*1.65;pivots[1].rotation.y=p*1.65;heart.visible=p>.4;heart.scale.setScalar(.67*ease((p-.4)/.6));}
-        if(action===1){heart.scale.setScalar(.67*(1-p));heart.position.y=2.4+p*2;box.visible=p>.5;box.scale.setScalar(ease((p-.5)/.5));}
-        if(action===2){lid.rotation.x=-ease(Math.min(1,p*1.8))*1.65;ring.visible=true;ring.position.y=.56+ease(p)*.65;ring.rotation.y=p*.35;box.rotation.y=Math.sin(p*Math.PI)*.14;arch.visible=p>.83;arch.scale.setScalar(ease((p-.83)/.17));}
+        elapsed+=dt;const duration=[6.5,3.4,5.5,3][action],p=reduced?1:ease(elapsed/duration);
+        const from=poses[action],to=poses[action+1];for(let i=0;i<5;i++)view[i]=from[i]+(to[i]-from[i])*p;
+        if(action===0){const open=reduced?1:ease(Math.min(1,elapsed/3.2));pivots[0].rotation.y=-open*1.85;pivots[1].rotation.y=open*1.85;const travel=reduced?1:ease((elapsed-1.2)/5.3);for(let i=0;i<5;i++)view[i]=from[i]+(to[i]-from[i])*travel;}
+        if(action===1){heart.position.x=-ease(p)*2.4;heart.rotation.y=p*.8;}
+        if(action===2){const close=[1.95,-15+distance*.7,1.65,-15,1.6],a=p<.65?from:close,b=p<.65?close:to,q=p<.65?ease(p/.65):ease((p-.65)/.35);for(let i=0;i<5;i++)view[i]=a[i]+(b[i]-a[i])*q;lid.rotation.x=-ease(Math.min(1,p*2.2))*1.65;ring.visible=true;ring.position.y=.56+ease(p)*.24;}
         if(action===3){arch.scale.setScalar(1+Math.sin(p*Math.PI)*.035);particles.rotation.z=p*.16;}
         if(p>=1){const completed=done;chapter=action+1;action=-1;visible();heart.scale.setScalar(.67);box.scale.setScalar(1);arch.scale.setScalar(1);completed?.();}
       }
-      camera.position.set(reduced?0:Math.sin(t*.14)*.08,view[0],view[1]);camera.lookAt(0,view[2],0);
+      camera.position.set(view[4]+(reduced?0:Math.sin(t*.14)*.045),view[0],view[1]);camera.lookAt(view[4],view[2],view[3]);
       renderer.render(scene,camera);
     }
     raf=requestAnimationFrame(draw);
@@ -165,7 +195,7 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
   raf=requestAnimationFrame(draw);onReady?.();
   return {
     play(step,complete){if(disposed||action>=0||step!==chapter||step>3)return;action=step;elapsed=0;done=complete;},
-    reset(){chapter=0;action=-1;done=null;pivots.forEach(p=>p.rotation.y=0);lid.rotation.x=0;heart.scale.setScalar(.67);box.scale.setScalar(1);box.rotation.y=0;arch.scale.setScalar(1);visible();},
+    reset(){chapter=0;action=-1;done=null;pivots.forEach(p=>p.rotation.y=0);lid.rotation.x=0;heart.position.x=0;heart.scale.setScalar(.67);box.scale.setScalar(1);box.rotation.y=0;arch.scale.setScalar(1);visible();},
     dispose(){disposed=true;cancelAnimationFrame(raf);observer.disconnect();renderer.domElement.removeEventListener('pointerdown',pointerDown);renderer.domElement.removeEventListener('pointerup',pointerUp);renderer.domElement.removeEventListener('webglcontextlost',lost);const geometries=new Set(),materials=new Set();scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());environment.dispose();renderer.dispose();renderer.domElement.remove();},
   };
 }
