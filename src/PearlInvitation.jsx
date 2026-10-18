@@ -32,7 +32,8 @@ export function PearlStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='en
   const own=[event.photo,event.photo2,event.photo3,event.photo4].map(p=>typeof p==='string'&&p.startsWith('data:image/')?p:null);
   const clear=()=>{timers.current.forEach(clearTimeout);timers.current=[];};
   const later=(ms,fn)=>timers.current.push(setTimeout(()=>{if(!dead.current)fn();},ms));
-  function finish(){video.current?.pause();engine.current?.stop();setPhase('present');}
+  function centreCard(){video.current?.closest('.guest-experience')?.scrollTo({top:0,behavior:'instant'});}
+  function finish(){video.current?.pause();engine.current?.stop();setPhase('present');centreCard();}
   useEffect(()=>{
     dead.current=false;let e;
     const lost=ev=>{ev.preventDefault();setGl(false);setFailure(true);video.current?.pause();engine.current?.stop();setPhase('present');};
@@ -58,10 +59,10 @@ export function PearlStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='en
   },[opened]);
   useLayoutEffect(()=>{
     if(phase!=='present')return;const a=slot.current?.getBoundingClientRect(),b=present.current?.getBoundingClientRect();
-    if(!a||!b?.width||reduced){setPhase('ask');return;}
+    if(!a||!b?.width||reduced){setPhase('ask');centreCard();return;}
     setFlip({x:a.left+a.width/2-b.left-b.width/2,y:a.top+a.height/2-b.top-b.height/2,s:a.width/b.width});
     const r1=requestAnimationFrame(()=>{const r2=requestAnimationFrame(()=>setFlip(null));timers.current.push(setTimeout(()=>cancelAnimationFrame(r2),1400));});
-    later(1350,()=>setPhase('ask'));return()=>cancelAnimationFrame(r1);
+    later(1350,()=>{setPhase('ask');centreCard();});return()=>cancelAnimationFrame(r1);
   },[phase]);
   const shown=['present','ask'].includes(phase),names=event.names.split(/\s*&\s*/);
   return <section className={'pearl-stage pearl-is-'+phase} aria-label="Pearl & Promise invitation">

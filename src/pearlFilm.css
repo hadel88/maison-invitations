@@ -1,5 +1,6 @@
 /* Pearl & Promise owns its framing. The two existing film designs are untouched. */
 .pearl-stage{position:relative;height:100cqh;min-height:500px;overflow:hidden;overflow:clip;isolation:isolate;background:#e5c7b5;color:#65483a}
+.cinema-guest:has(.pearl-stage){overflow-anchor:none}
 .pearl-backdrop{position:absolute;inset:-35px;background:center/cover no-repeat;filter:blur(24px) brightness(.76);transform:scale(1.1)}
 .pearl-film-frame{position:absolute;height:100%;aspect-ratio:9/16;left:50%;top:50%;transform:translate(-50%,-50%)}
 .pearl-film-frame>video,.pearl-still,.pearl-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:fill}
