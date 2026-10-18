@@ -21,6 +21,7 @@ import {
   Gift,
   Image as ImageIcon,
 } from "lucide-react";
+import { EventTabs } from "./EventTabs";
 import { useCastleBackdrop } from "./useCastleBackdrop";
 import { dateLabel } from "./catalog";
 import { api, download } from "./client";
@@ -640,13 +641,7 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
             </div>
           ))}
         </div>
-        <div className="ev-tabs" role="tablist">
-          {tabs.map(([id, label]) => (
-            <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? "selected" : ""} onClick={() => setTab(id)}>
-              {label}
-            </button>
-          ))}
-        </div>
+        <EventTabs tabs={tabs} value={tab} onChange={setTab} />
         <div className="ev-main">
           {tab === "wall" && <WallPanel invite={invite} wall={wall} setWall={setWall} off={wallOff} guests={guests} notify={notify} />}
           {tab === "tasks" &&

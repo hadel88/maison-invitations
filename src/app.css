@@ -1481,3 +1481,20 @@
  .ev-card .ev-stat strong { font-size: 24px; }
  .ev-card .ev-stat span { font-size: 10px; }
 }
+
+/* Edge-to-edge event dashboard, with fixed arrows beside its swipeable tabs. */
+.ws.ws-journey.ev { width: 100%; max-width: none; margin: 0; padding: 0 0 24px; }
+.ws-journey.ev > .ws-back { margin: 0; padding: 14px 16px; }
+.ws-journey.ev .ev-hero { margin-top: 0; }
+.ws-journey.ev .ev-card { width: 100%; max-width: none; margin-top: 14px; border-radius: 0; }
+.ev-hero .magic-journey-heading .ev-map-info { border-radius: 0; }
+.ev-hero .journey-map.magic-journey-map { border-radius: 0; }
+.ev-tabs-shell { display: grid; grid-template-columns: minmax(0,1fr); align-items: center; gap: 6px; min-width: 0; }
+.ev-tabs-shell.has-overflow { grid-template-columns: 32px minmax(0,1fr) 32px; }
+.ev-tabs-shell .ev-tabs { min-width: 0; margin: 0; position: relative; overscroll-behavior-x: contain; }
+.ev-tabs-shell .ev-tabs button { flex: 1 0 auto; }
+.ev-tabs-arrow { display: none; align-items: center; justify-content: center; width: 32px; height: 36px; padding: 0; border: 1px solid var(--ev-line); border-radius: 999px; color: var(--ev-accent); background: var(--ev-card); cursor: pointer; }
+.ev-tabs-shell.has-overflow .ev-tabs-arrow { display: flex; }
+.ev-tabs-arrow:disabled { opacity: .3; cursor: default; }
+.ev-tabs-arrow:not(:disabled):hover { background: var(--ev-soft); }
+.ev-tabs-arrow:focus-visible { outline: 2px solid var(--ev-accent); outline-offset: 2px; }
