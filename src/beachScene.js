@@ -70,7 +70,7 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
   mesh(heartGeometry,rose,heart);heart.scale.setScalar(.67);
   const heartRim=mesh(heartGeometry,gold,heart,0,0,-.06);heartRim.scale.setScalar(1.06);
   const heartHalo=mesh(new THREE.TorusGeometry(1.1,.012,8,90),gold,heart,0,.12,-.08);heartHalo.rotation.y=.3;
-  const box=new THREE.Group();box.position.set(1.6,1.1,-15);scene.add(box);
+  const box=new THREE.Group();box.position.set(3.4,1.1,-15);scene.add(box);
   mesh(rounded(2,.75,1.65,.13),velvet,box);
   mesh(rounded(1.84,.08,1.48,.05),gold,box,0,.38,0);
   mesh(rounded(1.72,.09,1.37,.05),velvet,box,0,.43,0);
@@ -141,8 +141,8 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
     for(const y of[.65,2.7,4.75])mesh(new THREE.CylinderGeometry(.055,.055,.28,12),gold,pivot,0,y,.02);
   }
   // The ring box rests on a plinth; it is not suspended in the air.
-  mesh(new THREE.CylinderGeometry(.72,.85,.72,48),limestone,scene,1.6,.36,-15);
-  mesh(new THREE.CylinderGeometry(.88,.88,.12,48),limestone,scene,1.6,.76,-15);
+  mesh(new THREE.CylinderGeometry(.72,.85,.72,48),limestone,scene,3.4,.36,-15);
+  mesh(new THREE.CylinderGeometry(.88,.88,.12,48),limestone,scene,3.4,.76,-15);
   const particlePositions=new Float32Array(64*3);for(let i=0;i<64;i++){particlePositions[i*3]=Math.sin(i*7.2)*4;particlePositions[i*3+1]=(i%17)/17*6;particlePositions[i*3+2]=Math.cos(i*11)*3;}
   const particleGeometry=new THREE.BufferGeometry();particleGeometry.setAttribute('position',new THREE.BufferAttribute(particlePositions,3));
   const particles=new THREE.Points(particleGeometry,new THREE.PointsMaterial({color:'#ffe5b5',size:.035,transparent:true,opacity:.75,depthWrite:false}));scene.add(particles);
@@ -166,7 +166,7 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
     if(!document.hidden){
       elapsedTime+=dt;const t=reduced?0:elapsedTime;
       const distance=Math.max(8,baseZ*.62);
-      const poses=[[2.9,baseZ,2.6,0,0],[2.6,-10+distance,2.4,-10,0],[2.35,-15+distance*.9,1.65,-15,1.6],[2.9,-25+baseZ*.95,2.6,-25,0],[2.9,-25+baseZ*.9,2.6,-25,0]],view=[...poses[Math.min(chapter,4)]];
+      const poses=[[2.9,baseZ,2.6,0,0],[2.6,-10+distance,2.4,-10,0],[2.35,-15+distance*.9,1.65,-15,3.4],[2.9,-25+baseZ*.95,2.6,-25,0],[2.9,-25+baseZ*.9,2.6,-25,0]],view=[...poses[Math.min(chapter,4)]];
       heart.position.y=2.4+Math.sin(t*1.4)*.12;heart.rotation.y=Math.sin(t*.65)*.22;
       particles.rotation.y=t*.025;particles.position.y=Math.sin(t*.3)*.07;
       const positions=waterGeometry.attributes.position.array;if(water.visible)for(let i=0;i<positions.length;i+=3)positions[i+1]=baseWater[i+1]+Math.sin(positions[i]*.5+t*.7)*.035+Math.cos(positions[i+2]*.8+t)*.018;if(water.visible)waterGeometry.attributes.position.needsUpdate=true;
@@ -175,7 +175,7 @@ export function createBeachScene(host, { onTap, onReady, onError } = {}) {
         const from=poses[action],to=poses[action+1];for(let i=0;i<5;i++)view[i]=from[i]+(to[i]-from[i])*p;
         if(action===0){const open=reduced?1:ease(Math.min(1,elapsed/3.2));pivots[0].rotation.y=-open*1.85;pivots[1].rotation.y=open*1.85;const travel=reduced?1:ease((elapsed-1.2)/5.3);for(let i=0;i<5;i++)view[i]=from[i]+(to[i]-from[i])*travel;}
         if(action===1){heart.position.x=-ease(p)*2.4;heart.rotation.y=p*.8;}
-        if(action===2){const close=[1.95,-15+distance*.7,1.65,-15,1.6],a=p<.65?from:close,b=p<.65?close:to,q=p<.65?ease(p/.65):ease((p-.65)/.35);for(let i=0;i<5;i++)view[i]=a[i]+(b[i]-a[i])*q;lid.rotation.x=-ease(Math.min(1,p*2.2))*1.65;ring.visible=true;ring.position.y=.56+ease(p)*.24;}
+        if(action===2){const close=[1.95,-15+distance*.7,1.65,-15,3.4],a=p<.65?from:close,b=p<.65?close:to,q=p<.65?ease(p/.65):ease((p-.65)/.35);for(let i=0;i<5;i++)view[i]=a[i]+(b[i]-a[i])*q;lid.rotation.x=-ease(Math.min(1,p*2.2))*1.65;ring.visible=true;ring.position.y=.56+ease(p)*.24;}
         if(action===3){arch.scale.setScalar(1+Math.sin(p*Math.PI)*.035);particles.rotation.z=p*.16;}
         if(p>=1){const completed=done;chapter=action+1;action=-1;visible();heart.scale.setScalar(.67);box.scale.setScalar(1);arch.scale.setScalar(1);completed?.();}
       }
