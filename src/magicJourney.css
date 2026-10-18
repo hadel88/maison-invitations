@@ -1,0 +1,31 @@
+.journey-map.magic-journey-map { height: 570px; border: 1px solid #c9b792; border-radius: 26px; background: #bfc6b6; box-shadow: 0 18px 45px #22372516; }
+.journey-map.magic-journey-map::before { display: none; }
+.magic-map-scroll { width: 100%; height: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: #c9b58a #273d4266; }
+.magic-map-scroll:focus-visible { outline: 2px solid #caa765; outline-offset: -5px; }
+.magic-map-scene { position: relative; min-width: 940px; width: 100%; height: 100%; }
+.magic-map-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.magic-map-stop { position: absolute; z-index: 2; width: 160px; padding: 0; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; transform: translate(-50%,-50%); cursor: pointer; color: #3b4038; }
+.magic-stop-medallion { position: relative; display: grid; place-items: center; width: 54px; height: 54px; background: radial-gradient(circle at 30% 25%,#fff8e5,#d4be8c); border: 1px solid #bb9861; border-radius: 50%; box-shadow: 0 5px 14px #18382e55,inset 0 0 0 4px #fff6df66; color: #715634; transition: transform .3s; }
+.magic-map-stop:hover .magic-stop-medallion { transform: translateY(-5px); }
+.magic-stop-medallion i { position: absolute; right: -3px; bottom: -3px; width: 19px; height: 19px; display: grid; place-items: center; font: 10px Georgia; background: #f6e7bf; border: 1px solid #ae8b51; border-radius: 50%; }
+.magic-map-stop.is-complete .magic-stop-medallion { background: radial-gradient(circle at 35% 25%,#e7edc1,#a1b48a); box-shadow: 0 0 22px #fff0b766,0 5px 14px #17382d55; }
+.magic-stop-copy { display: block; margin-top: 11px; background: #fffaf0ed; border: 1px solid #d0bd93; padding: 9px 10px; border-radius: 12px; width: 100%; box-shadow: 0 5px 14px #25362c25; }
+.magic-stop-copy strong { display: block; font: 20px/1.05 var(--serif,Georgia); color: #4b493a; }
+.magic-stop-copy small { display: block; font-size: 9px; line-height: 1.4; color: #7c705b; margin-top: 5px; }
+.magic-map-stop:focus-visible { outline: 2px solid #fff1b0; outline-offset: 7px; border-radius: 14px; }
+.magic-map-heading { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); width: min(80%,430px); text-align: center; background: #203c42b8; border: 1px solid #e4c99588; border-radius: 18px; padding: 15px 20px; color: #fff2d2; pointer-events: none; backdrop-filter: blur(5px); }
+.magic-map-heading > span { display: block; font-size: 8px; letter-spacing: .19em; margin-bottom: 7px; }
+.magic-map-heading > strong { display: block; font: 32px/1.06 var(--serif,Georgia); font-weight: 400; }
+.magic-map-caption { position: absolute; bottom: 22px; left: 0; right: 0; color: #fff0cb; font-size: 8px; letter-spacing: .18em; text-align: center; pointer-events: none; text-shadow: 0 1px 4px #14302a; }
+.magic-map-pan-hint { display: none; }
+.ev-hero .journey-map.magic-journey-map { height: 570px; }
+.ev-hero .magic-journey-map .ev-map-info { display: block; z-index: 4; width: min(86%,410px); top: 20px; margin: 0; left: 50%; transform: translateX(-50%); position: absolute; background: #14323bd1; pointer-events: none; }
+.ev-hero:has(.magic-journey-map) .ev-map-info-mobile { display: none; }
+@media(max-width:940px) {
+ .journey-map.magic-journey-map, .ev-hero .journey-map.magic-journey-map { height: 570px; min-height: 0; display: block; border-radius: 20px; }
+ .magic-map-pan-hint { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 7px; align-items: center; width: max-content; max-width: 95%; background: #fff5dfec; padding: 9px 14px; border: 1px solid #cab386; border-radius: 999px; color: #6f6045; font-size: 10px; pointer-events: none; }
+ .magic-map-caption { display: none; }
+ .ev-hero .magic-journey-map .ev-map-info { display: block !important; position: absolute; top: 18px; width: 88%; margin: 0; left: 50%; transform: translateX(-50%); }
+ .magic-map-heading > strong { font-size: 27px; }
+ .magic-map-scene { min-width: 940px; }
+}

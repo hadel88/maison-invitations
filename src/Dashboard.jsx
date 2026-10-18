@@ -21,6 +21,7 @@ import {
   Gift,
   Image as ImageIcon,
 } from "lucide-react";
+import { useCastleBackdrop } from "./useCastleBackdrop";
 import { dateLabel } from "./catalog";
 import { api, download } from "./client";
 import { Modal } from "./ui";
@@ -488,6 +489,7 @@ const when = (iso) =>
   new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack, onEdit, onShare, onPreview }) {
+  const castleBackdrop = useCastleBackdrop();
   const fixTab = (t) => (t === "guests" ? "rsvps" : t);
   const [tab, setTab] = useState(initialTab && initialTab !== "overview" ? fixTab(initialTab) : "tasks");
   const [guests, setGuests] = useGuests(invite, notify);
@@ -619,7 +621,7 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
         </div>
       </section>
 
-      <section className="ev-card">
+      <section className="ev-card" ref={castleBackdrop}>
         <div className="ev-head">
           <div>
             <h2>Manage your magical day</h2>

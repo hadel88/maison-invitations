@@ -50,3 +50,30 @@
 
 .st-card-birthday .st-card-text { background: transparent; backdrop-filter: none; color: #e9d0a6; }
 .st-card-birthday .st-card-text h3, .st-card-birthday .st-card-text em { color: #e9d0a6; }
+
+/* The birthday now opens as a small physical gift, not a full-screen book cover. */
+.birthday-stage { background: radial-gradient(ellipse at 50% 50%, #74334a, #321b31 72%); }
+.birthday-night { background-image: url('/birthday-party-v2.webp'); opacity: 0; transition: opacity 2s 1.2s, transform 8s ease; }
+.birthday-night-shade { opacity: 0; transition: opacity 2s 1.2s; }
+.birthday-opening .birthday-night, .birthday-opening .birthday-night-shade { opacity: 1; }
+.birthday-cover-copy { top: 11%; }
+.birthday-cover-copy h2 { font-size: clamp(32px,5.2cqh,45px); margin: 17px auto; }
+.birthday-cover-star { display: none; }
+.birthday-seal { top: 84%; flex-direction: row; justify-content: center; align-items: center; gap: 11px; width: max-content; max-width: 88%; padding: 14px 21px; border: 1px solid #d9b16a80; border-radius: 999px; background: #311a2c66; }
+.birthday-opening .birthday-seal { animation: none; opacity: 0; visibility: hidden; }
+.birthday-copy { transition-delay: 3.5s; }
+.birthday-edition { bottom: 4%; }
+.birthday-box-canvas { pointer-events: auto; cursor: pointer; }
+.birthday-opening .birthday-box-canvas { pointer-events: none; cursor: default; }
+.graduation-stage { background: radial-gradient(ellipse at 50% 52%, #234159, #0b1d31 75%); }
+.graduation-stage .birthday-night { background-image: url('/graduation-night.webp'); }
+.graduation-stage .birthday-copy { transition-delay: 4.1s; }
+.graduation-stage .birthday-cover-copy h2 { color: #f1dfb7; }
+.graduation-stage .birthday-cover-copy { top: 13%; }
+.graduation-stage .birthday-wish { background: #112c4280; }
+.graduation-stage .birthday-copy h1 { font-size: clamp(40px,6.7cqh,59px); }
+.cinema-graduation .cinema-detail-sheet h2 { color: #233d53; }
+.cinema-graduation .cinema-detail-sheet .btn.primary { background: #25465d; border-color: #25465d; }
+.graduation-poster-title { top: 12%; }
+.birthday-poster-gift { position: absolute; top: 52%; left: 0; right: 0; text-align: center; font: 70px Georgia; color: #debd78; }
+@media(min-width:1101px) { .atelier-three:has(.poster-graduation) { grid-template-columns: repeat(3,minmax(0,1fr)); max-width: 1160px; } }

@@ -1,16 +1,36 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { birthdayLidPoint, BIRTHDAY_OPEN_END } from '../src/birthdayGL.js';
+import { giftPanelPoint, diplomaPoint, celebrationPhases, CELEBRATION_END } from '../src/celebrationCanvas.js';
 import { cinemaThemes, cinemaEvent } from '../src/cinemaThemes.js';
 
-test('the birthday lid holds closed for the seal and rotates about a fixed rear hinge', () => {
-  assert.deepEqual(birthdayLidPoint(215, 860, 12, .9, 430, 860), [215, 860, 12]);
-  for (const t of [0, 1, 2.5, 4, BIRTHDAY_OPEN_END]) {
-    assert.ok(birthdayLidPoint(215, 0, 12, t, 430, 860).every((v, i) => Math.abs(v - [215, 0, 12][i]) < 1e-10));
-    assert.ok(birthdayLidPoint(215, 860, 2, t, 430, 860).every(Number.isFinite));
+test('the gift panels open around their fixed bottom edges after the lid releases', () => {
+  assert.deepEqual(giftPanelPoint(1,.8,1,'front',0),[1,.8,1]);
+  for (const t of [0,1,2.5,4,CELEBRATION_END]) {
+    assert.deepEqual(giftPanelPoint(1,-.8,1,'front',t),[1,-.8,1]);
+    for (const side of ['front','back','left','right']) assert.ok(giftPanelPoint(1,.8,1,side,t).every(Number.isFinite));
   }
-  assert.ok(birthdayLidPoint(215, 860, 12, BIRTHDAY_OPEN_END, 430, 860)[1] < 0);
+  assert.equal(celebrationPhases(.5).lid,0);
+  assert.equal(celebrationPhases(1).panels,0);
+  assert.ok(giftPanelPoint(1,.8,1,'front',4)[1]<-.8);
 });
+
+test('graduation paper unrolls into a flat diploma and lifts clear before revealing the invitation', () => {
+  assert.deepEqual(diplomaPoint(.5,0,4),[0,1.45,-.25]);
+  const bottom=diplomaPoint(.5,1,4);
+  assert.ok(Math.abs(bottom[1]+1.55)<1e-10);
+  assert.equal(bottom[2],-.25);
+  assert.ok(diplomaPoint(.5,1,CELEBRATION_END)[1]>3);
+  for(const t of [0,1.3,2.5,4,6.2]) for(const v of [0,.25,.5,.75,1]) assert.ok(diplomaPoint(.5,v,t).every(Number.isFinite));
+});
+
+test('graduation has its own occasion, cap opening and celebration schedule', () => {
+  const event=cinemaEvent(cinemaThemes.find(t=>t.id==='graduation-flight'));
+  assert.equal(event.occasion,'Graduation');
+  assert.equal(event.scene,'graduation-flight');
+  assert.ok(event.timeline.some(t=>/caps/i.test(t.title)));
+  assert.ok(event.rsvpDeadline<event.date);
+});
+
 test('the birthday design creates a birthday event with a birthday schedule and its own RSVP date', () => {
   const theme = cinemaThemes.find(t => t.id === 'birthday-wish');
   const event = cinemaEvent(theme);

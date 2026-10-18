@@ -1448,24 +1448,17 @@
   .ev-hero .journey-map { min-height: 0; display: block; height: 690px; }
 }
 
-/* Keep the dashboard content normal inside a castle-stone floral frame. */
+/* A single illustrated background plate, including its castle and floral frame. */
 .ev-card {
   max-width: 1220px;
-  padding: clamp(16px, 2.4vw, 30px) clamp(14px, 2.2vw, 28px);
+  padding: var(--castle-top,210px) clamp(26px,6.5%,80px) var(--castle-bottom,90px);
   overflow: visible;
-  border: 64px solid transparent;
-  border-image-source: url("/castle-dashboard-frame.png");
-  border-image-slice: 180 fill;
-  border-image-width: 64px;
-  border-image-repeat: stretch round;
+  border: 0;
+  border-image: none;
   border-radius: 0;
-  background: linear-gradient(180deg, #fffaf5, #fffdf9 45%, #fff8f0);
+  background: #faf0df url('/dashboard-castle-background-wide.webp') center / 100% 100% no-repeat;
   box-shadow: none;
   isolation: isolate;
 }
-@media (max-width: 800px) {
-  .ev-card { border-width: 46px 42px; border-image-width: 46px 42px; padding: 14px 12px; }
-}
-@media (max-width: 520px) {
-  .ev-card { border-width: 38px 34px; border-image-width: 38px 34px; padding: 12px 8px; }
-}
+@media(max-width:800px) { .ev-card { padding: var(--castle-top,140px) 6.5% var(--castle-bottom,65px); background-image: url('/dashboard-castle-background.webp'); } }
+@media(max-width:520px) { .ev-card { padding: var(--castle-top,130px) 7% var(--castle-bottom,65px); } }
