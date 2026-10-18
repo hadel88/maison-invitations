@@ -58,6 +58,8 @@ const ShareDialog = lazy(() => import("./Dialogs").then((m) => ({ default: m.Sha
 const InfoDialog = lazy(() => import("./Dialogs").then((m) => ({ default: m.InfoDialog })));
 const GuestPage = lazy(() => import("./Guest"));
 const GuestExperience = lazy(() => import("./Guest").then((m) => ({ default: m.GuestExperience })));
+const BeachDemo = lazy(() => import("./BeachDemo"));
+const BeachDemoPreview = lazy(() => import("./BeachDemo").then(m => ({ default: m.BeachDemoPreview })));
 function Loading() {
   return <div className="lx-loading" role="status" aria-label="Loading"><span /></div>;
 }
@@ -85,6 +87,7 @@ function App() {
   const [editor, setEditor] = useState(null);
   const [spaceTab, setSpaceTab] = useState("listing");
   const [experience, setExperience] = useState(null);
+  const [beachPreview, setBeachPreview] = useState(false);
   const [auth, setAuth] = useState(false);
   const [info, setInfo] = useState(null);
   const [share, setShare] = useState(null);
@@ -368,6 +371,7 @@ function App() {
             }} />
             <div id="designs" />
             <CinemaCollection
+              onBeachDemo={() => setBeachPreview(true)}
               onPreview={setExperience}
               onCreate={(event) => studio(event, "details")}
               notify={setToast}
@@ -613,6 +617,7 @@ function App() {
             notify={setToast}
           />
         )}
+        {beachPreview && <BeachDemoPreview onClose={() => setBeachPreview(false)} />}
         {experience && (
           <Modal className="experience-modal" onClose={() => setExperience(null)}>
             <GuestExperience
@@ -680,4 +685,4 @@ function App() {
   );
 
 }
-createRoot(document.getElementById("root")).render(<App />);
+createRoot(document.getElementById("root")).render(new URLSearchParams(location.search).get("demo") === "beach-sunset-romance" ? <Suspense fallback={<Loading />}><BeachDemo /></Suspense> : <App />);

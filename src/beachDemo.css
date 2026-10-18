@@ -1,0 +1,61 @@
+.beach-demo { position: relative; width: 100%; height: 100dvh; min-height: 500px; overflow: hidden; isolation: isolate; background: linear-gradient(#a18f9e,#edbba7 55%,#ddc29d); color: #fff5e6; font-family: var(--sans,'DM Sans',sans-serif); }
+.beach-world,.beach-world canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+.beach-world canvas { cursor: pointer; }
+.beach-vignette { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(#392432b5, #39243240 32%,transparent 50%,transparent 67%,#32202baf); }
+.beach-topbar { position: absolute; inset: 0 0 auto; display: flex; justify-content: space-between; align-items: center; padding: max(20px,env(safe-area-inset-top)) clamp(20px,4vw,55px) 0; z-index: 3; }
+.beach-topbar > a { color: #fff0d8; font: 29px/.9 var(--serif,Georgia); text-decoration: none; text-shadow: 0 2px 15px #36202d55; }
+.beach-topbar > a span { display: block; font: 6px/1.5 sans-serif; letter-spacing: .18em; margin-top: 9px; }
+.beach-topbar > div { display: flex; gap: 9px; }
+.beach-topbar button { display: grid; place-items: center; width: 37px; height: 37px; border: 1px solid #fff0d55c; border-radius: 50%; background: #5134373b; color: #fff1da; cursor: pointer; backdrop-filter: blur(6px); }
+.beach-topbar button:disabled { opacity: .4; }
+.beach-narrative { position: absolute; z-index: 2; top: 12%; left: 7%; right: 7%; margin: auto; max-width: 650px; text-align: center; pointer-events: none; text-shadow: 0 2px 18px #48302555; animation: beach-arrive 1.1s both; transition: opacity .55s; }
+.beach-narrative.is-transitioning { animation: none; opacity: 0; }
+.beach-eyebrow { display: block; font: 8px/1.8 sans-serif; letter-spacing: .23em; color: #fff0d6; }
+.beach-narrative h1 { font: 400 clamp(33px,5.5vh,58px)/1.08 var(--serif,Georgia); letter-spacing: -.025em; text-wrap: balance; margin: 15px auto; color: #fff8e9; }
+.beach-narrative p { color: inherit; font: italic clamp(13px,1.8vh,17px)/1.6 Georgia; max-width: 430px; margin: auto; text-wrap: pretty; }
+.beach-demo[data-step='2'] .beach-narrative,.beach-demo[data-step='3'] .beach-narrative { top: 10%; }
+.beach-demo[data-step='2'] .beach-narrative h1,.beach-demo[data-step='3'] .beach-narrative h1 { font-size: clamp(30px,4.8vh,48px); }
+.beach-demo[data-step='4'] .beach-narrative { top: 23%; left: 16%; right: 16%; max-width: 410px; padding: 25px 20px; background: #fff5e7e8; border: 1px solid #d1ac73; border-radius: 130px 130px 8px 8px; text-shadow: none; color: #5b4245; backdrop-filter: blur(7px); }
+.beach-demo[data-step='4'] .beach-eyebrow { color: #9d7c60; font-size: 7px; }
+.beach-demo[data-step='4'] .beach-narrative h1 { color: #6a424b; font-size: clamp(36px,5.3vh,56px); }
+.beach-demo[data-step='4'] .beach-narrative p { font-size: 14px; }
+.beach-wedding-details { display: flex; flex-direction: column; gap: 14px; padding-top: 22px; }
+.beach-wedding-details > span { font-size: 9px; letter-spacing: .13em; color: #80664e; }
+.beach-wedding-details > strong { font: italic 14px/1.6 Georgia; font-weight: 400; }
+.beach-wedding-details > small { font: italic 12px/1.6 Georgia; color: #947663; }
+.beach-action-area { position: absolute; z-index: 3; bottom: max(20px,env(safe-area-inset-bottom)); left: 15px; right: 15px; display: flex; align-items: center; flex-direction: column; gap: 13px; }
+.beach-touch-hint { font-size: 7px; letter-spacing: .22em; color: #fff0d0; text-shadow: 0 2px 7px #39272c; }
+.beach-action { display: inline-flex; justify-content: center; align-items: center; gap: 13px; min-height: 48px; padding: 13px 22px; border: 1px solid #eed3a1; background: linear-gradient(120deg,#6c3e47d9,#8a5e5bd9); color: #fff2dc; border-radius: 999px; box-shadow: 0 6px 25px #493c3630,inset 0 1px #ffefd62b; backdrop-filter: blur(8px); font: italic 16px/1.2 Georgia; cursor: pointer; }
+.beach-action:disabled { cursor: wait; opacity: .65; }
+.beach-action:not(:disabled):hover { background: #83565d; }
+.beach-demo button:focus-visible,.beach-rsvp button:focus-visible,.beach-rsvp input:focus-visible,.beach-rsvp textarea:focus-visible { outline: 2px solid #fff0a9; outline-offset: 4px; }
+.beach-progress { display: flex; gap: 7px; margin-top: 2px; }
+.beach-progress span { display: block; width: 20px; height: 2px; background: #fff0d144; }
+.beach-progress span.is-lit { background: #f4d29c; }
+.beach-demo-note { font-size: 6px; letter-spacing: .16em; color: #fff0d7a8; }
+.beach-notice { position: absolute; bottom: 165px; left: 20px; right: 20px; margin: auto; max-width: 410px; padding: 15px 40px 15px 17px; border: 1px solid #dbbe8f; border-radius: 12px; background: #fff6e6f2; color: #6a4a4c; font-size: 12px; line-height: 1.6; z-index: 5; }
+.beach-notice button { position: absolute; right: 9px; top: 12px; background: none; border: 0; color: inherit; cursor: pointer; }
+.beach-render-note { position: absolute; top: 72px; left: 15px; right: 15px; text-align: center; font-size: 10px; color: #fff4de; }
+.beach-rsvp { width: min(92vw,440px); max-height: 88dvh; margin: auto; padding: 38px 28px 28px; border: 1px solid #c4a374; border-radius: 22px; background: #fff7e9; color: #60434b; box-shadow: 0 30px 100px #231b2966; }
+.beach-rsvp::backdrop { background: #2b233577; backdrop-filter: blur(10px); }
+.beach-rsvp .beach-eyebrow { color: #a38360; font-size: 7px; text-align: center; }
+.beach-rsvp h2 { font: 400 38px/1.1 var(--serif,Georgia); margin: 20px 0 12px; text-align: center; color: #6a424b; }
+.beach-rsvp-close { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 30px; height: 30px; border: 0; background: transparent; color: #80615d; cursor: pointer; }
+.beach-rsvp form { display: flex; flex-direction: column; gap: 18px; }
+.beach-sample-note { font-size: 11px; color: #9a7d6f; text-align: center; margin: 0 0 5px; line-height: 1.6; }
+.beach-rsvp label { display: flex; flex-direction: column; gap: 8px; font-size: 12px; }
+.beach-rsvp input:not([type=radio]),.beach-rsvp textarea { width: 100%; padding: 12px; border: 1px solid #ddcbb1; border-radius: 9px; background: #fffaf2; color: #60434b; font: 14px/1.5 sans-serif; }
+.beach-rsvp fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.beach-rsvp legend { font-size: 12px; margin-bottom: 12px; }
+.beach-rsvp fieldset label { flex-direction: row; align-items: center; font-size: 13px; }
+.beach-rsvp input[type=radio] { accent-color: #8c5961; }
+.beach-rsvp-success { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding-top: 15px; }
+.beach-rsvp-success > small { font-size: 12px; line-height: 1.7; color: #9a7d6f; }
+@keyframes beach-arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media(max-height:650px) { .beach-topbar { padding-top: 12px; } .beach-narrative { top: 13%; } .beach-narrative h1 { font-size: 32px; } .beach-action-area { bottom: 13px; gap: 8px; } .beach-demo[data-step='4'] .beach-narrative { top: 16%; padding: 19px; } .beach-wedding-details { gap: 9px; padding-top: 12px; } .beach-demo[data-step='4'] .beach-narrative h1 { font-size: 37px; } }
+@media(prefers-reduced-motion:reduce) { .beach-demo * { animation: none!important; transition: none!important; } }
+
+.beach-fallback { background: url('/beach-sunset-environment.webp') 45% center / cover; }
+
+.beach-demo-modal { width: 100vw; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; overflow: hidden; background: #a27478; }
+.beach-demo-modal::backdrop { background: #251f29cc; }

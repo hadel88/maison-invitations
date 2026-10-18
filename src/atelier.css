@@ -140,3 +140,12 @@
 
 .invitation-screen > .guest-experience { scrollbar-width: none; }
 .invitation-screen > .guest-experience::-webkit-scrollbar { display: none; }
+
+.poster-beach-demo { background: #a56d70; }
+.poster-beach-demo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(#5c333844,transparent 35%,#542e3d66); pointer-events: none; }
+.poster-beach-demo > img { width: 100%; height: 100%; object-fit: cover; object-position: 45% center; }
+.beach-poster-badge { position: absolute; z-index: 2; top: 22px; left: 12px; right: 12px; text-align: center; font-size: 8px; letter-spacing: .16em; color: #fff1d8; }
+.beach-poster-names { position: absolute; z-index: 2; top: 24%; left: 12%; right: 12%; text-align: center; color: #fff8e8; font: 400 clamp(39px,4vw,65px)/.95 var(--serif,Georgia); text-shadow: 0 2px 20px #55303966; }
+.beach-poster-names small { display: block; margin-bottom: 25px; font: 7px/1.8 sans-serif; letter-spacing: .14em; }
+.beach-poster-names em { display: block; font: italic 30px Georgia; margin: 8px 0; }
+.beach-collection-note { display: block; margin-top: 12px; color: #9b8575; font-size: 10px; line-height: 1.6; }
