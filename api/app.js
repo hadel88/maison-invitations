@@ -1,6 +1,7 @@
 import { createHmac } from "node:crypto";
 import { providerSources } from '../src/providers.js';
 import { eventWorlds } from '../src/worlds.js';
+import { validateSeating } from '../src/seating.js';
 const SB = process.env.SUPABASE_URL;
 const KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
 const cookie = (req, name) => {
@@ -274,6 +275,22 @@ export default async function handler(req, res) {
         confirmation: !s.access_token,
       });
     }
+    if (action === 'guest-photo' || action === 'guest-wish' || action === 'shared-photo') {
+      if ((action !== 'shared-photo' && req.method !== 'POST') || (action === 'shared-photo' && req.method !== 'GET')) return res.status(405).end();
+      const args = req.method === 'GET' ? req.query : b;
+      const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if(!uuid.test(args.slug||'')||!uuid.test(args.guest||''))return res.status(403).json({error:'A selected guest link is required.'});
+      if(action==='shared-photo'){
+        if(!uuid.test(args.photo||''))return res.status(400).json({error:'Photo not found.'});
+        const photo=await sb('/rest/v1/rpc/maison_guest_photo_read',{method:'POST',body:{p_slug:args.slug,p_token:args.guest,p_photo:args.photo}});
+        return photo?res.json(photo):res.status(403).json({error:'Photo unavailable or access removed.'});
+      }
+      const jpeg=(value,max)=>typeof value==='string'&&value.length<max&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(value);
+      if((action==='guest-photo'&&(!jpeg(b.image,900000)||!jpeg(b.thumb,60000)))||typeof(b.caption||'')!=='string'||(b.caption||'').length>500||(action==='guest-wish'&&!(b.caption||'').trim())||b.consent!==true)
+        return res.status(400).json({error:'Choose a photo, a short caption, and confirm you may share it.'});
+      const row=await sb('/rest/v1/rpc/maison_guest_photo_add',{method:'POST',body:{p_slug:b.slug,p_token:b.guest,p_image:action==='guest-photo'?b.image:null,p_thumb:action==='guest-photo'?b.thumb:null,p_caption:b.caption||''}});
+      return row?res.json(row):res.status(403).json({error:'Your host has not shared access, or has revoked it.'});
+    }
     if (action === "shared-dashboard") {
       if (req.method !== "GET") return res.status(405).end();
       const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -447,6 +464,19 @@ export default async function handler(req, res) {
         if (expertsMissing(e)) return expertsNotReady(res);
         throw e;
       }
+    }
+    if(action==='seating'){
+      if(!['GET','POST'].includes(req.method))return res.status(405).end();
+      const id=req.method==='GET'?req.query.id:b.id;
+      if(!/^[0-9a-f-]{36}$/i.test(id||''))return res.status(400).json({error:'Choose an invitation.'});
+      const own=await sb('/rest/v1/maison_invitations?id=eq.'+encodeURIComponent(id)+'&select=id',{token:s.token});
+      if(!own?.length)return res.status(404).json({error:'Invitation not found.'});
+      const key='seating:'+id;
+      if(req.method==='GET'){const rows=await sb('/rest/v1/maison_planning?occasion=eq.'+encodeURIComponent(key)+'&select=data',{token:s.token});return res.json(rows[0]?.data||{tables:[],assignments:{}})}
+      const guests=await sb('/rest/v1/maison_guests?invitation_id=eq.'+encodeURIComponent(id)+'&select=id,name,response,party_size',{token:s.token});
+      const seating=validateSeating(b.seating,guests);
+      await sb('/rest/v1/maison_planning?on_conflict=owner_id,occasion',{method:'POST',token:s.token,body:{owner_id:s.user.id,occasion:key,data:seating,updated_at:new Date().toISOString()},headers:{Prefer:'resolution=merge-duplicates'}});
+      return res.json(seating);
     }
     if(action==='journey'){
       const [planning,shortlist,guests]=await Promise.all([

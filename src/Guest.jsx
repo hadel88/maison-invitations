@@ -38,6 +38,7 @@ import { api, download, calendar } from "./client";
 import { Field } from "./ui";
 import { CinemaStage } from "./Cinema";
 import { CraftWelcome, CraftGarland, craftWords } from "./CraftInvitation";
+import { eventPhase, responseNote } from './guestPlanning';
 
 function useSound(music, active) {
   const [muted, setMuted] = useState(false);
@@ -97,6 +98,7 @@ export function GuestExperience({
   );
   const [party, setParty] = useState(guest?.party_size || 1);
   const [note, setNote] = useState("");
+  const [meal,setMeal]=useState(''),[allergies,setAllergies]=useState('');
   const [website, setWebsite] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -131,7 +133,7 @@ export function GuestExperience({
           name,
           response,
           partySize: party,
-          note,
+          note: responseNote({note,meal,allergies,attending:response==='yes'}),
           website,
         },
       });
@@ -179,6 +181,7 @@ export function GuestExperience({
       {opened && (
         <div className="cinema-detail-sheet" aria-label="Invitation details and RSVP">
         <div className="opened-invite">
+          <div className="guest-phase-message">{{en:{before:'The lovely anticipation begins.',today:'Today is the day. We are so happy you are here.',after:'Thank you for being part of our story.'},de:{before:'Die Vorfreude beginnt.',today:'Heute ist der große Tag. Schön, dass du da bist.',after:'Danke, dass du Teil unserer Geschichte bist.'},fr:{before:'Le bonheur de se retrouver approche.',today:'Le grand jour est arrivé. Quel bonheur de vous retrouver.',after:'Merci de faire partie de notre histoire.'}}[lang]?.[eventPhase(event)]}</div>
           {crafted ? <CraftWelcome event={event} lang={lang} /> : <p className="guest-message">{event.message}</p>}
           <section className="event-details">
             <span className="eyebrow">{c.details}</span>
@@ -235,6 +238,8 @@ export function GuestExperience({
                 {c.venue}
                 <ArrowUpRight size={14} />
               </a>
+              <a className="btn secondary" href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent('parking near '+event.venue+' '+event.address)} target="_blank" rel="noreferrer">{{en:'Parking nearby',de:'Parken in der Nähe',fr:'Stationnement à proximité'}[lang]}<ArrowUpRight size={14}/></a>
+              <a className="btn secondary" href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent('hotels near '+event.venue+' '+event.address)} target="_blank" rel="noreferrer">{{en:'Places to stay',de:'Unterkünfte',fr:'Où séjourner'}[lang]}<ArrowUpRight size={14}/></a>
             </div>
           </section>
           {crafted && event.dressCode && <section className="craft-dress"><CraftGarland /><span className="craft-eyebrow">{craftWords(lang).attire}</span><h2>{craftWords(lang).dress}</h2><p>{event.dressCode}</p></section>}
@@ -341,6 +346,7 @@ export function GuestExperience({
                     </select>
                   </label>
                 )}
+                {response==='yes'&&<div className="guest-dietary"><label className="field">{{en:'Meal preference (optional)',de:'Essenswunsch (optional)',fr:'Préférence de repas (facultatif)'}[lang]}<select value={meal} onChange={e=>setMeal(e.target.value)}><option value="">—</option><option value="Standard">{{en:'Standard',de:'Standard',fr:'Classique'}[lang]}</option><option value="Vegetarian">{{en:'Vegetarian',de:'Vegetarisch',fr:'Végétarien'}[lang]}</option><option value="Vegan">{{en:'Vegan',de:'Vegan',fr:'Végétalien'}[lang]}</option><option value="Other / see note">{{en:'Other · see note',de:'Andere · siehe Nachricht',fr:'Autre · voir le message'}[lang]}</option></select></label><Field label={{en:'Allergies or dietary needs (optional)',de:'Allergien oder Ernährungsbedürfnisse (optional)',fr:'Allergies ou besoins alimentaires (facultatif)'}[lang]} value={allergies} onChange={setAllergies} maxLength={150}/></div>}
                 <label className="field">
                   {lang === "de"
                     ? "Nachricht an den Gastgeber (optional)"
@@ -349,7 +355,7 @@ export function GuestExperience({
                       : "A note for your host (optional)"}
                   <textarea
                     rows={3}
-                    maxLength={1000}
+                    maxLength={650}
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                   />

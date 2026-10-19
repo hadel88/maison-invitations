@@ -35,6 +35,8 @@ import { buildTasks, groupTasks, milestones, expertFor, townOf } from "./journey
 import { DetailsPanel, LocationPanel, TimelinePanel, GiftsPanel, initials } from "./EventPanels";
 import "./app.css";
 import Stationery from './Stationery';
+import PhotoAlbum from './PhotoAlbum';
+import SeatingPlan from './SeatingPlan';
 
 const DAY = 86400000;
 function countdown(date) {
@@ -576,6 +578,7 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
     ["details", "Event details"],
     ["photos", "Photo gallery" + (photos.length ? " · " + photos.length : "")],
     ["stationery", "Matching stationery"],
+    ['seating', 'Seating plan'],
   ];
   const town = townOf(c);
   const daysLeft = Math.round((new Date(c.date + "T12:00:00") - new Date(new Date().toDateString() + " 12:00")) / DAY);
@@ -672,8 +675,9 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
               <TimelinePanel key={"t" + invite.updated_at} {...panelProps} />
             </div>
           )}
-          {tab === "photos" && <PhotosPanel invite={invite} photos={photos} setWall={setWall} off={wallOff} notify={notify} />}
+          {tab === "photos" && <PhotosPanel invite={invite} photos={photos} setWall={setWall} off={wallOff} notify={notify} onSaveContent={saveContent}/>}
           {tab === 'stationery' && <Stationery content={c} guests={guests} onSaveContent={saveContent}/>}
+          {tab === 'seating' && <SeatingPlan invite={invite} guests={guests} notify={notify}/>}
         </div>
         <button className="ev-experts-link" onClick={() => onExperts(invite, { city: town })}>
           <Compass size={15} /> Find venues & experts{town ? " in " + town : ""} <ArrowRight size={14} />
@@ -794,9 +798,10 @@ function WallPanel({ invite, wall, setWall, off, guests, notify }) {
   );
 }
 
-function PhotosPanel({ invite, photos, setWall, off, notify }) {
+function PhotosPanel({ invite, photos, setWall, off, notify, onSaveContent }) {
   const [busy, setBusy] = useState(0);
   const [view, setView] = useState(null);
+  const [mode,setMode]=useState('album');
   if (off) return <section className="ws-panel"><WallOff /></section>;
   async function upload(files) {
     for (const f of Array.from(files).slice(0, 12)) {
@@ -838,7 +843,8 @@ function PhotosPanel({ invite, photos, setWall, off, notify }) {
           <input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={(e) => upload(e.target.files)} />
         </label>
       </div>
-      {photos.length ? (
+      <div className="photo-view-toggle" aria-label="Photo display"><button aria-pressed={mode==='album'} onClick={()=>setMode('album')}>Magical album</button><button aria-pressed={mode==='gallery'} onClick={()=>setMode('gallery')}>Photo gallery</button></div>
+      {mode==='album' ? <PhotoAlbum photos={photos} title={invite.content.names} design={invite.content.albumStyle||'ivory'} onDesign={value=>onSaveContent({albumStyle:value},'Album design saved.')} loadPhoto={p=>api('wall',{query:{photo:p.id}}).then(d=>d.image)}/> : photos.length ? (
         <div className="ws-photos">
           {photos.map((p) => (
             <figure key={p.id}>
@@ -1054,7 +1060,7 @@ function GuestsPanel({ invite, guests, setGuests, notify }) {
           <Plus size={15} /> Add & copy link
         </button>
       </form>
-      <div className="maison-access-help"><strong><Lock size={14}/> You choose who sees your dashboard.</strong>Enable sharing for individual guests below. They can view the programme, RSVP totals, planning progress, and your wall photos and notes. They cannot edit anything or see private guest replies. Their personal link grants access, so ask them to keep it private. Uncheck to revoke access.</div>
+      <div className="maison-access-help"><strong><Lock size={14}/> You choose who joins your celebration space.</strong>Enable sharing for individual guests below. They can view the programme, RSVP totals, their own table, planning progress and memories, and contribute photos and wishes. They cannot change your plans or see private guest replies. Their personal link grants access, so ask them to keep it private. Uncheck to revoke access.</div>
       {guests.length ? (
         <ul className="ws-guests">
           {guests.map((g) => {

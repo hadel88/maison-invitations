@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {autoSeat,validateSeating} from '../src/seating.js';
+const id=n=>'00000000-0000-0000-0000-'+String(n).padStart(12,'0');
+const tables=[{id:id(1),name:'Olive',capacity:4},{id:id(2),name:'Rose',capacity:3}];
+const guests=[{id:id(11),name:'Family A',party_size:3,response:'yes'},{id:id(12),name:'Family B',party_size:2,response:'yes'},{id:id(13),name:'Family C',party_size:2,response:'yes'},{id:id(14),name:'Declined',party_size:2,response:'no'}];
+test('suggestions keep each party together and use the best fitting table',()=>{const r=autoSeat(tables,guests);assert.equal(r.assignments[id(11)],id(2));assert.equal(r.assignments[id(12)],id(1));assert.equal(r.assignments[id(13)],id(1));assert.deepEqual(r.unseated,[]);assert.ok(!r.assignments[id(14)]);assert.doesNotThrow(()=>validateSeating({tables,assignments:r.assignments},guests))});
+test('parties are left unseated when no table can hold them',()=>{const r=autoSeat([{id:id(1),name:'Small',capacity:2}],guests);assert.ok(r.unseated.includes(id(11)));assert.doesNotThrow(()=>validateSeating({tables:[{id:id(1),name:'Small',capacity:2}],assignments:r.assignments},guests))});
+test('server rejects overcapacity, unknown guests, duplicate tables and invalid capacities',()=>{assert.throws(()=>validateSeating({tables,assignments:{[id(11)]:id(1),[id(12)]:id(1)}},guests),/more guests/);assert.throws(()=>validateSeating({tables,assignments:{[id(99)]:id(1)}},guests),/no longer exists/);assert.throws(()=>validateSeating({tables:[tables[0],tables[0]],assignments:{}},guests),/unique/);assert.throws(()=>validateSeating({tables:[{...tables[0],capacity:0}],assignments:{}},guests),/1–50/)});
+test('declining after assignment removes the party from the saved plan',()=>{assert.deepEqual(validateSeating({tables,assignments:{[id(14)]:id(1)}},guests).assignments,{})});
