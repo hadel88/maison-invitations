@@ -34,6 +34,7 @@ import { JourneyMap } from "./RoyalHub";
 import { buildTasks, groupTasks, milestones, expertFor, townOf } from "./journey";
 import { DetailsPanel, LocationPanel, TimelinePanel, GiftsPanel, initials } from "./EventPanels";
 import "./app.css";
+import Stationery from './Stationery';
 
 const DAY = 86400000;
 function countdown(date) {
@@ -574,6 +575,7 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
     ["gifts", "Gift registry" + (c.gifts?.length ? " · " + c.gifts.length : "")],
     ["details", "Event details"],
     ["photos", "Photo gallery" + (photos.length ? " · " + photos.length : "")],
+    ["stationery", "Matching stationery"],
   ];
   const town = townOf(c);
   const daysLeft = Math.round((new Date(c.date + "T12:00:00") - new Date(new Date().toDateString() + " 12:00")) / DAY);
@@ -671,6 +673,7 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
             </div>
           )}
           {tab === "photos" && <PhotosPanel invite={invite} photos={photos} setWall={setWall} off={wallOff} notify={notify} />}
+          {tab === 'stationery' && <Stationery content={c} guests={guests} onSaveContent={saveContent}/>}
         </div>
         <button className="ev-experts-link" onClick={() => onExperts(invite, { city: town })}>
           <Compass size={15} /> Find venues & experts{town ? " in " + town : ""} <ArrowRight size={14} />
@@ -998,6 +1001,15 @@ function GuestsPanel({ invite, guests, setGuests, notify }) {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [remove, setRemove] = useState(null);
+  const [sharing, setSharing] = useState(null);
+  async function setAccess(g, enabled) {
+    setSharing(g.id);
+    try {
+      const updated = await api('guest-dashboard-access', { method:'POST', data:{id:g.id,enabled} });
+      setGuests(rows=>rows.map(row=>row.id===g.id?updated:row));
+      notify(enabled ? 'Read-only dashboard access enabled for '+g.name+'.' : 'Dashboard access revoked for '+g.name+'.');
+    } catch(e) { notify(e.message); } finally { setSharing(null); }
+  }
   async function add(e) {
     e.preventDefault();
     setBusy(true);
@@ -1042,6 +1054,7 @@ function GuestsPanel({ invite, guests, setGuests, notify }) {
           <Plus size={15} /> Add & copy link
         </button>
       </form>
+      <div className="maison-access-help"><strong><Lock size={14}/> You choose who sees your dashboard.</strong>Enable sharing for individual guests below. They can view the programme, RSVP totals, planning progress, and your wall photos and notes. They cannot edit anything or see private guest replies. Their personal link grants access, so ask them to keep it private. Uncheck to revoke access.</div>
       {guests.length ? (
         <ul className="ws-guests">
           {guests.map((g) => {
@@ -1058,6 +1071,8 @@ function GuestsPanel({ invite, guests, setGuests, notify }) {
                   {g.response === "yes" ? g.party_size + (g.party_size > 1 ? " people" : " person") : ""}
                 </span>
                 <span className="ws-actions">
+                  <label className="maison-access"><input type="checkbox" checked={!!g.dashboard_access} disabled={sharing===g.id} onChange={e=>setAccess(g,e.target.checked)} aria-label={'Share dashboard with '+g.name}/>Share dashboard</label>
+                  {g.dashboard_access && <button className="ws-icon" aria-label={'Copy shared dashboard for '+g.name} onClick={()=>copyText(location.origin+'/?shared='+invite.slug+'&guest='+g.token,notify,'Private dashboard link copied.')}><Lock size={15}/></button>}
                   <button
                     className="ws-icon"
                     aria-label={"Copy link for " + g.name}

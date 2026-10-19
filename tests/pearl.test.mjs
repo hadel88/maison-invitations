@@ -33,3 +33,15 @@ test('Pearl never fades back to source portraits during rotations or page turns'
  for(const items of data.frames)for(const x of items)if(x[0]===0)assert.equal(x[10],1,'Use an opaque replacement, never a fade over the original.');
  assert.deepEqual(data.bookDissolve,[106,119]);assert.ok(existsSync(new URL('../public/pearl-film-transition.webp',import.meta.url)));
 });
+
+test('Pearl photos keep continuous physical frame paths through the orbit',()=>{
+ for(const id of [1,2,3,4]){
+  const points=Array.from({length:240},(_,i)=>data.frames[480+i].find(x=>x[0]===0&&x[1]===id).slice(2,10));
+  for(let i=1;i<points.length-1;i++)for(let k=0;k<8;k+=2){
+   const speed=Math.hypot(points[i][k]-points[i-1][k],points[i][k+1]-points[i-1][k+1]);
+   const jerk=Math.hypot(points[i+1][k]-2*points[i][k]+points[i-1][k],points[i+1][k+1]-2*points[i][k+1]+points[i-1][k+1]);
+   assert.ok(speed<24,`Photo ${id} teleported at frame ${480+i}`);
+   assert.ok(jerk<8,`Photo ${id} jumped out of its motion path at frame ${480+i}`);
+  }
+ }
+});

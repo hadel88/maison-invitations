@@ -114,7 +114,7 @@ export default function HomeSections({ onStart }) {
             ],
             [
               "What happens to our guests’ data?",
-              "Maison uses no analytics or advertising cookies. Guest lists and notes are never shown on the public invitation, and you can export or delete your data at any time.",
+              "Guest lists and private replies are kept with your host. The host can select individual guests to view a read-only dashboard with event details, RSVP totals, planning progress, and wall photos and notes. Personal sharing links should be kept private; the host can revoke access at any time.",
             ],
           ].map(([q, a]) => (
             <details key={q}>

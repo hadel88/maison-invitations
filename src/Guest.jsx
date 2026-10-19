@@ -101,6 +101,13 @@ export function GuestExperience({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [sharedAccess, setSharedAccess] = useState(false);
+  useEffect(()=>{
+    if(!slug||!token||preview)return;
+    let live=true;
+    api('shared-dashboard',{query:{slug,guest:token}}).then(()=>{if(live)setSharedAccess(true)}).catch(()=>{if(live)setSharedAccess(false)});
+    return()=>{live=false};
+  },[slug,token,preview]);
   const [rsvpToken] = useState(
     () =>
       token ||
@@ -384,6 +391,7 @@ export function GuestExperience({
             </button>
           )}
           <div className="guest-signoff">
+            {sharedAccess&&<div className="maison-guest-share"><ShieldCheck size={24}/><p>Your host has shared a private celebration space with you.</p><a className="btn secondary" href={'/?shared='+encodeURIComponent(slug)+'&guest='+encodeURIComponent(token)}>Open shared dashboard <ArrowRight size={15}/></a></div>}
             With love, and a little <a href="/">maison</a>
             <small>
               Only essential cookies. Replies are private to your host.

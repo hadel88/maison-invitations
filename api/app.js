@@ -274,6 +274,14 @@ export default async function handler(req, res) {
         confirmation: !s.access_token,
       });
     }
+    if (action === "shared-dashboard") {
+      if (req.method !== "GET") return res.status(405).end();
+      const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuid.test(req.query.slug || '') || !uuid.test(req.query.guest || ''))
+        return res.status(403).json({ error: 'Your host has not shared this dashboard with this guest link.' });
+      const data = await sb('/rest/v1/rpc/maison_shared_dashboard', { method: 'POST', body: { p_slug: req.query.slug, p_token: req.query.guest } });
+      return data ? res.json(data) : res.status(403).json({ error: 'Dashboard access is unavailable. Your host may have removed access or unpublished the invitation.' });
+    }
     if (action === "open")
       return res.json(
         await sb("/rest/v1/rpc/maison_open", {
@@ -598,6 +606,17 @@ export default async function handler(req, res) {
       if (!data?.length)
         return res.status(404).json({ error: "Invitation not found" });
       return res.json(data[0]);
+    }
+    if (action === "guest-dashboard-access") {
+      if (req.method !== 'POST') return res.status(405).end();
+      if (typeof b.enabled !== 'boolean' || !/^[0-9a-f-]{36}$/i.test(b.id || ''))
+        return res.status(400).json({ error: 'Choose a guest and a sharing setting.' });
+      // The caller's JWT and existing invitation-owner RLS enforce ownership.
+      const rows = await sb('/rest/v1/maison_guests?id=eq.' + encodeURIComponent(b.id), {
+        token: s.token, method: 'PATCH', body: { dashboard_access: b.enabled }, headers: { Prefer: 'return=representation' },
+      });
+      if (!rows?.length) return res.status(404).json({ error: 'Guest not found.' });
+      return res.json(rows[0]);
     }
     if (action === "guests") {
       if (req.method === "DELETE") {

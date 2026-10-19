@@ -42,17 +42,19 @@ import "./royal.css";
 import "./app.css";
 import { occasionFor } from "./worlds";
 import { CinemaCollection } from "./Cinema";
-import { RoyalHero, ExpertsPage } from "./RoyalHub";
-import { HomeOccasions } from "./HomeOccasions";
+import { ExpertsPage } from "./RoyalHub";
 import { cinemaThemes, cinemaEvent } from "./cinemaThemes";
 import { InviteArt, Modal, Field } from "./ui";
 import HomeSections from "./Home";
 import { hasJourney } from "./packages";
+import { MaisonHero, MaisonWorlds, MaisonStory } from "./MaisonHome";
+import "./maison.css";
 
 // Screens that are not needed for the first view load on demand.
 const AuthDialog = lazy(() => import("./AuthDialog"));
 const Editor = lazy(() => import("./Editor"));
 const Dashboard = lazy(() => import("./Dashboard"));
+const SharedDashboard = lazy(() => import("./SharedDashboard"));
 const ExpertSpace = lazy(() => import("./ExpertSpace"));
 const ShareDialog = lazy(() => import("./Dialogs").then((m) => ({ default: m.ShareDialog })));
 const InfoDialog = lazy(() => import("./Dialogs").then((m) => ({ default: m.InfoDialog })));
@@ -63,7 +65,7 @@ const BeachDemoPreview = lazy(() => import("./BeachDemo").then(m => ({ default: 
 function Loading() {
   return <div className="lx-loading" role="status" aria-label="Loading"><span /></div>;
 }
-const firstEvent = () => cinemaEvent(cinemaThemes[0], defaultEvent(templates[0]));
+const firstEvent = () => cinemaEvent(cinemaThemes.find(t => t.id === 'rose-garden'), defaultEvent(templates[0]));
 
 function App() {
   const [lang, setLang] = useState(
@@ -251,6 +253,7 @@ function App() {
         />
       </Suspense>
     );
+  if (q.get('shared')) return <Suspense fallback={<Loading/>}><SharedDashboard slug={q.get('shared')} token={q.get('guest')}/></Suspense>;
   if (publicSlug)
     return (
       <Suspense fallback={<Loading />}>
@@ -350,25 +353,12 @@ function App() {
       <Suspense fallback={<Loading />}>
         {view === "cinema" ? (
           <>
-            <RoyalHero
-              heroOnly
-              occasion={worldOccasion}
-              onOccasion={setWorldOccasion}
-              theme={worldTheme}
-              onTheme={setWorldTheme}
-              lang={lang}
+            <MaisonHero
               onCreate={() => studio(firstEvent(), "design")}
-              onWorld={() => go("designs")}
-              onExperts={() => show("experts")}
-              onExperience={() => setExperience({ ...firstEvent(), worldTheme })}
+              onPreview={() => setExperience(cinemaEvent(cinemaThemes.find(t => t.id === 'sage'), defaultEvent(templates[0])))}
+              onExplore={() => document.getElementById('worlds')?.scrollIntoView({ behavior: 'smooth' })}
             />
-            <HomeOccasions lang={lang} onSelect={(occasion) => {
-              if (occasion !== "All designs") setWorldOccasion(occasion);
-              setFilter(occasion);
-              setSearch("");
-              setFavOnly(false);
-              show("gallery");
-            }} />
+            <MaisonWorlds onPreview={setExperience} onCreate={event => studio(event, 'details')} />
             <div id="designs" />
             <CinemaCollection
               onBeachDemo={() => setBeachPreview(true)}
@@ -376,6 +366,7 @@ function App() {
               onCreate={(event) => studio(event, "details")}
               notify={setToast}
             />
+            <MaisonStory onStart={() => studio(firstEvent(), 'design')} onExperts={() => show('experts')} onDashboard={openMine}/>
             <HomeSections
               onStart={(pkg) => studio(firstEvent(), "design", pkg)}
             />
