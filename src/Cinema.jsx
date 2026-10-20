@@ -48,8 +48,8 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
    <span className="atelier-place">{event.venue}</span>
   </div>
   {theme.kind==='rose'&&<><img className="ribbon-stage-still" src="/rose-ribbon-still.png" alt="" aria-hidden="true"/><canvas className="atelier-ribbon-canvas" ref={ribbonCanvas} aria-hidden="true"/></>}
-  {theme.kind==='sage'?<SageEnvelope opened={opened} onComplete={setRevealed}/>:<div className="atelier-curtains" aria-hidden="true"><div className="atelier-leaf leaf-left" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/><div className="atelier-leaf leaf-right" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/></div>}
-  {!opened&&<button className={`atelier-open-control ${theme.kind==='rose'?'with-ribbon':''}`} onClick={onOpen} aria-label={c.open}>
+  {theme.kind==='sage'?<SageEnvelope opened={opened} onOpen={onOpen} onComplete={setRevealed} event={event} guest={guest} theme={theme} lang={lang} openLabel={c.touch}/>:<div className="atelier-curtains" aria-hidden="true"><div className="atelier-leaf leaf-left" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/><div className="atelier-leaf leaf-right" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/></div>}
+  {!opened&&theme.kind!=='sage'&&<button className={`atelier-open-control ${theme.kind==='rose'?'with-ribbon':''}`} onClick={onOpen} aria-label={c.open}>
     {theme.kind==='rose'?null:theme.kind==='sage'?<span className="sage-seal-hitarea" aria-hidden="true"/>:<span className="atelier-monogram">{names.map(n=>n.trim()[0]).join(' & ')}</span>}
     <span className="atelier-touch">{c.touch}</span>
   </button>}
@@ -58,18 +58,31 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
   {revealed&&<button className="atelier-replay" aria-label={c.replay} onClick={()=>{onReplay();if(theme.kind==='rose'||theme.kind==='sage')root.current?.closest('.guest-experience')?.scrollTo({top:0,behavior:'instant'})}}><RotateCcw size={15}/></button>}
  </section>
 }
-function SageEnvelope({opened,onComplete}){
- useEffect(()=>{if(!opened)return;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const timer=setTimeout(()=>onComplete(true),reduced?0:2850);return()=>clearTimeout(timer)},[opened,onComplete]);
- return <div className="sage-envelope-scene" aria-hidden="true">
-  <div className="sage-envelope-body"/>
-  <div className="sage-envelope-pocket"/>
-  <div className="sage-envelope-flap">
-   <div className="sage-envelope-front"/>
-   <div className="sage-envelope-lining"/>
-   <div className="sage-wax-release"><img src="/maison-wax-seal.png" width="168" height="168" alt=""/></div>
-  </div>
-  <div className="sage-envelope-print">You are invited</div>
-  <svg className="sage-flap-seam" viewBox="0 0 100 100" preserveAspectRatio="none"><path className="sage-flap-seam-shadow" d="M0 31 L50 48 L100 31"/><path className="sage-flap-seam-light" d="M0 30.5 L50 47.5 L100 30.5"/></svg>
+function SageEnvelope({opened,onOpen,onComplete,event,guest,theme,lang,openLabel}){
+ const canvas=useRef(null),engine=useRef(null),openedRef=useRef(opened),completeRef=useRef(onComplete);
+ const [seal,setSeal]=useState(null),[ready,setReady]=useState(false);
+ openedRef.current=opened; completeRef.current=onComplete;
+ const card={names:event.names,subtitle:event.subtitle||theme.line,overline:guest?.name?`FOR ${guest.name.toUpperCase()}`:(theme.overline||words[lang]?.invited||words.en.invited),date:dateLabel(event.date,lang),venue:event.venue,font:event.font&&event.font!=='classic'?ensureFont(event.font).family:"'Cormorant Garamond', Georgia, serif"};
+ useEffect(()=>{
+  let dead=false;
+  import('./sageEnvelope').then(({createSageEnvelope})=>{
+   if(dead)return;
+   const instance=createSageEnvelope(canvas.current,{card,guestLine:guest?.name||'',onSeal:setSeal});
+   engine.current=instance;
+   instance.ready.then(()=>{if(dead)return;setReady(true);if(openedRef.current){if(matchMedia('(prefers-reduced-motion: reduce)').matches){instance.finish();completeRef.current(true)}else instance.play(()=>completeRef.current(true))}}).catch(()=>{if(!dead)setReady(false)});
+  }).catch(()=>{if(!dead)setReady(false)});
+  return()=>{dead=true;engine.current?.destroy();engine.current=null};
+ },[]);
+ useEffect(()=>{
+  const instance=engine.current;if(!instance)return;
+  let active=true;
+  instance.ready.then(()=>{if(!active)return;if(opened){if(matchMedia('(prefers-reduced-motion: reduce)').matches){instance.finish();completeRef.current(true)}else instance.play(()=>completeRef.current(true))}else{instance.reset();completeRef.current(false)}});
+  return()=>{active=false};
+ },[opened]);
+ useEffect(()=>{engine.current?.setCard(card)},[event.names,event.subtitle,event.date,event.venue,event.font,guest?.name,theme.line,theme.overline,lang]);
+ return <div className="sage-envelope-scene">
+  <canvas ref={canvas} className="sage-envelope-canvas" aria-hidden="true"/>
+  {!opened&&ready&&seal&&<button className="sage-seal-control" style={{left:`${seal.x}px`,top:`${seal.y}px`,width:`${Math.max(88,Math.min(174,seal.r*2.7))}px`}} onClick={onOpen} aria-label={openLabel}><span>{openLabel}</span></button>}
  </div>;
 }
 export function CinemaCollection({onPreview,onCreate,notify,onBeachDemo,occasion='All designs',onOccasionChange,lang='en'}){

@@ -4,23 +4,27 @@ import { readFileSync } from 'node:fs';
 
 const cinema = readFileSync(new URL('../src/Cinema.jsx', import.meta.url), 'utf8');
 const styles = readFileSync(new URL('../src/atelier.css', import.meta.url), 'utf8');
+const sage = readFileSync(new URL('../src/sageEnvelope.js', import.meta.url), 'utf8');
 
-test('Sage cover is a real layered envelope with the wax attached to its flap', () => {
-  const flapMarkup = cinema.match(/<div className="sage-envelope-flap">([\s\S]*?)<\/div>\s*<div className="sage-envelope-print">/);
-  assert.ok(flapMarkup, 'the envelope flap should have its own layer');
-  assert.match(flapMarkup[1], /className="sage-envelope-lining"/);
-  assert.match(flapMarkup[1], /className="sage-wax-release"/);
-  assert.match(flapMarkup[1], /maison-wax-seal\.png/);
-  assert.match(styles, /clip-path:\s*polygon\(0 0, 100% 0, 100% 63\.9%, 50% 100%, 0 63\.9%\)/);
-  assert.match(styles, /\.atelier-opening \.sage-envelope-flap\s*\{[^}]*rotateX\(176deg\)/s);
+test('Sage uses its 3D envelope renderer and places the tappable control over the wax', () => {
+  assert.match(cinema, /import\('\.\/sageEnvelope'\)/);
+  assert.match(cinema, /<canvas ref=\{canvas\} className="sage-envelope-canvas"/);
+  assert.match(cinema, /onSeal:setSeal/);
+  assert.match(cinema, /className="sage-seal-control"/);
+  assert.match(sage, /flap\.add\(seal\)/);
+  assert.match(sage, /sealLayers\.forEach\(\(m\) => \{ m\.material\.map = waxTex/);
+  assert.match(sage, /seal\.position\.set\(0, SEAL_Y, tz\)/);
+  assert.match(styles, /\.sage-seal-control\s*\{/);
 });
 
-test('the invitation stays hidden until the seal opens the flap, then rises as opaque paper', () => {
-  assert.match(cinema, /setTimeout\(\(\)=>onComplete\(true\),reduced\?0:2850\)/);
+test('the invitation card stays in the pocket until the flap starts moving and arrives before reveal', () => {
+  assert.match(sage, /cardGroup\.visible = cardLoaded && t >= SAGE_TIMES\.flap\[0\]/);
+  assert.match(sage, /rise: \[2\.35, 4\.45\]/);
+  assert.match(sage, /forward: \[4\.25, 6\.05\]/);
+  assert.match(cinema, /instance\.play\(\(\)=>completeRef\.current\(true\)\)/);
   assert.match(styles, /\.atelier-sage\.atelier-opening \.atelier-inscription\s*\{\s*visibility:\s*hidden;/);
-  assert.match(styles, /\.atelier-sage\.atelier-revealed \.atelier-inscription\s*\{[^}]*translateY\(0\)/s);
-  assert.match(styles, /background:\s*color-mix\(in srgb, var\(--occasion-paper,[^)]+\)\s*98%, white\)/);
-  assert.match(styles, /backdrop-filter:\s*none/);
+  assert.match(styles, /\.atelier-sage\.atelier-revealed \.atelier-inscription \{ opacity: 0; visibility: visible;/);
+  assert.match(styles, /\.sage-envelope-scene \{ background: transparent;/);
 });
 
 test('the Rose bow material keeps its untying motion and adds visible woven satin sheen', () => {
