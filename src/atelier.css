@@ -123,17 +123,41 @@
 .invitation-screen .atelier-curtains { transform: none; }
 .invitation-screen .atelier-date { font-size: 10px; }
 .sage-envelope-canvas, .sage-envelope-fallback { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 6; pointer-events: none; }
-.sage-envelope-fallback { background: url('/atelier-sage-cover.webp') center / cover; transition: transform 4s .7s cubic-bezier(.45,0,.2,1); }
+.sage-envelope-canvas { opacity: .92; }
+.atelier-sage .atelier-curtains { opacity: .48; }
+.sage-envelope-fallback { background: url('/atelier-sage-cover.webp') center / cover; transition: transform 2.8s cubic-bezier(.45,0,.2,1); }
 .atelier-opening .sage-envelope-fallback { transform: translateY(115%); }
-.sage-wax-release { position: absolute; z-index: 8; top: 43%; left: 50%; transform: translate(-50%, -50%) rotate(-5deg); width: 110px; height: 110px; object-fit: contain; filter: drop-shadow(3px 8px 7px #18201566); pointer-events: none; }
-.atelier-opening .sage-wax-release { animation: sage-lift-seal 1.35s cubic-bezier(.3,.6,.3,1) both; }
-.invitation-screen .atelier-sage .atelier-open-control { top: 43%; padding: 0; width: 190px; transform: translate(-50%, -55px); gap: 18px; }
-.sage-seal-hitarea { display: block; width: 110px; height: 110px; }
+.sage-wax-release { position: absolute; z-index: 8; top: 43%; left: 50%; transform: translate(-50%, -50%) rotate(-5deg); width: 132px; height: 132px; object-fit: contain; filter: drop-shadow(3px 8px 7px #18201566); pointer-events: none; }
+.atelier-opening .sage-wax-release { animation: sage-lift-seal 1.65s cubic-bezier(.32,.62,.28,1) both; }
+.invitation-screen .atelier-sage .atelier-open-control { top: 43%; padding: 0; width: 210px; transform: translate(-50%, -55px); gap: 18px; }
+.sage-seal-hitarea { display: block; width: 132px; height: 132px; }
 .atelier-sage .atelier-touch { margin-top: 0; }
+.atelier-sage .atelier-inscription {
+  z-index: 10;
+  left: 8%;
+  right: 8%;
+  top: 23%;
+  padding: 24px 16px 26px;
+  color: #3f4535;
+  background: rgba(244, 241, 224, .78);
+  border: 1px solid rgba(255, 252, 238, .82);
+  border-radius: 110px 110px 8px 8px;
+  box-shadow: 0 16px 42px rgba(24, 32, 21, .25), inset 0 1px 0 rgba(255, 255, 255, .72);
+  backdrop-filter: blur(7px) saturate(.88);
+  -webkit-backdrop-filter: blur(7px) saturate(.88);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .68);
+}
+.atelier-sage .atelier-inscription h1,
+.atelier-sage .atelier-inscription p,
+.atelier-sage .atelier-inscription .atelier-date,
+.atelier-sage .atelier-inscription .atelier-place { color: #3f4535; }
+.atelier-sage .atelier-inscription .atelier-overline,
+.atelier-sage .atelier-inscription .atelier-date { text-shadow: 0 1px 0 rgba(255,255,255,.82); }
 @keyframes sage-lift-seal {
   0% { opacity: 1; transform: translate(-50%, -50%) translateZ(0) rotate(-5deg); }
-  45% { opacity: 1; transform: translate(-50%, -58%) translateZ(85px) rotateY(-22deg) rotate(-12deg); }
-  100% { opacity: 0; transform: translate(-20%, 55%) translateZ(140px) rotateY(-42deg) rotate(-24deg); }
+  32% { opacity: 1; transform: translate(-51%, -60%) translateZ(38px) rotateY(-10deg) rotate(-8deg); }
+  68% { opacity: .96; transform: translate(-40%, -53%) translateZ(85px) rotateY(-24deg) rotate(8deg); }
+  100% { opacity: 0; transform: translate(24%, 34%) translateZ(125px) rotateY(-38deg) rotate(22deg); }
 }
 @media (max-width: 430px) { .invitation-screen > .guest-experience.cinema-guest { width: 100%; height: 100dvh; box-shadow: none; } }
 @media (prefers-reduced-motion: reduce) { .atelier-opening .sage-wax-release { visibility: hidden; } .atelier-opening .sage-envelope-fallback { transition: none; } }

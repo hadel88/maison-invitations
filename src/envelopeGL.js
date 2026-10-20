@@ -1,7 +1,7 @@
 const ease = x => { x = Math.max(0, Math.min(1, x)); return x * x * x * (x * (x * 6 - 15) + 10); };
-export const ENVELOPE_END = 8.2;
+export const ENVELOPE_END = 5.8;
 export function envelopeMotion(t) {
-  return { flap: ease((t - 1.05) / 2.6), sides: ease((t - 3.65) / 2.4), withdraw: ease((t - 4.25) / 3.5) };
+  return { flap: ease((t - .25) / 1.7), sides: ease((t - 1.35) / 1.8), withdraw: ease((t - 2.65) / 3.05) };
 }
 export function envelopeVertex(x, y, part, t, w, h) {
   const m = envelopeMotion(t);

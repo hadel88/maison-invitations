@@ -88,10 +88,10 @@
 .ivory-stage{perspective:1400px}
 .invitation-screen .ivory-stage{height:100cqh;min-height:0}
 .ivory-gatefold{transform-style:flat}
-.ivory-paper{transition:transform 5.5s cubic-bezier(.45,.02,.18,1);box-shadow:0 1px 18px #524c3c18}
+.ivory-paper{opacity:.93;transition:transform 4s cubic-bezier(.45,.02,.18,1),opacity 4s;box-shadow:0 1px 18px #524c3c18}
 .ivory-opening .ivory-paper-left{transform:rotateY(-112deg)}
 .ivory-opening .ivory-paper-right{transform:rotateY(112deg);filter:none}
-.ivory-setting{transform:scale(1.04);transition:transform 5.5s cubic-bezier(.2,.65,.25,1)}
+.ivory-setting{transform:scale(1.04);transition:transform 4s cubic-bezier(.2,.65,.25,1)}
 .ivory-opening .ivory-setting{transform:scale(1)}
 .ivory-letter,.ivory-opening .ivory-letter{transform:translateY(18px);opacity:0;transition:opacity 1.6s,transform 2s}
 .ivory-revealed .ivory-letter{transform:none;opacity:1}

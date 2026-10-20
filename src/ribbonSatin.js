@@ -4,17 +4,19 @@ import { ribbonRow } from './roseRibbonGeometry';
 
 function clothTexture() {
   const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 128;
-  const ctx = canvas.getContext('2d'), pixels = ctx.createImageData(128, 128);
-  for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) {
-    const value = 241 + Math.sin(x * Math.PI) * 5 + Math.cos(y * Math.PI / 2) * 5;
-    const i = (y * 128 + x) * 4;
+  canvas.width = canvas.height = 256;
+  const ctx = canvas.getContext('2d'), pixels = ctx.createImageData(256, 256);
+  for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
+    const weave = ((x + y) & 1) ? 2.4 : -2.4;
+    const grain = Math.sin(x * .21 + Math.sin(y * .08)) * 1.8 + Math.cos(y * .18) * 1.5;
+    const value = 246 + weave + grain;
+    const i = (y * 256 + x) * 4;
     pixels.data.set([value, value, value, 255], i);
   }
   ctx.putImageData(pixels, 0, 0);
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(6, 2);
+  texture.repeat.set(14, 6);
   return texture;
 }
 
@@ -49,12 +51,12 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
 
   const weave = clothTexture();
   const material = new THREE.MeshPhysicalMaterial({
-    color: '#d8a5ad', metalness: 0, roughness: .91,
+    color: '#d8a5ad', metalness: 0, roughness: .82,
     transparent: true, opacity: .99, alphaMap: weave, depthWrite: false,
-    specularIntensity: .12,
-    sheen: .16, sheenColor: '#f2d2d5', sheenRoughness: .92,
-    anisotropy: .08, anisotropyRotation: Math.PI / 2,
-    bumpMap: weave, bumpScale: .025, side: THREE.DoubleSide,
+    specularIntensity: .18,
+    sheen: .26, sheenColor: '#f4d9da', sheenRoughness: .74,
+    anisotropy: .18, anisotropyRotation: Math.PI / 2,
+    bumpMap: weave, bumpScale: .04, side: THREE.DoubleSide,
     envMapIntensity: .35,
   });
   material.shadowSide = THREE.DoubleSide;

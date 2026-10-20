@@ -61,7 +61,7 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
 function SageEnvelope({opened,onComplete}){
  const canvas=useRef(null),renderer=useRef(null),[fallback,setFallback]=useState(false);
  useEffect(()=>{try{renderer.current=createEnvelopeRenderer(canvas.current,{onComplete:()=>onComplete(true),onError:()=>setFallback(true)})}catch{setFallback(true)}return()=>{renderer.current?.dispose();renderer.current=null}},[onComplete]);
- useEffect(()=>{if(opened)renderer.current?.open();else renderer.current?.reset();if(!opened||!fallback)return;const timer=setTimeout(()=>onComplete(true),matchMedia('(prefers-reduced-motion: reduce)').matches?0:4200);return()=>clearTimeout(timer)},[opened,fallback,onComplete]);
+ useEffect(()=>{if(opened)renderer.current?.open();else renderer.current?.reset();if(!opened||!fallback)return;const timer=setTimeout(()=>onComplete(true),matchMedia('(prefers-reduced-motion: reduce)').matches?0:3000);return()=>clearTimeout(timer)},[opened,fallback,onComplete]);
  return <>{fallback?<div className="sage-envelope-fallback" aria-hidden="true"/>:<canvas className="sage-envelope-canvas" ref={canvas} aria-hidden="true"/>}<img className="sage-wax-release" src="/maison-wax-seal.png" width="132" height="132" alt="" aria-hidden="true"/></>;
 }
 export function CinemaCollection({onPreview,onCreate,notify,onBeachDemo,occasion='All designs',onOccasionChange,lang='en'}){
@@ -84,7 +84,7 @@ export function CinemaCollection({onPreview,onCreate,notify,onBeachDemo,occasion
   <div className="atelier-three">{(showAll?matching:matching.slice(0,6)).map((t,i)=><article key={t.id}>
    <button className={'atelier-poster poster-'+t.kind} style={sceneVariables(t)} onClick={()=>onPreview(eventFor(t))} aria-label={'Experience '+t.name}>
     <img src={'/'+t.cover+'-sm.webp'} srcSet={'/'+t.cover+'-sm.webp 600w, /'+t.cover+'.webp 941w'} sizes="(max-width: 760px) 90vw, 30vw" width="600" height="1066" loading="lazy" decoding="async" alt={t.name+' invitation artwork'}/>
-    {t.kind==='rose'?<RibbonPreview/>:t.kind==='sage'?<img className="atelier-wax" src="/maison-wax-seal.png" alt=""/>:t.kind==='ivory'?<IvoryPlaque names={t.names} shape={t.plaqueShape||(t.id==='woodland-wish'?'woodland-keepsake':'ivory')}/>:null}
+    {t.kind==='rose'?<RibbonPreview/>:t.kind==='sage'?<img className="atelier-wax" src="/maison-wax-seal.png" alt=""/>:t.kind==='ivory'?<IvoryPlaque names={t.names} shape={t.plaqueShape||(t.id==='woodland-wish'?'woodland-keepsake':'ivory')} palette={t}/>:null}
     {['graduation','graduation-curtain'].includes(t.kind)&&<span className="birthday-poster-title graduation-poster-title"><small>THE FUTURE IS YOURS</small>{t.kind==='graduation-curtain'?'The Crimson Ovation':'The next chapter'}</span>}
     {t.kind==='birthday'&&<><span className="birthday-poster-title"><small>A LITTLE SOMETHING JUST FOR YOU</small>A birthday worth the noise</span><span className="birthday-poster-gift" aria-hidden="true">✦</span></>}
     {['film','story'].includes(t.kind)&&<span className="film-poster-title"><small>{t.kind==='film'?'A FILM INVITATION':'A FAIRYTALE FILM'}</small>{t.name}</span>}

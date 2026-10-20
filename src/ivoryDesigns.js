@@ -13,7 +13,7 @@ const rows = [
  ['ivory-graduation-boy','The Midnight Laurel','Graduation','Boys','graduation-boy','#e5eaf0','#3d4b63','#ae914d','laurel','Louis’s graduation'],
  ['ivory-graduation-girl','The Champagne Laurel','Graduation','Girls','graduation-girl','#eee4eb','#6a4b61','#ac8c55','laurel','Clara’s graduation'],
  ['ivory-dinner','The Olive & Lemon Letter','Dinner party','Neutral','dinner','#f3e9d9','#67573b','#ac8148','citrus','An evening at our table'],
- ['ivory-anniversary','The Pearl Anniversary','Anniversary','Neutral','anniversary','#f1e6df','#73504d','#a8894d','roses','Camille & Arthur'],
+ ['ivory-anniversary','The Gilded Heirloom','Anniversary','Neutral','anniversary','#eadbd4','#603d42','#b68a52','roses','Camille & Arthur'],
  ['ivory-corporate','The Gilded Letter','Corporate event','Neutral','corporate','#e8e6df','#42433f','#a58c50','geometry','The Maison Evening'],
  ['ivory-christening','The Little Blessing','Christening','Neutral','christening-neutral','#f4f0e6','#66624e','#ab985e','olive','Noah'],
  ['ivory-christening-boy','The Blue Olive Blessing','Christening','Boys','christening-boy','#e8eef2','#516575','#a49a70','olive','Oliver'],
