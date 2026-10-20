@@ -37,6 +37,8 @@ import { copy, dateLabel, defaultEvent, templates } from "./catalog";
 import { api, download, calendar } from "./client";
 import { Field } from "./ui";
 import { CinemaStage } from "./Cinema";
+import {sceneFor} from "./cinemaThemes";
+import {sceneVariables} from "./occasionScenes";
 import { CraftWelcome, CraftGarland, craftWords } from "./CraftInvitation";
 import { eventPhase, responseNote } from './guestPlanning';
 
@@ -146,7 +148,7 @@ export function GuestExperience({
     }
   }
   return (
-    <div className="invitation-screen"><div className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : ["castle-gates","castle-story","pearl-promise","little-wonder"].includes(event.scene) ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
+    <div className="invitation-screen"><div style={sceneVariables(sceneFor(event))} className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : ["castle-gates","castle-story","pearl-promise","little-wonder"].includes(event.scene) ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
       <div className="guest-controls">
         <a href="/" className="brand">
           maison

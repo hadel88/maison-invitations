@@ -1,4 +1,5 @@
-export const cinemaThemes = [
+import {occasionScenes,goldOccasionScenes,occasionEvent} from './occasionScenes.js';
+const originalThemes = [
  {id:'rose-garden',name:'Rose & Ribbon',occasion:'Wedding',audience:'Romantic',kind:'rose',image:'atelier-rose',cover:'atelier-rose-cover',color:'#c29789',ink:'#634b45',names:'Juliette & Hugo',line:'Together is a beautiful place to be.',tag:'BLUSH ROSES · SOFT CHIFFON',motif:'ribbon'},
  {id:'ivory',name:'The Ivory Garden',occasion:'Wedding',audience:'Romantic',kind:'ivory',image:'atelier-ivory',cover:'atelier-ivory-cover',color:'#9a8967',ink:'#4d514b',names:'Sofia & Alexander',line:'A lifetime of love begins here.',tag:'EMBROIDERED LINEN · LAKE COMO',motif:'doors'},
  {id:'sage',name:'A Secret in Sage',occasion:'Wedding',audience:'Romantic',kind:'sage',image:'atelier-sage',cover:'atelier-sage-cover',color:'#8d654e',ink:'#4b4936',names:'Clara & Gabriel',line:'Some days stay with us forever.',tag:'BOTANICAL PAPER · A WAX SEAL',motif:'envelope'},
@@ -13,9 +14,14 @@ export const cinemaThemes = [
  {id:'woodland-wish',name:'The Woodland Wish',occasion:'Birthday',audience:'Children',kind:'ivory',image:'cinema-garden',cover:'atelier-ivory-cover',color:'#8d9871',ink:'#3f5639',names:'Isla turns 5',line:'A little adventure with our favourite people.',tag:'A STORYBOOK GARDEN · LITTLE BIRTHDAY WISHES',motif:'doors'},
  {id:'rose-engagement',name:'The Rose Promise',occasion:'Engagement',audience:'Romantic',kind:'rose',image:'atelier-rose',cover:'atelier-rose-cover',color:'#c29789',ink:'#634b45',names:'Emma & Louis',line:'The beginning of our forever.',tag:'ROSES · RIBBON · OUR NEXT CHAPTER',motif:'ribbon'},
 ];
+export const cinemaThemes = [
+ ...[...occasionScenes,...goldOccasionScenes].map(scene=>({...scene,kind:'rose',audience:'Celebration',color:scene.ink,motif:'ribbon',occasionDoor:true,tag:scene.bow.toUpperCase()+' CHIFFON · '+scene.occasion.toUpperCase()})),
+ ...originalThemes.filter(theme=>!occasionScenes.some(scene=>scene.id===theme.id))
+];
 export const cinemaGroups=['The collection'];
 export function sceneFor(event={}){return cinemaThemes.find(t=>t.id===event.scene)||cinemaThemes[0]}
 export function cinemaEvent(theme,base={}){
+ if(theme.occasionDoor)return occasionEvent(theme,base);
  const event={...base,scene:theme.id,occasion:theme.occasion,names:theme.names,subtitle:theme.line,music:'soft',worldTheme:'garden'};
  if(theme.id==='woodland-wish')return {...event,date:'2027-06-19',time:'14:00',timezone:'Europe/Berlin',venue:'The Secret Garden',address:'Berlin, Germany',rsvpDeadline:'2027-06-05',dressCode:'Ready for a little adventure',message:'Follow the butterflies and bring your biggest smile. We are celebrating five wonderful years with cake, garden games and a little bit of magic.',timeline:[{time:'14:00',title:'Welcome, little explorers',note:'Garden games and a treasure hunt.'},{time:'15:00',title:'A wish and a birthday cake',note:'Five candles and all our favourite people.'}]};
  if(theme.id==='rose-engagement')return {...event,date:'2027-06-26',time:'18:00',timezone:'Europe/Paris',venue:'The Rose Pavilion',address:'Paris, France',rsvpDeadline:'2027-06-12',dressCode:'Garden elegance',message:'We said yes to forever. Join us for a beautiful evening of stories, laughter and a toast to everything ahead.',timeline:[{time:'18:00',title:'A garden welcome',note:'Meet us among the roses.'},{time:'19:00',title:'A toast to forever',note:'Dinner, stories and our favourite people.'}]};

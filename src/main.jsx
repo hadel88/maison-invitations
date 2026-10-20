@@ -367,9 +367,12 @@ function App() {
               onExperts={() => show('experts')}
               onExperience={() => setExperience({ ...firstEvent(), worldTheme })}
             />
-            <HomeOccasions lang={lang} onSelect={occasion=>{if(occasion!=='All designs')setWorldOccasion(occasion);setFilter(occasion);setSearch('');setFavOnly(false);show('gallery')}}/>
+            <HomeOccasions lang={lang} onSelect={occasion=>{if(occasion!=='All designs')setWorldOccasion(occasion);setFilter(occasion);setSearch('');setFavOnly(false);go('designs')}}/>
             <div id="designs" />
             <CinemaCollection
+              occasion={filter}
+              onOccasionChange={setFilter}
+              lang={lang}
               onBeachDemo={() => setBeachPreview(true)}
               onPreview={setExperience}
               onCreate={(event) => studio(event, "details")}
