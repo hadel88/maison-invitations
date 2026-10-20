@@ -22,6 +22,7 @@ import { dateLabel } from "./catalog";
 import { Modal, Field } from "./ui";
 import { PACKAGES } from "./packages";
 import RibbonPreview from './RibbonPreview';
+import IvoryPlaque from './IvoryPlaque';
 import {sceneVariables} from './occasionScenes';
 
 // New invitations start as "invitation"; older ones keep the package they effectively had.
@@ -420,8 +421,9 @@ export default function Editor({ record, user, onClose, onSave, onPreview }) {
           {!user && <div className="small-note">Explore freely. You’ll sign in when you save or publish.</div>}
         </section>
         <div className="st-stage">
-          <div className={"st-card" + (scene.kind==='rose'?' st-card-rose':'') + (["birthday","graduation","graduation-curtain"].includes(scene.kind) ? " st-card-birthday" : "")} style={{ backgroundImage: `url(${small(scene.cover)})`,...sceneVariables(scene) }}>
+          <div className={"st-card" + (scene.kind==='rose'?' st-card-rose':scene.kind==='ivory'?' st-card-ivory':'') + (["birthday","graduation","graduation-curtain"].includes(scene.kind) ? " st-card-birthday" : "")} style={{ backgroundImage: `url(${small(scene.cover)})`,...sceneVariables(scene) }}>
             {scene.kind==='rose'&&<RibbonPreview/>}
+            {scene.kind==='ivory'&&<IvoryPlaque names={event.names} shape={scene.plaqueShape||(scene.id==='woodland-wish'?'woodland-keepsake':'ivory')}/>}
             <div className="st-card-text" style={{ fontFamily: font.family }}>
               <span className="st-card-over">You’re invited</span>
               <h3>{event.names}</h3>

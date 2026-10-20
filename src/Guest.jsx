@@ -39,6 +39,8 @@ import { Field } from "./ui";
 import { CinemaStage } from "./Cinema";
 import {sceneFor} from "./cinemaThemes";
 import {sceneVariables} from "./occasionScenes";
+import {ivoryVariables} from "./ivoryDesigns";
+import {IvoryDetailsHeading} from "./IvoryInvitation";
 import { CraftWelcome, CraftGarland, craftWords } from "./CraftInvitation";
 import { eventPhase, responseNote } from './guestPlanning';
 
@@ -148,7 +150,7 @@ export function GuestExperience({
     }
   }
   return (
-    <div className="invitation-screen"><div style={sceneVariables(sceneFor(event))} className={"guest-experience cinema-guest " + (crafted ? "cinema-craft " : ["castle-gates","castle-story","pearl-promise","little-wonder"].includes(event.scene) ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
+    <div className="invitation-screen"><div style={{...sceneVariables(sceneFor(event)),...ivoryVariables(sceneFor(event))}} className={"guest-experience cinema-guest " + (sceneFor(event).kind==='ivory'?'cinema-ivory ':'') + (crafted ? "cinema-craft " : ["castle-gates","castle-story","pearl-promise","little-wonder"].includes(event.scene) ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
       <div className="guest-controls">
         <a href="/" className="brand">
           maison
@@ -183,6 +185,7 @@ export function GuestExperience({
       {opened && (
         <div className="cinema-detail-sheet" aria-label="Invitation details and RSVP">
         <div className="opened-invite">
+          {sceneFor(event).kind==='ivory'&&<IvoryDetailsHeading event={event} theme={sceneFor(event)}/>}
           <div className="guest-phase-message">{{en:{before:'The lovely anticipation begins.',today:'Today is the day. We are so happy you are here.',after:'Thank you for being part of our story.'},de:{before:'Die Vorfreude beginnt.',today:'Heute ist der große Tag. Schön, dass du da bist.',after:'Danke, dass du Teil unserer Geschichte bist.'},fr:{before:'Le bonheur de se retrouver approche.',today:'Le grand jour est arrivé. Quel bonheur de vous retrouver.',after:'Merci de faire partie de notre histoire.'}}[lang]?.[eventPhase(event)]}</div>
           {crafted ? <CraftWelcome event={event} lang={lang} /> : <p className="guest-message">{event.message}</p>}
           <section className="event-details">

@@ -1,3 +1,4 @@
+import {ivoryThemes,ivoryEvent} from './ivoryDesigns.js';
 import {occasionScenes,goldOccasionScenes,occasionEvent} from './occasionScenes.js';
 const originalThemes = [
  {id:'rose-garden',name:'Rose & Ribbon',occasion:'Wedding',audience:'Romantic',kind:'rose',image:'atelier-rose',cover:'atelier-rose-cover',color:'#c29789',ink:'#634b45',names:'Juliette & Hugo',line:'Together is a beautiful place to be.',tag:'BLUSH ROSES · SOFT CHIFFON',motif:'ribbon'},
@@ -16,11 +17,13 @@ const originalThemes = [
 ];
 export const cinemaThemes = [
  ...[...occasionScenes,...goldOccasionScenes].map(scene=>({...scene,kind:'rose',audience:'Celebration',color:scene.ink,motif:'ribbon',occasionDoor:true,tag:scene.bow.toUpperCase()+' CHIFFON · '+scene.occasion.toUpperCase()})),
- ...originalThemes.filter(theme=>!occasionScenes.some(scene=>scene.id===theme.id))
+ ...ivoryThemes,
+ ...originalThemes.filter(theme=>![...occasionScenes,...ivoryThemes].some(scene=>scene.id===theme.id))
 ];
 export const cinemaGroups=['The collection'];
 export function sceneFor(event={}){return cinemaThemes.find(t=>t.id===event.scene)||cinemaThemes[0]}
 export function cinemaEvent(theme,base={}){
+ if(theme.ivoryCollection)return ivoryEvent(theme,base);
  if(theme.occasionDoor)return occasionEvent(theme,base);
  const event={...base,scene:theme.id,occasion:theme.occasion,names:theme.names,subtitle:theme.line,music:'soft',worldTheme:'garden'};
  if(theme.id==='woodland-wish')return {...event,date:'2027-06-19',time:'14:00',timezone:'Europe/Berlin',venue:'The Secret Garden',address:'Berlin, Germany',rsvpDeadline:'2027-06-05',dressCode:'Ready for a little adventure',message:'Follow the butterflies and bring your biggest smile. We are celebrating five wonderful years with cake, garden games and a little bit of magic.',timeline:[{time:'14:00',title:'Welcome, little explorers',note:'Garden games and a treasure hunt.'},{time:'15:00',title:'A wish and a birthday cake',note:'Five candles and all our favourite people.'}]};
