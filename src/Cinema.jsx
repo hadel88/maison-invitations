@@ -29,13 +29,14 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
  useEffect(()=>{setRevealed(false);if(!opened||theme.kind==='sage')return;const id=setTimeout(()=>setRevealed(true),matchMedia('(prefers-reduced-motion: reduce)').matches?50:theme.kind==='rose'?10500:5500);return()=>clearTimeout(id)},[opened,theme.kind]);
  const names=event.names.split(/\s*&\s*/);
  const font=ensureFont(event.font);
- if(theme.kind==='ivory')return <IvoryStage theme={theme} event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>;
- if(['birthday','graduation','graduation-curtain'].includes(theme.kind))return <BirthdayStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>;
- if(theme.kind==='baby-film')return <BabyStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang}/>;
- if(theme.kind==='pearl')return <PearlStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang} preview={preview}/>;
- if(theme.kind==='story')return <StoryStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang} preview={preview}/>;
- if(theme.kind==='film')return <FilmStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang} preview={preview}/>;
- if(theme.kind==='craft')return <CraftStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>;
+ const toned=content=><div className="occasion-tone" style={sceneVariables(theme)}>{content}</div>;
+ if(theme.kind==='ivory')return toned(<IvoryStage theme={theme} event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>);
+ if(['birthday','graduation','graduation-curtain'].includes(theme.kind))return toned(<BirthdayStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>);
+ if(theme.kind==='baby-film')return toned(<BabyStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang}/>);
+ if(theme.kind==='pearl')return toned(<PearlStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang} preview={preview}/>);
+ if(theme.kind==='story')return toned(<StoryStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang} preview={preview}/>);
+ if(theme.kind==='film')return toned(<FilmStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang} preview={preview}/>);
+ if(theme.kind==='craft')return toned(<CraftStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>);
  return <section ref={root} className={`atelier-stage atelier-${theme.kind} ${opened?'atelier-opening':''} ${revealed?'atelier-revealed':''} ${ribbonReady?'ribbon-ready':''} ${theme.occasionDoor?'occasion-door':''}`} aria-label={theme.name+' invitation'} style={{'--atelier-ink':theme.ink,...sceneVariables(theme)}}>
   <div className="atelier-landscape" style={{backgroundImage:`url(/${theme.image}.webp)`}}/>
   <div className="atelier-light" aria-hidden="true"/>
@@ -62,7 +63,7 @@ function SageEnvelope({opened,onComplete}){
  const canvas=useRef(null),renderer=useRef(null),[fallback,setFallback]=useState(false);
  useEffect(()=>{try{renderer.current=createEnvelopeRenderer(canvas.current,{onComplete:()=>onComplete(true),onError:()=>setFallback(true)})}catch{setFallback(true)}return()=>{renderer.current?.dispose();renderer.current=null}},[onComplete]);
  useEffect(()=>{if(opened)renderer.current?.open();else renderer.current?.reset();if(!opened||!fallback)return;const timer=setTimeout(()=>onComplete(true),matchMedia('(prefers-reduced-motion: reduce)').matches?0:3000);return()=>clearTimeout(timer)},[opened,fallback,onComplete]);
- return <>{fallback?<div className="sage-envelope-fallback" aria-hidden="true"/>:<canvas className="sage-envelope-canvas" ref={canvas} aria-hidden="true"/>}<img className="sage-wax-release" src="/maison-wax-seal.png" width="132" height="132" alt="" aria-hidden="true"/></>;
+ return <>{fallback?<div className="sage-envelope-fallback" aria-hidden="true"/>:<canvas className="sage-envelope-canvas" ref={canvas} aria-hidden="true"/>}<img className="sage-wax-release" src="/maison-wax-seal.png" width="168" height="168" alt="" aria-hidden="true"/></>;
 }
 export function CinemaCollection({onPreview,onCreate,notify,onBeachDemo,occasion='All designs',onOccasionChange,lang='en'}){
  const [copied,setCopied]=useState(''),[showAll,setShowAll]=useState(true);

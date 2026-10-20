@@ -123,26 +123,26 @@
 .invitation-screen .atelier-curtains { transform: none; }
 .invitation-screen .atelier-date { font-size: 10px; }
 .sage-envelope-canvas, .sage-envelope-fallback { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 6; pointer-events: none; }
-.sage-envelope-canvas { opacity: .92; }
+.sage-envelope-canvas { opacity: .97; }
 .atelier-sage .atelier-curtains { opacity: .48; }
-.sage-envelope-fallback { background: url('/atelier-sage-cover.webp') center / cover; transition: transform 2.8s cubic-bezier(.45,0,.2,1); }
-.atelier-opening .sage-envelope-fallback { transform: translateY(115%); }
-.sage-wax-release { position: absolute; z-index: 8; top: 43%; left: 50%; transform: translate(-50%, -50%) rotate(-5deg); width: 132px; height: 132px; object-fit: contain; filter: drop-shadow(3px 8px 7px #18201566); pointer-events: none; }
-.atelier-opening .sage-wax-release { animation: sage-lift-seal 1.65s cubic-bezier(.32,.62,.28,1) both; }
-.invitation-screen .atelier-sage .atelier-open-control { top: 43%; padding: 0; width: 210px; transform: translate(-50%, -55px); gap: 18px; }
-.sage-seal-hitarea { display: block; width: 132px; height: 132px; }
+.sage-envelope-fallback { background: url('/atelier-sage-cover.webp') center / cover; transform-origin: top center; transition: transform 3.8s .2s cubic-bezier(.35,.04,.18,1), opacity 1s 2.8s; }
+.atelier-opening .sage-envelope-fallback { transform: rotateX(118deg); opacity: .32; }
+.sage-wax-release { position: absolute; z-index: 11; top: 43%; left: 50%; transform: translate(-50%, -50%) rotate(-5deg); width: 168px; height: 168px; object-fit: contain; filter: drop-shadow(3px 10px 9px #18201577); pointer-events: none; }
+.atelier-opening .sage-wax-release { animation: sage-lift-seal 4.45s cubic-bezier(.28,.04,.2,1) both; }
+.invitation-screen .atelier-sage .atelier-open-control { top: 43%; padding: 0; width: 238px; transform: translate(-50%, -55px); gap: 18px; }
+.sage-seal-hitarea { display: block; width: 168px; height: 168px; }
 .atelier-sage .atelier-touch { margin-top: 0; }
 .atelier-sage .atelier-inscription {
   z-index: 10;
   left: 8%;
   right: 8%;
   top: 23%;
-  padding: 24px 16px 26px;
-  color: #3f4535;
-  background: rgba(244, 241, 224, .78);
-  border: 1px solid rgba(255, 252, 238, .82);
+  padding: clamp(154px, 28vh, 220px) 16px 20px;
+  color: var(--occasion-ink, #3f4535);
+  background: color-mix(in srgb, var(--occasion-paper, #e9eddc) 82%, transparent);
+  border: 1px solid color-mix(in srgb, var(--occasion-accent, #a99563) 58%, white);
   border-radius: 110px 110px 8px 8px;
-  box-shadow: 0 16px 42px rgba(24, 32, 21, .25), inset 0 1px 0 rgba(255, 255, 255, .72);
+  box-shadow: 0 16px 42px rgba(24, 32, 21, .25), inset 0 1px 0 rgba(255, 255, 255, .72), inset 0 0 0 5px rgba(255,255,255,.2);
   backdrop-filter: blur(7px) saturate(.88);
   -webkit-backdrop-filter: blur(7px) saturate(.88);
   text-shadow: 0 1px 0 rgba(255, 255, 255, .68);
@@ -150,17 +150,20 @@
 .atelier-sage .atelier-inscription h1,
 .atelier-sage .atelier-inscription p,
 .atelier-sage .atelier-inscription .atelier-date,
-.atelier-sage .atelier-inscription .atelier-place { color: #3f4535; }
+.atelier-sage .atelier-inscription .atelier-place { color: var(--occasion-ink, #3f4535); }
 .atelier-sage .atelier-inscription .atelier-overline,
 .atelier-sage .atelier-inscription .atelier-date { text-shadow: 0 1px 0 rgba(255,255,255,.82); }
 @keyframes sage-lift-seal {
-  0% { opacity: 1; transform: translate(-50%, -50%) translateZ(0) rotate(-5deg); }
-  32% { opacity: 1; transform: translate(-51%, -60%) translateZ(38px) rotateY(-10deg) rotate(-8deg); }
-  68% { opacity: .96; transform: translate(-40%, -53%) translateZ(85px) rotateY(-24deg) rotate(8deg); }
-  100% { opacity: 0; transform: translate(24%, 34%) translateZ(125px) rotateY(-38deg) rotate(22deg); }
+  0% { opacity: 1; transform: translate(-50%, -50%) translateZ(0) rotate(-5deg) scale(1); }
+  22% { opacity: 1; transform: translate(-50%, -53%) translateZ(28px) rotateX(-14deg) rotate(-8deg) scale(1.04); }
+  43% { opacity: 1; transform: translate(-52%, -67%) translateZ(92px) rotateX(-78deg) rotateY(-18deg) rotate(-11deg) scale(1.02); }
+  58% { opacity: 1; transform: translate(-35%, -55%) translateZ(120px) rotateX(-112deg) rotateY(-30deg) rotate(4deg) scale(.96); }
+  76% { opacity: 1; transform: translate(-50%, calc(-50% - 12px)) translateZ(48px) rotateY(12deg) rotate(10deg) scale(.92); }
+  90% { opacity: 1; transform: translate(-50%, calc(-50% - 8px)) translateZ(0) rotate(6deg) scale(.92); }
+  100% { opacity: 1; transform: translate(-50%, calc(-50% - 12px)) translateZ(0) rotate(5deg) scale(.92); }
 }
 @media (max-width: 430px) { .invitation-screen > .guest-experience.cinema-guest { width: 100%; height: 100dvh; box-shadow: none; } }
-@media (prefers-reduced-motion: reduce) { .atelier-opening .sage-wax-release { visibility: hidden; } .atelier-opening .sage-envelope-fallback { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .atelier-opening .sage-wax-release { animation: none; transform: translate(-50%, calc(-50% - 12px)) rotate(5deg) scale(.92); } .atelier-opening .sage-envelope-fallback { transition: none; } }
 
 .invitation-screen > .guest-experience { scrollbar-width: none; }
 .invitation-screen > .guest-experience::-webkit-scrollbar { display: none; }
@@ -200,7 +203,8 @@
 .occasion-filters button:focus-visible{outline:2px solid #9b7649;outline-offset:3px}
 .occasion-filters button span{font-size:10px;opacity:.65;margin-left:7px}
 .occasion-results{text-align:center;font:italic 14px Georgia;color:#897560;margin:0 0 35px}
-.occasion-door .atelier-inscription{left:9%;right:9%;top:24%;padding:28px 12px;background:color-mix(in srgb,var(--occasion-paper) 87%,transparent);border:1px solid #fff7;border-radius:120px 120px 8px 8px;backdrop-filter:blur(8px);box-shadow:0 14px 45px #211a191a;text-shadow:none}
+.occasion-door .atelier-landscape{opacity:1}
+.occasion-door .atelier-inscription{left:9%;right:9%;top:24%;padding:28px 12px;background:linear-gradient(160deg,color-mix(in srgb,var(--occasion-paper) 94%,white),var(--occasion-paper) 65%,color-mix(in srgb,var(--occasion-paper) 94%,var(--occasion-accent)));border:1px solid color-mix(in srgb,var(--occasion-accent) 52%,white);border-radius:120px 120px 8px 8px;backdrop-filter:none;box-shadow:0 14px 45px #211a191a,inset 0 0 0 1px #ffffff80;text-shadow:none}
 .occasion-door .atelier-inscription h1{font-size:clamp(33px,5.8vh,58px);margin:22px 0 18px}
 .occasion-door .atelier-inscription p{font-size:16px;margin-bottom:20px}
 .occasion-door .atelier-inscription .atelier-overline{letter-spacing:.14em;line-height:1.7}
@@ -209,5 +213,21 @@
 .cinema-detail-sheet .event-details h2,.cinema-detail-sheet .rsvp h2{color:var(--occasion-ink,#675247)}
 .cinema-detail-sheet .btn.primary{background:var(--occasion-ink,#83715c);border-color:var(--occasion-ink,#83715c)}
 @media(max-width:600px){.occasion-filters{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;padding:2px 0 12px;scrollbar-width:thin}.occasion-filters button{flex-shrink:0}.occasion-results{text-align:left}.occasion-door .atelier-inscription{padding:24px 10px}}
+
+/* Each film-style invitation carries its occasion palette onto the paper inside. */
+.occasion-tone{display:contents}
+.occasion-tone .film-card{
+  background:radial-gradient(ellipse at 28% 18%,color-mix(in srgb,var(--occasion-paper) 78%,white),var(--occasion-paper) 62%,color-mix(in srgb,var(--occasion-accent) 17%,var(--occasion-paper)));
+  box-shadow:inset 0 0 0 1.4cqw color-mix(in srgb,var(--occasion-paper) 78%,white),inset 0 0 0 1.8cqw var(--occasion-accent),inset 0 0 0 2.6cqw color-mix(in srgb,var(--occasion-paper) 84%,white),inset 0 0 0 2.85cqw color-mix(in srgb,var(--occasion-accent) 72%,white),0 1.5cqw 5cqw #3a271033;
+  color:var(--occasion-ink)
+}
+.occasion-tone .film-card-monogram{background:none;color:var(--occasion-accent);-webkit-text-fill-color:var(--occasion-accent)}
+.occasion-tone .film-card-over,.occasion-tone .film-card-address{color:color-mix(in srgb,var(--occasion-ink) 70%,var(--occasion-accent))}
+.occasion-tone .film-card-names,.occasion-tone .film-card-venue,.occasion-tone .film-card-date{color:var(--occasion-ink)}
+.occasion-tone .film-card-names em{color:var(--occasion-accent)}
+.occasion-tone .film-card-line{color:color-mix(in srgb,var(--occasion-ink) 82%,var(--occasion-accent))}
+.occasion-tone .film-card-rule{background:linear-gradient(90deg,transparent,var(--occasion-accent),transparent)}
+.occasion-tone .film-ask button{border-color:color-mix(in srgb,var(--occasion-accent) 62%,white)}
+.occasion-tone .film-ask .film-yes{background:var(--occasion-ink);border-color:var(--occasion-ink)}
 
 .st-card-rose{position:relative;overflow:hidden;isolation:isolate}

@@ -20,6 +20,25 @@ function clothTexture() {
   return texture;
 }
 
+function clothReliefTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 256;
+  const ctx = canvas.getContext('2d'), pixels = ctx.createImageData(256, 256);
+  for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
+    const warp = Math.sin(x * .72 + Math.sin(y * .035) * 1.4) * 13;
+    const weft = Math.sin(y * .66 + Math.sin(x * .04) * 1.2) * 11;
+    const grain = Math.sin(x * .17 + y * .12) * 5;
+    const value = Math.max(0, Math.min(255, 128 + warp + weft + grain));
+    const i = (y * 256 + x) * 4;
+    pixels.data.set([value, value, value, 255], i);
+  }
+  ctx.putImageData(pixels, 0, 0);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(14, 6);
+  return texture;
+}
+
 export function createRibbonRenderer(canvas, { onReady, onComplete, onError, static: still = false } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: still, powerPreference: 'low-power' });
   renderer.setClearColor(0x000000, 0);
@@ -50,14 +69,15 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
   fill.position.set(5, 1, 6); scene.add(fill);
 
   const weave = clothTexture();
+  const relief = clothReliefTexture();
   const material = new THREE.MeshPhysicalMaterial({
-    color: '#d8a5ad', metalness: 0, roughness: .82,
+    color: '#d8a5ad', metalness: 0, roughness: .93,
     transparent: true, opacity: .99, alphaMap: weave, depthWrite: false,
-    specularIntensity: .18,
-    sheen: .26, sheenColor: '#f4d9da', sheenRoughness: .74,
-    anisotropy: .18, anisotropyRotation: Math.PI / 2,
-    bumpMap: weave, bumpScale: .04, side: THREE.DoubleSide,
-    envMapIntensity: .35,
+    specularIntensity: .12,
+    sheen: .18, sheenColor: '#f1d9d8', sheenRoughness: .88,
+    anisotropy: .08, anisotropyRotation: Math.PI / 2,
+    bumpMap: relief, bumpScale: .065, side: THREE.DoubleSide,
+    envMapIntensity: .22,
   });
   material.shadowSide = THREE.DoubleSide;
   const nu = 96, nv = 18, indices = [];
@@ -147,7 +167,7 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
       disposed = true; cancelAnimationFrame(raf); observer.disconnect();
       canvas.removeEventListener('webglcontextlost', lost);
       for (const s of surfaces) s.geometry.dispose();
-      material.dispose(); weave.dispose(); shadowGeometry.dispose(); shadowMaterial.dispose();
+      material.dispose(); weave.dispose(); relief.dispose(); shadowGeometry.dispose(); shadowMaterial.dispose();
       environment.dispose(); light.shadow.map?.dispose(); renderer.dispose();
     },
   };
