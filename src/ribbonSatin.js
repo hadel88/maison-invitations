@@ -16,7 +16,8 @@ function clothTexture() {
   ctx.putImageData(pixels, 0, 0);
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(14, 6);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.repeat.set(4, 1.8);
   return texture;
 }
 
@@ -35,7 +36,7 @@ function clothReliefTexture() {
   ctx.putImageData(pixels, 0, 0);
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(14, 6);
+  texture.repeat.set(4, 1.8);
   return texture;
 }
 
@@ -71,13 +72,13 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
   const weave = clothTexture();
   const relief = clothReliefTexture();
   const material = new THREE.MeshPhysicalMaterial({
-    color: '#d8a5ad', metalness: 0, roughness: .93,
-    transparent: true, opacity: .99, alphaMap: weave, depthWrite: false,
-    specularIntensity: .12,
-    sheen: .18, sheenColor: '#f1d9d8', sheenRoughness: .88,
-    anisotropy: .08, anisotropyRotation: Math.PI / 2,
-    bumpMap: relief, bumpScale: .065, side: THREE.DoubleSide,
-    envMapIntensity: .22,
+    color: '#d8a5ad', map: weave, metalness: 0, roughness: .44,
+    specularIntensity: .7,
+    sheen: .92, sheenColor: '#f7e5e3', sheenRoughness: .34,
+    anisotropy: .24, anisotropyRotation: Math.PI / 2,
+    bumpMap: relief, bumpScale: .018, side: THREE.DoubleSide,
+    clearcoat: .07, clearcoatRoughness: .52,
+    envMapIntensity: .52,
   });
   material.shadowSide = THREE.DoubleSide;
   const nu = 96, nv = 18, indices = [];

@@ -1,0 +1,346 @@
+import * as THREE from 'three';
+import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js';
+
+// "A Secret in Sage": a real paper envelope in 3D.
+// The embossed green envelope fills the screen; the wax seal sits on the tip of the V flap.
+// On touch the flap lifts and folds back on its hinge (bending a little, like paper), the seal
+// travels with it, the camera steps back so the opened envelope stays in view, and the
+// invitation card slides out of the pocket and comes forward to the guest.
+// Light and soft shadows come from one directional light, so flap, seal and card shade
+// each other as they move.
+
+const W = 0.6, H = 1;                 // envelope size in world units (portrait)
+const TOP = H / 2;
+const V_DIP = 0.23;                   // lowest point of the pocket's V opening
+const V_SIDE = TOP - 0.035;           // the pocket edge at the envelope's sides
+const FLAP_L = 0.56;                  // hinge → flap tip
+const FLAP_SIDE = 0.1;                // hinge → where the flap's sides turn to the tip
+const SEAL = 0.19;                    // seal diameter
+const CARD_W = W * 0.8, CARD_H = CARD_W * 1.4, CARD_T = 0.0025;
+const CARD_HIDDEN_Y = V_DIP - 0.012 - CARD_H / 2;
+const CARD_RISEN_Y = 0.43 + CARD_H / 2;
+const FOV = 32, TAN = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
+
+// timeline (seconds)
+export const SAGE_TIMES = { press: [0, 0.45], flap: [0.3, 2.35], camera: [1.45, 3.8], rise: [2.35, 4.45], forward: [4.25, 6.05], done: 6.15 };
+
+const clamp01 = (x) => Math.min(1, Math.max(0, x));
+const span = (t, [a, b]) => clamp01((t - a) / (b - a));
+const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const sine = (x) => -(Math.cos(Math.PI * x) - 1) / 2;
+const outCubic = (x) => 1 - Math.pow(1 - x, 3);
+const mix = (a, b, x) => a + (b - a) * x;
+
+function loadImage(src) {
+  return new Promise((ok, no) => { const i = new Image(); i.decoding = 'async'; i.onload = () => ok(i); i.onerror = no; i.src = src; });
+}
+function canvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+
+// envelope coordinates (x ∈ [-W/2, W/2], y ∈ [-H/2, H/2]) → texture canvas pixels
+function toPx(c, x, y) { return [(x / W + 0.5) * c.width, (0.5 - y / H) * c.height]; }
+// the cover photo is a little narrower than the envelope: use its full width, crop height
+function drawPaper(g, img, c) {
+  const s = c.width / img.width, ih = img.height * s;
+  g.drawImage(img, 0, (c.height - ih) / 2, c.width, ih);
+}
+
+function flapPath(g, c, ox = 0, oy = 0) {
+  const p = (x, y) => toPx(c, x + ox, y + oy);
+  g.beginPath();
+  g.moveTo(...p(-W / 2, TOP)); g.lineTo(...p(W / 2, TOP)); g.lineTo(...p(W / 2, TOP - FLAP_SIDE));
+  g.quadraticCurveTo(...p(W * 0.16, TOP - FLAP_L * 0.78), ...p(0.012, TOP - FLAP_L + 0.004));
+  g.quadraticCurveTo(...p(0, TOP - FLAP_L - 0.002), ...p(-0.012, TOP - FLAP_L + 0.004));
+  g.quadraticCurveTo(...p(-W * 0.16, TOP - FLAP_L * 0.78), ...p(-W / 2, TOP - FLAP_SIDE));
+  g.closePath();
+}
+
+// green embossed paper for the outside, with the seams of a folded envelope
+function outsideTextures(img, guestLine, family) {
+  const c = canvas(1024, Math.round(1024 * H / W));
+  const pocket = canvas(c.width, c.height), flap = canvas(c.width, c.height);
+  let g = pocket.getContext('2d');
+  drawPaper(g, img, pocket);
+  // bottom flap seams and the edges of the side flaps
+  const line = (pts, color, width) => { g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo : g.moveTo).call(g, ...toPx(pocket, x, y))); g.strokeStyle = color; g.lineWidth = width; g.stroke(); };
+  for (const [col, w, d] of [['rgba(18,24,14,.42)', 3.2, 0], ['rgba(232,226,198,.32)', 1.6, -0.0035]]) {
+    line([[-W / 2, -H / 2 + d], [-0.035, -0.07 + d], [0.035, -0.07 + d], [W / 2, -H / 2 + d]], col, w);
+  }
+  // the pocket's cut edge catches the light
+  line([[-W / 2, V_SIDE - 0.002], [0, V_DIP - 0.002], [W / 2, V_SIDE - 0.002]], 'rgba(238,232,206,.55)', 2.4);
+  if (guestLine) {
+    g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
+    const [x, y] = toPx(pocket, 0, -0.27);
+    g.font = `italic 400 64px ${family}`;
+    g.fillStyle = 'rgba(16,20,12,.35)'; g.fillText(guestLine, x + 1.5, y + 2.5);
+    const gold = g.createLinearGradient(x - 220, y - 40, x + 220, y + 40);
+    gold.addColorStop(0, '#b89a5c'); gold.addColorStop(0.45, '#ecd9a4'); gold.addColorStop(0.55, '#d8bd7f'); gold.addColorStop(1, '#a8874a');
+    g.fillStyle = gold; g.fillText(guestLine, x, y); g.restore();
+  }
+  g = flap.getContext('2d');
+  drawPaper(g, img, flap);
+  // the flap's folded edge: a soft light line just inside, a darker line at the cut
+  flapPath(g, flap); g.save(); g.clip();
+  g.strokeStyle = 'rgba(246,240,216,.7)'; g.lineWidth = 9; flapPath(g, flap); g.stroke();
+  g.strokeStyle = 'rgba(16,22,12,.45)'; g.lineWidth = 2.5; flapPath(g, flap); g.stroke();
+  g.restore();
+  return { pocket, flap };
+}
+
+// the liner: the same emboss turned into ivory paper
+function linerTexture(img) {
+  const c = canvas(512, Math.round(512 * H / W)), g = c.getContext('2d');
+  drawPaper(g, img, c);
+  const d = g.getImageData(0, 0, c.width, c.height), p = d.data;
+  let sum = 0; for (let i = 0; i < p.length; i += 4) sum += p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11;
+  const mean = sum / (p.length / 4);
+  for (let i = 0; i < p.length; i += 4) {
+    const l = (p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11 - mean) / 60;
+    const k = 0.93 + 0.11 * Math.max(-1.4, Math.min(1.4, l));
+    p[i] = Math.min(255, 240 * k); p[i + 1] = Math.min(255, 233 * k); p[i + 2] = Math.min(255, 214 * k);
+  }
+  g.putImageData(d, 0, 0);
+  return c;
+}
+
+// the invitation card with the couple's words
+export async function drawSageCard(card) {
+  const fam = card.font || "'Cormorant Garamond', Georgia, serif";
+  const serif = "'Cormorant Garamond', Georgia, serif";
+  try { await Promise.all([document.fonts.load(`italic 400 120px ${fam}`, card.names), document.fonts.load(`italic 400 40px ${serif}`), document.fonts.load(`500 26px ${serif}`)]); } catch { /* system font */ }
+  const c = canvas(1024, Math.round(1024 * 1.4)), g = c.getContext('2d'), w = c.width, h = c.height, cx = w / 2;
+  const paper = g.createLinearGradient(0, 0, w, h);
+  paper.addColorStop(0, '#fbf8ef'); paper.addColorStop(0.55, '#f4efe2'); paper.addColorStop(1, '#ece5d3');
+  g.fillStyle = paper; g.fillRect(0, 0, w, h);
+  // cotton grain
+  const n = g.getImageData(0, 0, w, h), p = n.data;
+  for (let i = 0; i < p.length; i += 4) { const r = (Math.random() - 0.5) * 7; p[i] += r; p[i + 1] += r; p[i + 2] += r; }
+  g.putImageData(n, 0, 0);
+  const gold = (y0, y1) => { const gr = g.createLinearGradient(0, y0, w, y1); gr.addColorStop(0, '#a78b52'); gr.addColorStop(0.5, '#d8c08a'); gr.addColorStop(1, '#9c8049'); return gr; };
+  g.strokeStyle = gold(0, h); g.lineWidth = 3; g.strokeRect(46, 46, w - 92, h - 92);
+  g.lineWidth = 1.2; g.strokeRect(62, 62, w - 124, h - 124);
+  // little sprigs in the corners
+  g.fillStyle = '#a99563';
+  for (const [x, y] of [[62, 62], [w - 62, 62], [62, h - 62], [w - 62, h - 62]]) { g.beginPath(); g.arc(x, y, 6, 0, Math.PI * 2); g.fill(); }
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  const ink = '#46513e';
+  g.fillStyle = '#8f7c4f'; g.font = `500 26px ${serif}`; g.letterSpacing = '7px';
+  g.fillText(card.overline, cx, 225, w - 220); g.letterSpacing = '0px';
+  g.fillStyle = gold(150, 270); g.fillRect(cx - 40, 268, 80, 2);
+  const fit = (txt, size, max) => { let s = size; do { g.font = `italic 400 ${s}px ${fam}`; s -= 4; } while (g.measureText(txt).width > max && s > 40); };
+  g.fillStyle = ink;
+  const names = card.names.split(/\s*&\s*/);
+  if (names.length > 1) {
+    fit(names[0], 132, w - 220); g.fillText(names[0], cx, 430);
+    g.fillStyle = '#a99563'; g.font = `italic 400 70px ${serif}`; g.fillText('&', cx, 545);
+    g.fillStyle = ink; fit(names[1], 132, w - 220); g.fillText(names[1], cx, 655);
+  } else { fit(card.names, 132, w - 220); g.fillText(card.names, cx, 540); }
+  g.fillStyle = ink; g.font = `italic 400 38px ${serif}`;
+  const words = card.subtitle.split(' '); let lineTxt = '', lines = [];
+  for (const wd of words) { const t = lineTxt ? lineTxt + ' ' + wd : wd; if (g.measureText(t).width > w - 300 && lineTxt) { lines.push(lineTxt); lineTxt = wd; } else lineTxt = t; }
+  if (lineTxt) lines.push(lineTxt); lines = lines.slice(0, 3);
+  lines.forEach((l, i) => g.fillText(l, cx, 800 + i * 50));
+  const y = 800 + lines.length * 50 + 45;
+  g.fillStyle = gold(y, y); g.fillRect(cx - 90, y, 180, 1.6);
+  g.fillStyle = '#5c624c'; g.font = `500 30px ${serif}`; g.letterSpacing = '5px';
+  g.fillText(card.date.toUpperCase(), cx, y + 70, w - 200); g.letterSpacing = '0px';
+  g.fillStyle = ink; g.font = `italic 400 44px ${serif}`; g.fillText(card.venue || '', cx, y + 145, w - 200);
+  return c;
+}
+
+export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
+  const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(FOV, 1, 0.01, 20);
+
+  scene.add(new THREE.HemisphereLight(0xfff6e6, 0x7d8466, 1.9));
+  const sun = new THREE.DirectionalLight(0xfff3dc, 2.3);
+  sun.position.set(-0.55, 1.35, 2.2); sun.target.position.set(0, 0.35, 0);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  Object.assign(sun.shadow.camera, { left: -0.9, right: 0.9, top: 1.3, bottom: -1.0, near: 0.5, far: 5 });
+  sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.002; sun.shadow.radius = 5; sun.shadow.blurSamples = 16;
+  scene.add(sun, sun.target);
+
+  const tex = (src, aniso = true) => {
+    const t = new THREE.CanvasTexture(src); t.colorSpace = THREE.SRGBColorSpace;
+    if (aniso) t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    return t;
+  };
+  const paperMat = (map, bump, edge = false) => new THREE.MeshStandardMaterial({
+    map, bumpMap: bump, bumpScale: edge ? 0.003 : 0.012, roughness: edge ? 0.98 : 0.94, metalness: 0,
+  });
+  const envUV = (geo, oy = 0) => { // uv from envelope coordinates
+    const pos = geo.attributes.position, uv = new Float32Array(pos.count * 2);
+    for (let i = 0; i < pos.count; i++) { uv[i * 2] = pos.getX(i) / W + 0.5; uv[i * 2 + 1] = (pos.getY(i) + oy) / H + 0.5; }
+    geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    return geo;
+  };
+
+  const env = new THREE.Group(); scene.add(env);
+  // back panel (its inside is the liner)
+  const back = new THREE.Mesh(envUV(new THREE.PlaneGeometry(W, H)), new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.96 }));
+  back.receiveShadow = true; env.add(back);
+  // pocket: the front of the envelope below the V opening
+  const pocketShape = new THREE.Shape();
+  pocketShape.moveTo(-W / 2, -H / 2); pocketShape.lineTo(W / 2, -H / 2); pocketShape.lineTo(W / 2, V_SIDE);
+  pocketShape.quadraticCurveTo(0.03, V_DIP + 0.012, 0, V_DIP); pocketShape.quadraticCurveTo(-0.03, V_DIP + 0.012, -W / 2, V_SIDE);
+  pocketShape.closePath();
+  const pocket = new THREE.Mesh(envUV(new THREE.ExtrudeGeometry(pocketShape, { depth: .006, bevelEnabled: true, bevelSegments: 2, bevelSize: .0015, bevelThickness: .0015, curveSegments: 24 })), [
+    new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: .94 }),
+    new THREE.MeshStandardMaterial({ color: 0x4f5940, roughness: .98 }),
+  ]);
+  pocket.position.z = 0.009; pocket.castShadow = true; pocket.receiveShadow = true; env.add(pocket);
+
+  // flap, hinged at the top edge. Tessellated so it can bend like paper.
+  const flapShape = new THREE.Shape();
+  flapShape.moveTo(-W / 2, 0); flapShape.lineTo(W / 2, 0); flapShape.lineTo(W / 2, -FLAP_SIDE);
+  flapShape.quadraticCurveTo(W * 0.16, -FLAP_L * 0.78, 0.012, -FLAP_L + 0.004);
+  flapShape.quadraticCurveTo(0, -FLAP_L - 0.002, -0.012, -FLAP_L + 0.004);
+  flapShape.quadraticCurveTo(-W * 0.16, -FLAP_L * 0.78, -W / 2, -FLAP_SIDE);
+  flapShape.closePath();
+  let flapGeo = new THREE.ExtrudeGeometry(flapShape, { depth: .005, bevelEnabled: true, bevelSegments: 2, bevelSize: .001, bevelThickness: .0015, curveSegments: 28 });
+  flapGeo = new TessellateModifier(0.035, 8).modify(flapGeo);
+  envUV(flapGeo, TOP);
+  flapGeo.computeVertexNormals();
+  const flapRest = Float32Array.from(flapGeo.attributes.position.array);
+  const hinge = new THREE.Group(); hinge.position.set(0, TOP, 0.0005); env.add(hinge);
+  const flapFront = new THREE.Mesh(flapGeo, [
+    new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: .94, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }),
+    new THREE.MeshStandardMaterial({ color: 0x4f5940, roughness: .98, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }),
+  ]);
+  const flapBack = new THREE.Mesh(flapGeo, [
+    new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: .96, side: THREE.BackSide, name: 'flapLiner' }),
+    new THREE.MeshStandardMaterial({ color: 0xbeb59f, roughness: .99, side: THREE.BackSide }),
+  ]);
+  flapFront.castShadow = true; flapFront.receiveShadow = true; flapBack.receiveShadow = true;
+  const flap = new THREE.Group(); flap.position.z = 0.022; flap.add(flapFront, flapBack); hinge.add(flap);
+
+  // the wax seal: a few stacked layers give it body when it tilts
+  const seal = new THREE.Group(); flap.add(seal);
+  const sealGeo = new THREE.PlaneGeometry(SEAL * 1312 / 1199, SEAL);
+  const sealLayers = [0.55, 0.62, 0.72, 1].map((shade, i) => {
+    const m = new THREE.Mesh(sealGeo, new THREE.MeshStandardMaterial({ color: new THREE.Color(shade, shade, shade), transparent: false, alphaTest: 0.5, roughness: 0.55, metalness: 0 }));
+    m.position.z = 0.0018 * (i + 1); m.castShadow = true; seal.add(m); return m;
+  });
+  const SEAL_Y = -FLAP_L + SEAL * 0.36;
+
+  // the card
+  const cardMats = [0, 1, 2, 3, 4, 5].map((i) => new THREE.MeshStandardMaterial({ color: i === 4 ? 0xffffff : 0xf3eedf, roughness: 0.82 }));
+  const cardMesh = new THREE.Mesh(new THREE.BoxGeometry(CARD_W, CARD_H, CARD_T), cardMats);
+  cardMesh.castShadow = true; cardMesh.receiveShadow = true;
+  const cardGroup = new THREE.Group(); cardGroup.add(cardMesh); env.add(cardGroup);
+
+  // views: closed (envelope fills the screen), opened (envelope low, room for the card) and the card in front
+  let aspect = 1, cssW = 1, cssH = 1;
+  function views() {
+    const phone = aspect < 0.78;
+  const vh0 = phone ? Math.min(H, W / aspect) * 0.955 : H / 0.9;
+    const vh1 = Math.max(1.277, W / (aspect * 0.97));
+    const c1 = 1.202 - vh1 / 2 + (vh1 - 1.277) * 0.08;
+    const vhz = Math.max(CARD_W / (0.86 * aspect), CARD_H / 0.8);
+    return { vh0, c0: 0, vh1, c1, vhz };
+  }
+  let cardLoaded = false;
+  function pose(t) {
+    const v = views();
+    // seal press and the flap's journey
+    const press = span(t, SAGE_TIMES.press);
+    const f = span(t, SAGE_TIMES.flap);
+    const lift = Math.sin(press * Math.PI) * 0.06;
+    const angle = THREE.MathUtils.degToRad(mix(0, 186, inOut(f)) + lift * 40 * (1 - f));
+    hinge.rotation.x = -angle;
+    // paper bends while it moves: the tip lags behind
+    const bend = Math.sin(f * Math.PI) * 0.075 + lift * 0.4;
+    const pos = flapGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const y = flapRest[i * 3 + 1] / FLAP_L; // 0 … -1
+      pos.setZ(i, flapRest[i * 3 + 2] - bend * y * y * FLAP_L * 0.55);
+    }
+    pos.needsUpdate = true; flapGeo.computeVertexNormals();
+    const ty = SEAL_Y / FLAP_L, tz = -bend * ty * ty * FLAP_L * 0.55, slope = -bend * 2 * ty * 0.55;
+    seal.position.set(0, SEAL_Y, tz); seal.rotation.x = Math.atan(slope);
+    const s = 1 - Math.sin(press * Math.PI) * 0.035; seal.scale.set(s, s, 1);
+    // camera steps back
+    const k = sine(span(t, SAGE_TIMES.camera));
+    const vh = mix(v.vh0, v.vh1, k), cy = mix(v.c0, v.c1, k);
+    camera.position.set(0, cy, vh / (2 * TAN)); camera.lookAt(0, cy, 0);
+    // the card rises out of the pocket, then comes forward
+    const r = span(t, SAGE_TIMES.rise), fw = span(t, SAGE_TIMES.forward);
+    const ry = mix(CARD_HIDDEN_Y, CARD_RISEN_Y, inOut(r));
+    const d1 = v.vh1 / (2 * TAN), zc = d1 - v.vhz / (2 * TAN);
+    const fz = outCubic(clamp01(fw * 1.35)), fy = inOut(fw);
+    cardGroup.position.set(0, mix(ry, v.c1 + 0.04 * v.vhz, fy), mix(0.0045, zc, fz) + Math.sin(fw * Math.PI) * 0.05);
+    cardGroup.rotation.set(Math.sin(fw * Math.PI) * -0.16, 0, Math.sin(fw * Math.PI) * 0.035 + Math.sin(r * Math.PI) * 0.012);
+    cardGroup.visible = cardLoaded && t >= SAGE_TIMES.flap[0];
+    // the light softens on the envelope once the card is presented
+    sun.intensity = mix(2.3, 2.0, fy);
+  }
+
+  function seal2D() {
+    const p = new THREE.Vector3(); seal.getWorldPosition(p); p.project(camera);
+    const top = new THREE.Vector3(0, SEAL / 2, 0); seal.localToWorld(top); top.project(camera);
+    return { x: (p.x + 1) / 2 * cssW, y: (1 - p.y) / 2 * cssH, r: Math.abs(top.y - p.y) / 2 * cssH };
+  }
+
+  let t = 0, start = 0, raf = 0, playing = false, onDone = null, dead = false;
+  function render() { pose(t); renderer.render(scene, camera); }
+  function resize() {
+    const r = canvasEl.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    cssW = r.width; cssH = r.height; aspect = r.width / r.height;
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = aspect; camera.updateProjectionMatrix();
+    render();
+    if (t === 0) onSeal?.(seal2D());
+  }
+  const ro = new ResizeObserver(resize); ro.observe(canvasEl);
+
+  function frame(now) {
+    if (!playing || dead) return;
+    if (!start) start = now - t * 1000;
+    t = (now - start) / 1000;
+    if (t >= SAGE_TIMES.done) { t = SAGE_TIMES.done; playing = false; render(); onDone?.(); return; }
+    render();
+    raf = requestAnimationFrame(frame);
+  }
+
+  // textures
+  const ready = (async () => {
+    const [cover, wax] = await Promise.all([loadImage('/atelier-sage-cover.webp'), loadImage('/maison-wax-seal.png')]);
+    if (dead) return;
+    const family = "'Cormorant Garamond', Georgia, serif";
+    if (guestLine) { try { await document.fonts.load(`italic 400 64px ${family}`); } catch { /* system font */ } }
+    const { pocket: pc, flap: fc } = outsideTextures(cover, guestLine, family);
+    const liner = tex(linerTexture(cover));
+    const pocketMap = tex(pc), flapMap = tex(fc);
+    for (const [m, map] of [[pocket.material[0], pocketMap], [flapFront.material[0], flapMap]]) {
+      m.map = map; m.bumpMap = map; m.bumpScale = .012; m.color.set(0xffffff); m.needsUpdate = true;
+    }
+    for (const [m, color] of [[back.material, 0xffffff], [flapBack.material[0], 0xe9e2cf]]) {
+      m.map = liner; m.bumpMap = liner; m.bumpScale = .005; m.color.set(color); m.needsUpdate = true;
+    }
+    const waxTex = tex(wax);
+    sealLayers.forEach((m) => { m.material.map = waxTex; m.material.needsUpdate = true; });
+    const cardCanvas = await drawSageCard(card);
+    if (dead) return;
+    cardMats[4].map = tex(cardCanvas); cardMats[4].needsUpdate = true;
+    cardLoaded = true;
+    resize();
+  })();
+
+  if (import.meta.env?.DEV) window.__sageSeek = (s) => { playing = false; cancelAnimationFrame(raf); t = s; render(); };
+  return {
+    ready,
+    play(done) { onDone = done; if (playing) return; playing = true; start = 0; raf = requestAnimationFrame(frame); },
+    reset() { playing = false; cancelAnimationFrame(raf); t = 0; render(); onSeal?.(seal2D()); },
+    finish() { playing = false; cancelAnimationFrame(raf); t = SAGE_TIMES.done; render(); },
+    seek(s) { playing = false; cancelAnimationFrame(raf); t = s; render(); },
+    async setCard(next) { const c = await drawSageCard(next); if (dead) return; cardMats[4].map?.dispose(); cardMats[4].map = tex(c); cardMats[4].needsUpdate = true; render(); },
+    destroy() { dead = true; playing = false; cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); renderer.forceContextLoss?.(); },
+  };
+}

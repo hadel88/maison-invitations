@@ -203,7 +203,8 @@
   perspective: 1500px;
   transform-style: preserve-3d;
   pointer-events: none;
-  background: url('/atelier-sage.webp') center / cover no-repeat #65704d;
+  /* Any crop beyond the model stays on the same paper stock, never the old scene behind it. */
+  background: url('/atelier-sage-cover.webp') center / cover no-repeat #65704d;
   box-shadow: inset 0 0 55px rgba(20, 28, 17, .24);
 }
 .sage-envelope-body {
@@ -327,3 +328,5 @@
   .atelier-sage .atelier-inscription { transform: none; transition: none; }
   .atelier-sage.atelier-opening .sage-wax-release { animation: none; transform: translate(-50%, -50%); }
 }
+.atelier-sage .atelier-inscription { z-index: 7; }
+.atelier-sage .atelier-scroll-hint, .atelier-sage .atelier-replay { z-index: 8; }

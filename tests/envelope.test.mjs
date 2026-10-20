@@ -22,3 +22,11 @@ test('the invitation stays hidden until the seal opens the flap, then rises as o
   assert.match(styles, /background:\s*color-mix\(in srgb, var\(--occasion-paper,[^)]+\)\s*98%, white\)/);
   assert.match(styles, /backdrop-filter:\s*none/);
 });
+
+test('the Rose bow material keeps its untying motion and adds visible woven satin sheen', () => {
+  const ribbon = readFileSync(new URL('../src/ribbonSatin.js', import.meta.url), 'utf8');
+  assert.match(ribbon, /sheen: \.92, sheenColor: '#f7e5e3', sheenRoughness: \.34/);
+  assert.match(ribbon, /specularIntensity: \.7/);
+  assert.match(ribbon, /bumpMap: relief, bumpScale: \.018/);
+  assert.doesNotMatch(ribbon, /roughness: \.93/);
+});
