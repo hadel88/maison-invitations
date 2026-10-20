@@ -18,7 +18,7 @@ import {filterInvitationDesigns} from './ivoryDesigns';
 import IvoryPlaque from './IvoryPlaque';
 import {IvoryStage} from './IvoryInvitation';
 const words={en:{open:'Open your invitation',touch:'Touch to open',scroll:'Scroll to discover',invited:'TOGETHER WITH OUR FAMILIES',celebrate:'invite you to celebrate our wedding',replay:'Replay opening'},de:{open:'Einladung öffnen',touch:'Zum Öffnen berühren',scroll:'Nach unten entdecken',invited:'GEMEINSAM MIT UNSEREN FAMILIEN',celebrate:'laden wir euch zu unserer Hochzeit ein',replay:'Erneut öffnen'},fr:{open:'Ouvrir votre invitation',touch:'Touchez pour ouvrir',scroll:'Faites défiler pour découvrir',invited:'ENTOURÉS DE NOS FAMILLES',celebrate:'nous vous invitons à célébrer notre mariage',replay:'Revoir l’ouverture'}};
-export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='en',preview=false}){
+export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,onAnimationComplete,lang='en',preview=false}){
  const theme=sceneFor(event),c=words[lang]||words.en,root=useRef(null),ribbonCanvas=useRef(null),ribbonEngine=useRef(null);
  const [ribbonReady,setRibbonReady]=useState(false);
  const openedRef=useRef(opened); openedRef.current=opened;
@@ -26,6 +26,7 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
  useEffect(()=>{if(opened)ribbonEngine.current?.open();else ribbonEngine.current?.reset()},[opened]);
  const [revealed,setRevealed]=useState(false);
  useEffect(()=>{setRevealed(false);if(!opened||theme.kind==='sage')return;const id=setTimeout(()=>setRevealed(true),matchMedia('(prefers-reduced-motion: reduce)').matches?50:theme.kind==='rose'?10500:5500);return()=>clearTimeout(id)},[opened,theme.kind]);
+ useEffect(()=>{if(revealed&&theme.kind==='sage')onAnimationComplete?.();},[revealed,theme.kind,onAnimationComplete]);
  const names=event.names.split(/\s*&\s*/);
  const font=ensureFont(event.font);
  const toned=content=><div className="occasion-tone" style={sceneVariables(theme)}>{content}</div>;
@@ -69,14 +70,14 @@ function SageEnvelope({opened,onOpen,onComplete,event,guest,theme,lang,openLabel
    if(dead)return;
    const instance=createSageEnvelope(canvas.current,{card,guestLine:guest?.name||'',onSeal:setSeal});
    engine.current=instance;
-   instance.ready.then(()=>{if(dead)return;setReady(true);if(openedRef.current){if(matchMedia('(prefers-reduced-motion: reduce)').matches){instance.finish();completeRef.current(true)}else instance.play(()=>completeRef.current(true))}}).catch(()=>{if(!dead)setReady(false)});
+   instance.ready.then(()=>{if(dead)return;setReady(true);if(openedRef.current){const rate=matchMedia('(prefers-reduced-motion: reduce)').matches?1.45:1;instance.play(()=>completeRef.current(true),rate)}}).catch(()=>{if(!dead)setReady(false)});
   }).catch(()=>{if(!dead)setReady(false)});
   return()=>{dead=true;engine.current?.destroy();engine.current=null};
  },[]);
  useEffect(()=>{
   const instance=engine.current;if(!instance)return;
   let active=true;
-  instance.ready.then(()=>{if(!active)return;if(opened){if(matchMedia('(prefers-reduced-motion: reduce)').matches){instance.finish();completeRef.current(true)}else instance.play(()=>completeRef.current(true))}else{instance.reset();completeRef.current(false)}});
+  instance.ready.then(()=>{if(!active)return;if(opened){const rate=matchMedia('(prefers-reduced-motion: reduce)').matches?1.45:1;instance.play(()=>completeRef.current(true),rate)}else{instance.reset();completeRef.current(false)}});
   return()=>{active=false};
  },[opened]);
  useEffect(()=>{engine.current?.setCard(card)},[event.names,event.subtitle,event.date,event.venue,event.font,guest?.name,theme.line,theme.overline,lang]);

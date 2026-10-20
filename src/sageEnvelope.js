@@ -286,7 +286,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
     return { x: (p.x + 1) / 2 * cssW, y: (1 - p.y) / 2 * cssH, r: Math.abs(top.y - p.y) / 2 * cssH };
   }
 
-  let t = 0, start = 0, raf = 0, playing = false, onDone = null, dead = false;
+  let t = 0, start = 0, raf = 0, playing = false, playRate = 1, onDone = null, dead = false;
   function render() { pose(t); renderer.render(scene, camera); }
   function resize() {
     const r = canvasEl.getBoundingClientRect();
@@ -303,7 +303,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
   function frame(now) {
     if (!playing || dead) return;
     if (!start) start = now - t * 1000;
-    t = (now - start) / 1000;
+    t = (now - start) / 1000 * playRate;
     if (t >= SAGE_TIMES.done) { t = SAGE_TIMES.done; playing = false; render(); onDone?.(); return; }
     render();
     raf = requestAnimationFrame(frame);
@@ -336,7 +336,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
   if (import.meta.env?.DEV) window.__sageSeek = (s) => { playing = false; cancelAnimationFrame(raf); t = s; render(); };
   return {
     ready,
-    play(done) { onDone = done; if (playing) return; playing = true; start = 0; raf = requestAnimationFrame(frame); },
+    play(done, rate = 1) { onDone = done; if (playing) return; playRate = rate; playing = true; start = 0; raf = requestAnimationFrame(frame); },
     reset() { playing = false; cancelAnimationFrame(raf); t = 0; render(); onSeal?.(seal2D()); },
     finish() { playing = false; cancelAnimationFrame(raf); t = SAGE_TIMES.done; render(); },
     seek(s) { playing = false; cancelAnimationFrame(raf); t = s; render(); },

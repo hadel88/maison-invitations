@@ -90,6 +90,8 @@ export function GuestExperience({
   onEdit,
 }) {
   const [opened, setOpened] = useState(false);
+  const [sageAnimationComplete, setSageAnimationComplete] = useState(false);
+  const sageEnvelope = sceneFor(event).kind === "sage";
 
   useEffect(()=>{document.documentElement.dataset.world=event.worldTheme||"midnight"},[event.worldTheme]);
   const [lang, setLang] = useState(event.language || "en");
@@ -181,8 +183,8 @@ export function GuestExperience({
           DESIGN PREVIEW · Responses here are a demonstration
         </span>
       )}
-      <CinemaStage event={event} guest={guest} opened={opened} onOpen={()=>setOpened(true)} onReplay={()=>setOpened(false)} onAnswer={(r)=>{if(r){setResponse(r);setSaved(false);}setTimeout(()=>document.querySelector('.cinema-detail-sheet .rsvp')?.scrollIntoView({behavior:'smooth',block:'start'}),60)}} lang={lang} preview={preview}/>
-      {opened && (
+      <CinemaStage event={event} guest={guest} opened={opened} onOpen={()=>setOpened(true)} onReplay={()=>{setOpened(false);setSageAnimationComplete(false)}} onAnimationComplete={()=>setSageAnimationComplete(true)} onAnswer={(r)=>{if(r){setResponse(r);setSaved(false);}setTimeout(()=>document.querySelector('.cinema-detail-sheet .rsvp')?.scrollIntoView({behavior:'smooth',block:'start'}),60)}} lang={lang} preview={preview}/>
+      {opened && (!sageEnvelope || sageAnimationComplete) && (
         <div className="cinema-detail-sheet" aria-label="Invitation details and RSVP">
         <div className="opened-invite">
           {sceneFor(event).kind==='ivory'&&<IvoryDetailsHeading event={event} theme={sceneFor(event)}/>}
