@@ -7,7 +7,7 @@ function clothTexture() {
   canvas.width = canvas.height = 128;
   const ctx = canvas.getContext('2d'), pixels = ctx.createImageData(128, 128);
   for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) {
-    const value = 126 + Math.sin(x * Math.PI / 2) * 5 + Math.cos(y * Math.PI) * 2;
+    const value = 241 + Math.sin(x * Math.PI) * 5 + Math.cos(y * Math.PI / 2) * 5;
     const i = (y * 128 + x) * 4;
     pixels.data.set([value, value, value, 255], i);
   }
@@ -49,11 +49,13 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
 
   const weave = clothTexture();
   const material = new THREE.MeshPhysicalMaterial({
-    color: '#cd96a0', metalness: 0, roughness: .25,
-    sheen: .5, sheenColor: '#ffe7e1', sheenRoughness: .28,
-    anisotropy: .65, anisotropyRotation: Math.PI / 2,
-    bumpMap: weave, bumpScale: .012, side: THREE.DoubleSide,
-    envMapIntensity: 1.1,
+    color: '#d8a5ad', metalness: 0, roughness: .91,
+    transparent: true, opacity: .99, alphaMap: weave, depthWrite: false,
+    specularIntensity: .12,
+    sheen: .16, sheenColor: '#f2d2d5', sheenRoughness: .92,
+    anisotropy: .08, anisotropyRotation: Math.PI / 2,
+    bumpMap: weave, bumpScale: .025, side: THREE.DoubleSide,
+    envMapIntensity: .35,
   });
   material.shadowSide = THREE.DoubleSide;
   const nu = 96, nv = 18, indices = [];
@@ -81,7 +83,7 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
   for (const side of [-1, 1]) for (const type of ['band', 'tail', 'loop']) addSurface(side, type);
   addSurface(1, 'knot');
   const shadowGeometry = new THREE.PlaneGeometry(40, 50);
-  const shadowMaterial = new THREE.ShadowMaterial({ color: 0x58353d, opacity: .23 });
+  const shadowMaterial = new THREE.ShadowMaterial({ color: 0x58353d, opacity: .12 });
   const shadow = new THREE.Mesh(shadowGeometry, shadowMaterial);
   shadow.position.z = -.85;
   shadow.receiveShadow = true;

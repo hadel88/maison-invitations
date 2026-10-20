@@ -41,13 +41,13 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
    <div className="atelier-date">{dateLabel(event.date,lang)}</div>
    <span className="atelier-place">{event.venue}</span>
   </div>
-  {theme.kind==='rose'&&<canvas className="atelier-ribbon-canvas" ref={ribbonCanvas} aria-hidden="true"/>}
+  {theme.kind==='rose'&&<><img className="ribbon-stage-still" src="/rose-ribbon-still.png" alt="" aria-hidden="true"/><canvas className="atelier-ribbon-canvas" ref={ribbonCanvas} aria-hidden="true"/></>}
   {theme.kind==='sage'?<SageEnvelope opened={opened} onComplete={setRevealed}/>:<div className="atelier-curtains" aria-hidden="true"><div className="atelier-leaf leaf-left" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/><div className="atelier-leaf leaf-right" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/></div>}
   {!opened&&<button className={`atelier-open-control ${theme.kind==='rose'?'with-ribbon':''}`} onClick={onOpen} aria-label={c.open}>
-    {theme.kind==='rose'?<img className="atelier-bow" src="/atelier-bow.webp" alt=""/>:theme.kind==='sage'?<span className="sage-seal-hitarea" aria-hidden="true"/>:<span className="atelier-monogram">{names.map(n=>n.trim()[0]).join(' & ')}</span>}
+    {theme.kind==='rose'?null:theme.kind==='sage'?<span className="sage-seal-hitarea" aria-hidden="true"/>:<span className="atelier-monogram">{names.map(n=>n.trim()[0]).join(' & ')}</span>}
     <span className="atelier-touch">{c.touch}</span>
   </button>}
-  {opened&&theme.kind==='rose'&&!ribbonReady&&<img className="atelier-bow departing-bow" src="/atelier-bow.webp" alt=""/>}
+
   {revealed&&<div className="atelier-scroll-hint"><span>{c.scroll}</span><ArrowDown size={17}/></div>}
   {revealed&&<button className="atelier-replay" aria-label={c.replay} onClick={()=>{onReplay();if(theme.kind==='rose'||theme.kind==='sage')root.current?.closest('.guest-experience')?.scrollTo({top:0,behavior:'instant'})}}><RotateCcw size={15}/></button>}
  </section>

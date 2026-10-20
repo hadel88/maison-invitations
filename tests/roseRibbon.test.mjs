@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {roseRibbonPoint,ribbonRow} from '../src/roseRibbonGeometry.js';
-test('rose satin cloth stays finite through the complete preserved untying sequence',()=>{
+test('rose chiffon cloth stays finite through the complete preserved untying sequence',()=>{
   for(const kind of ['loop','tail','band','knot'])for(const side of [-1,1])for(const time of [0,.6,.9,1.5,2.4,2.5,3,4,5.2])for(const u of [0,.1,.25,.5,.75,.9,1])for(const v of [0,.02,.3,.5,.7,.98,1])assert.ok(roseRibbonPoint(u,v,side,kind,time).every(Number.isFinite),`${kind}/${time}/${u}/${v}`);
 });
 test('the wrapped knot has a closed fabric seam before it unravels',()=>{

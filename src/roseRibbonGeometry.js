@@ -69,15 +69,16 @@ export function ribbonRow(u, side, type, time) {
   const cos = Math.cos(c.twist), sin = Math.sin(c.twist);
   const wx = bx * cos + nx * sin, wy = by * cos + ny * sin, wz = bz * cos + nz * sin;
   const crownAxis = [ty * wz - tz * wy, tz * wx - tx * wz, tx * wy - ty * wx];
-  // A continuous gathered fold near the knot relaxes into a broad satin face.
-  const gathering = type === 'knot' ? .65 : type === 'loop' ? Math.exp(-u * 8) + Math.exp(-(1 - u) * 8) : Math.exp(-u * 7);
+  // A continuous gathered fold near the knot relaxes into a soft chiffon face.
+  const gathering = type === 'knot' ? .30 : type === 'loop' ? Math.exp(-u * 8) + Math.exp(-(1 - u) * 8) : Math.exp(-u * 7);
   return v => {
     const q = (v - .5) * c.width;
     const billow = (type === 'loop' ? .15 : .075) * Math.sin(Math.PI * v);
     const pleats = .09 * Math.sin(v * Math.PI * 5 + Math.sin(u * Math.PI * 2) * .6) * gathering;
     const fold = .025 * Math.sin(v * Math.PI * 2 + u * Math.PI * 2);
     const seam = .005 * (Math.exp(-Math.pow((v - .018) / .008, 2)) + Math.exp(-Math.pow((v - .982) / .008, 2)));
-    const depth = billow + pleats + fold + seam;
+    const wrinkles = .009 * Math.sin(u * Math.PI * 14 + v * 17) * Math.sin(v * Math.PI);
+    const depth = billow + pleats + fold + seam + wrinkles;
     const cut = type === 'tail' ? smooth((u - .96) / .04) * (v - .5) * .21 : 0;
     return [c.x + wx * q + crownAxis[0] * depth, c.y + wy * q + crownAxis[1] * depth + .45 + cut, c.z + wz * q + crownAxis[2] * depth];
   };
