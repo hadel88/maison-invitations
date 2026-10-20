@@ -1,19 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { envelopeMotion, envelopeVertex, ENVELOPE_END } from '../src/envelopeGL.js';
+import { readFileSync } from 'node:fs';
 
-test('the envelope waits for the seal, then opens the flap before withdrawing', () => {
-  assert.deepEqual(envelopeMotion(1), { flap: 0, sides: 0, withdraw: 0 });
-  assert.ok(Math.abs(envelopeMotion(3.65).flap - 1) < 1e-10);
-  assert.equal(envelopeMotion(3.65).withdraw, 0);
-  assert.equal(envelopeMotion(ENVELOPE_END).withdraw, 1);
+const cinema = readFileSync(new URL('../src/Cinema.jsx', import.meta.url), 'utf8');
+const styles = readFileSync(new URL('../src/atelier.css', import.meta.url), 'utf8');
+
+test('Sage cover is a real layered envelope with the wax attached to its flap', () => {
+  const flapMarkup = cinema.match(/<div className="sage-envelope-flap">([\s\S]*?)<\/div>\s*<div className="sage-envelope-print">/);
+  assert.ok(flapMarkup, 'the envelope flap should have its own layer');
+  assert.match(flapMarkup[1], /className="sage-envelope-lining"/);
+  assert.match(flapMarkup[1], /className="sage-wax-release"/);
+  assert.match(flapMarkup[1], /maison-wax-seal\.png/);
+  assert.match(styles, /clip-path:\s*polygon\(0 0, 100% 0, 100% 63\.9%, 50% 100%, 0 63\.9%\)/);
+  assert.match(styles, /\.atelier-opening \.sage-envelope-flap\s*\{[^}]*rotateX\(176deg\)/s);
 });
-test('all envelope panels leave the invitation clear at the end on phone and desktop layouts', () => {
-  for (const [w, h] of [[320, 640], [430, 860]]) for (const part of ['back', 'top', 'bottom', 'left', 'right']) {
-    for (const [x, y] of [[0, 0], [w, 0], [w / 2, h / 2], [0, h], [w, h]]) {
-      const p = envelopeVertex(x, y, part, ENVELOPE_END, w, h);
-      assert.ok(p.every(Number.isFinite));
-      assert.ok(p[1] > h, `${part} must finish below the invitation`);
-    }
-  }
+
+test('the invitation stays hidden until the seal opens the flap, then rises as opaque paper', () => {
+  assert.match(cinema, /setTimeout\(\(\)=>onComplete\(true\),reduced\?0:2850\)/);
+  assert.match(styles, /\.atelier-sage\.atelier-opening \.atelier-inscription\s*\{\s*visibility:\s*hidden;/);
+  assert.match(styles, /\.atelier-sage\.atelier-revealed \.atelier-inscription\s*\{[^}]*translateY\(0\)/s);
+  assert.match(styles, /background:\s*color-mix\(in srgb, var\(--occasion-paper,[^)]+\)\s*98%, white\)/);
+  assert.match(styles, /backdrop-filter:\s*none/);
 });

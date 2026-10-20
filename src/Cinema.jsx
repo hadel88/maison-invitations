@@ -12,7 +12,6 @@ import {FilmStage} from './FilmInvitation';
 import {StoryStage} from './StoryInvitation';
 import {PearlStage} from './PearlInvitation';
 import {BabyStage} from './BabyInvitation';
-import {createEnvelopeRenderer} from './envelopeGL';
 import RibbonPreview from './RibbonPreview';
 import {occasionScenes,sceneVariables} from './occasionScenes';
 import {filterInvitationDesigns} from './ivoryDesigns';
@@ -60,10 +59,18 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
  </section>
 }
 function SageEnvelope({opened,onComplete}){
- const canvas=useRef(null),renderer=useRef(null),[fallback,setFallback]=useState(false);
- useEffect(()=>{try{renderer.current=createEnvelopeRenderer(canvas.current,{onComplete:()=>onComplete(true),onError:()=>setFallback(true)})}catch{setFallback(true)}return()=>{renderer.current?.dispose();renderer.current=null}},[onComplete]);
- useEffect(()=>{if(opened)renderer.current?.open();else renderer.current?.reset();if(!opened||!fallback)return;const timer=setTimeout(()=>onComplete(true),matchMedia('(prefers-reduced-motion: reduce)').matches?0:3000);return()=>clearTimeout(timer)},[opened,fallback,onComplete]);
- return <>{fallback?<div className="sage-envelope-fallback" aria-hidden="true"/>:<canvas className="sage-envelope-canvas" ref={canvas} aria-hidden="true"/>}<img className="sage-wax-release" src="/maison-wax-seal.png" width="168" height="168" alt="" aria-hidden="true"/></>;
+ useEffect(()=>{if(!opened)return;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const timer=setTimeout(()=>onComplete(true),reduced?0:2850);return()=>clearTimeout(timer)},[opened,onComplete]);
+ return <div className="sage-envelope-scene" aria-hidden="true">
+  <div className="sage-envelope-body"/>
+  <div className="sage-envelope-pocket"/>
+  <div className="sage-envelope-flap">
+   <div className="sage-envelope-front"/>
+   <div className="sage-envelope-lining"/>
+   <div className="sage-wax-release"><img src="/maison-wax-seal.png" width="168" height="168" alt=""/></div>
+  </div>
+  <div className="sage-envelope-print">You are invited</div>
+  <svg className="sage-flap-seam" viewBox="0 0 100 100" preserveAspectRatio="none"><path className="sage-flap-seam-shadow" d="M0 31 L50 48 L100 31"/><path className="sage-flap-seam-light" d="M0 30.5 L50 47.5 L100 30.5"/></svg>
+ </div>;
 }
 export function CinemaCollection({onPreview,onCreate,notify,onBeachDemo,occasion='All designs',onOccasionChange,lang='en'}){
  const [copied,setCopied]=useState(''),[showAll,setShowAll]=useState(true);
