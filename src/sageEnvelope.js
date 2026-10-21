@@ -20,7 +20,7 @@ const FLAP_L = 0.54;                  // hinge → flap tip
 const FLAP_SIDE = 0.3;                // hinge → where the flap's sides turn to the tip
 const FLAP_MID = (FLAP_SIDE + FLAP_L) / 2 + 0.012; // a gentle outward curve along each edge
 const SEAL = 0.19;                    // seal diameter
-const CARD_W = 0.38, CARD_H = CARD_W * 1.4, CARD_T = 0.0025;
+const CARD_W = 0.38, CARD_H = CARD_W * 1.6, CARD_T = 0.0025;
 const CARD_HIDDEN_Y = V_DIP - 0.012 - CARD_H / 2;
 // the card's bottom corners must clear the pocket's edge before it comes forward
 const CARD_RISEN_Y = V_DIP + (V_SIDE - V_DIP) * (CARD_W / W) + 0.012 + CARD_H / 2;
@@ -176,7 +176,7 @@ export async function drawSageCard(card) {
   const fam = card.font || "'Cormorant Garamond', Georgia, serif";
   const serif = "'Cormorant Garamond', Georgia, serif";
   try { await Promise.all([document.fonts.load(`italic 400 120px ${fam}`, card.names), document.fonts.load(`italic 400 40px ${serif}`), document.fonts.load(`500 26px ${serif}`)]); } catch { /* system font */ }
-  const c = canvas(1024, Math.round(1024 * 1.4)), g = c.getContext('2d'), w = c.width, h = c.height, cx = w / 2;
+  const c = canvas(1024, Math.round(1024 * 1.6)), g = c.getContext('2d'), w = c.width, h = c.height, cx = w / 2;
   const paper = g.createLinearGradient(0, 0, w, h);
   paper.addColorStop(0, '#fbf8ef'); paper.addColorStop(0.55, '#f4efe2'); paper.addColorStop(1, '#ece5d3');
   g.fillStyle = paper; g.fillRect(0, 0, w, h);
@@ -192,27 +192,27 @@ export async function drawSageCard(card) {
   for (const [x, y] of [[62, 62], [w - 62, 62], [62, h - 62], [w - 62, h - 62]]) { g.beginPath(); g.arc(x, y, 6, 0, Math.PI * 2); g.fill(); }
   g.textAlign = 'center'; g.textBaseline = 'middle';
   const ink = '#46513e';
-  g.fillStyle = '#8f7c4f'; g.font = `500 26px ${serif}`; g.letterSpacing = '7px';
-  g.fillText(card.overline, cx, 225, w - 220); g.letterSpacing = '0px';
-  g.fillStyle = gold(150, 270); g.fillRect(cx - 40, 268, 80, 2);
+  g.fillStyle = '#8f7c4f'; g.font = `500 31px ${serif}`; g.letterSpacing = '7px';
+  g.fillText(card.overline, cx, 260, w - 200); g.letterSpacing = '0px';
+  g.fillStyle = gold(150, 270); g.fillRect(cx - 45, 312, 90, 2);
   const fit = (txt, size, max) => { let s = size; do { g.font = `italic 400 ${s}px ${fam}`; s -= 4; } while (g.measureText(txt).width > max && s > 40); };
   g.fillStyle = ink;
   const names = card.names.split(/\s*&\s*/);
   if (names.length > 1) {
-    fit(names[0], 132, w - 220); g.fillText(names[0], cx, 430);
-    g.fillStyle = '#a99563'; g.font = `italic 400 70px ${serif}`; g.fillText('&', cx, 545);
-    g.fillStyle = ink; fit(names[1], 132, w - 220); g.fillText(names[1], cx, 655);
-  } else { fit(card.names, 132, w - 220); g.fillText(card.names, cx, 540); }
-  g.fillStyle = ink; g.font = `italic 400 38px ${serif}`;
+    fit(names[0], 158, w - 190); g.fillText(names[0], cx, 510);
+    g.fillStyle = '#a99563'; g.font = `italic 400 84px ${serif}`; g.fillText('&', cx, 645);
+    g.fillStyle = ink; fit(names[1], 158, w - 190); g.fillText(names[1], cx, 780);
+  } else { fit(card.names, 158, w - 190); g.fillText(card.names, cx, 640); }
+  g.fillStyle = ink; g.font = `italic 400 46px ${serif}`;
   const words = card.subtitle.split(' '); let lineTxt = '', lines = [];
-  for (const wd of words) { const t = lineTxt ? lineTxt + ' ' + wd : wd; if (g.measureText(t).width > w - 300 && lineTxt) { lines.push(lineTxt); lineTxt = wd; } else lineTxt = t; }
+  for (const wd of words) { const t = lineTxt ? lineTxt + ' ' + wd : wd; if (g.measureText(t).width > w - 260 && lineTxt) { lines.push(lineTxt); lineTxt = wd; } else lineTxt = t; }
   if (lineTxt) lines.push(lineTxt); lines = lines.slice(0, 3);
-  lines.forEach((l, i) => g.fillText(l, cx, 800 + i * 50));
-  const y = 800 + lines.length * 50 + 45;
-  g.fillStyle = gold(y, y); g.fillRect(cx - 90, y, 180, 1.6);
-  g.fillStyle = '#5c624c'; g.font = `500 30px ${serif}`; g.letterSpacing = '5px';
-  g.fillText(card.date.toUpperCase(), cx, y + 70, w - 200); g.letterSpacing = '0px';
-  g.fillStyle = ink; g.font = `italic 400 44px ${serif}`; g.fillText(card.venue || '', cx, y + 145, w - 200);
+  lines.forEach((l, i) => g.fillText(l, cx, 960 + i * 60));
+  const y = 960 + lines.length * 60 + 55;
+  g.fillStyle = gold(y, y); g.fillRect(cx - 100, y, 200, 1.8);
+  g.fillStyle = '#5c624c'; g.font = `500 36px ${serif}`; g.letterSpacing = '5px';
+  g.fillText(card.date.toUpperCase(), cx, y + 85, w - 180); g.letterSpacing = '0px';
+  g.fillStyle = ink; g.font = `italic 400 54px ${serif}`; g.fillText(card.venue || '', cx, y + 175, w - 180);
   return c;
 }
 
@@ -308,7 +308,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     // no zoom-out while opening: the camera only glides up with the card, so everything stays big
     const vh1 = vh0;
     const c1 = CARD_RISEN_Y + CARD_H / 2 + 0.05 * vh1 - vh1 / 2;
-    const vhz = Math.min(Math.max(CARD_W / (0.94 * aspect), CARD_H / 0.86), vh1 * 0.9); // always in front of the envelope
+    const vhz = Math.min(Math.max(CARD_W / (0.97 * aspect), CARD_H / 0.9), vh1 * 0.9); // always in front of the envelope
     return { vh0, c0, vh1, c1, vhz };
   }
   let cardLoaded = false;
