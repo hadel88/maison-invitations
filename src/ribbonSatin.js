@@ -7,8 +7,10 @@ function clothTexture() {
   canvas.width = canvas.height = 256;
   const ctx = canvas.getContext('2d'), pixels = ctx.createImageData(256, 256);
   for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
-    const weave = Math.sin(x * 1.7) * 5 + Math.sin(y * 1.7) * 4 + (((x + y) & 1) ? 2.4 : -2.4);
-    const grain = Math.sin(x * .21 + Math.sin(y * .08)) * 1.8 + Math.cos(y * .18) * 1.5;
+    // Dense velvet pile: fine irregular fibres, without a visible woven grid.
+    const hash = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+    const weave = ((hash - Math.floor(hash)) - .5) * 9;
+    const grain = Math.sin(x * .045 + Math.sin(y * .026)) * 4 + Math.cos(y * .037) * 2;
     const value = 246 + weave + grain;
     const i = (y * 256 + x) * 4;
     pixels.data.set([value, value, value, 255], i);
@@ -26,9 +28,10 @@ function clothReliefTexture() {
   canvas.width = canvas.height = 256;
   const ctx = canvas.getContext('2d'), pixels = ctx.createImageData(256, 256);
   for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
-    const warp = Math.sin(x * .72 + Math.sin(y * .035) * 1.4) * 13;
-    const weft = Math.sin(y * .66 + Math.sin(x * .04) * 1.2) * 11;
-    const grain = Math.sin(x * .17 + y * .12) * 5;
+    const hash = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+    const warp = (hash - Math.floor(hash) - .5) * 16;
+    const weft = Math.sin(y * 1.9 + Math.sin(x * .08)) * 3;
+    const grain = Math.sin(x * .045 + y * .025) * 2;
     const value = Math.max(0, Math.min(255, 128 + warp + weft + grain));
     const i = (y * 256 + x) * 4;
     pixels.data.set([value, value, value, 255], i);
@@ -72,13 +75,13 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
   const weave = clothTexture();
   const relief = clothReliefTexture();
   const material = new THREE.MeshPhysicalMaterial({
-    color: '#d8a5ad', map: weave, metalness: 0, roughness: .76,
-    specularIntensity: .3,
-    sheen: .92, sheenColor: '#f7e5e3', sheenRoughness: .72,
-    anisotropy: .24, anisotropyRotation: Math.PI / 2,
-    bumpMap: relief, bumpScale: .028, side: THREE.DoubleSide,
+    color: '#d8a5ad', map: weave, metalness: 0, roughness: .94,
+    specularIntensity: .16,
+    sheen: 1, sheenColor: '#e8bcc6', sheenRoughness: .88,
+    anisotropy: 0, anisotropyRotation: Math.PI / 2,
+    bumpMap: relief, bumpScale: .009, side: THREE.DoubleSide,
     clearcoat: 0, clearcoatRoughness: 1,
-    envMapIntensity: .3,
+    envMapIntensity: .2,
   });
   material.shadowSide = THREE.DoubleSide;
   const nu = 96, nv = 18, indices = [];
