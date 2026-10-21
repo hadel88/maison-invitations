@@ -1,5 +1,5 @@
-import {paperStock,paperRelief,ornamentGlyph,waxStock,paperCoverTile} from './invitationMaterials';
-import {traceSageFlap,sageFlapLift} from './sageEnvelopeProfiles.js';
+import {paperStock,paperRelief,ornamentGlyph,waxStock,invitationScript} from './invitationMaterials';
+import {traceSageFlap,sageFlapLift,traceSagePocket} from './sageEnvelopeProfiles.js';
 import {paintSageLetter} from './paintSageLetter.js';
 import * as THREE from 'three';
 import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js';
@@ -43,31 +43,14 @@ function loadImage(src) {
   return new Promise((ok, no) => { const i = new Image(); i.decoding = 'async'; i.onload = () => ok(i); i.onerror = no; i.src = src; });
 }
 // the script font for "You are invited" ships with the site (Great Vibes, OFL)
-async function loadScript() {
-  try {
-    if (![...document.fonts].some((f) => f.family.replace(/['"]/g, '') === 'Great Vibes')) {
-      const f = new FontFace('Great Vibes', "url(/fonts/great-vibes-400.woff2) format('woff2')");
-      document.fonts.add(await f.load());
-    }
-  } catch { /* falls back to the next script font */ }
-}
+async function loadScript() { await invitationScript();await document.fonts.load('52px "Great Vibes"'); }
 function canvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 
 // envelope coordinates (x ∈ [-W/2, W/2], y ∈ [-H/2, H/2]) → texture canvas pixels
 function toPx(c, x, y) { return [(x / W + 0.5) * c.width, (0.5 - y / H) * c.height]; }
 // the cover photo is a little narrower than the envelope: use its full width, crop height
 // one photo width = 0.6 world units; on a wider envelope the paper repeats, mirrored, so it stays seamless
-function drawPaper(g, img, c) {
-  const {width:tw,height:th,top:y}=paperCoverTile(img.width,img.height,c.width,c.height,W);
-  const n = Math.ceil((c.width / tw - 1) / 2) + 1;
-  for (let i = -n; i <= n; i++) {
-    const x = c.width / 2 - tw / 2 + i * tw;
-    if (x > c.width || x + tw < 0) continue;
-    g.save();
-    if (i % 2) { g.translate(x + tw, 0); g.scale(-1, 1); g.drawImage(img, 0, y, tw, th); } else g.drawImage(img, x, y, tw, th);
-    g.restore();
-  }
-}
+function drawPaper(g, img, c) { g.drawImage(img,0,0,c.width,c.height); }
 const texW = (base) => Math.min(base * 2.5, Math.round(base * W / 0.6));
 
 function flapPath(g, c, ox = 0, oy = 0, layout='arch') {
@@ -80,21 +63,14 @@ function outsideTextures(img, guestLine, family, inviteLine, script, design={}) 
   const pocket = canvas(c.width, c.height), flap = canvas(c.width, c.height);
   let g = pocket.getContext('2d');
   drawPaper(g, img, pocket);
-  // bottom flap seams and the edges of the side flaps
-  const line = (pts, color, width) => { g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo : g.moveTo).call(g, ...toPx(pocket, x, y))); g.strokeStyle = color; g.lineWidth = width; g.stroke(); };
-  for (const [col, w, d] of [['rgba(18,24,14,.42)', 3.2, 0], ['rgba(232,226,198,.32)', 1.6, -0.0035]]) {
-    line([[-W / 2, -H / 2 + d], [-0.035, -0.07 + d], [0.035, -0.07 + d], [W / 2, -H / 2 + d]], col, w);
-  }
-  // the pocket's cut edge catches the light
-  line([[-W / 2, V_SIDE - 0.002], [0, V_DIP - 0.002], [W / 2, V_SIDE - 0.002]], 'rgba(238,232,206,.55)', 2.4);
   if (inviteLine) { // pressed into the paper in dark ink, like a letterpress line
     g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
     const [x, y] = toPx(pocket, 0, -0.19), px = pocket.width / W;
     let size = 0.052 * px; g.font = `${size}px ${script}`;
     while (g.measureText(inviteLine).width > 0.4 * px && size > 20) { size -= 2; g.font = `${size}px ${script}`; }
-    g.fillStyle = 'rgba(236,232,206,.22)'; g.fillText(inviteLine, x + 1, y + 3);
-    g.fillStyle = 'rgba(14,17,9,.95)'; g.strokeStyle = 'rgba(14,17,9,.8)'; g.lineWidth = Math.max(1.5, size * 0.025);
-    g.fillText(inviteLine, x, y); g.strokeText(inviteLine, x, y);
+
+    g.fillStyle=design.ink||'#46513e';
+    g.fillText(inviteLine, x, y);
     g.restore();
   }
   if (guestLine) {
@@ -106,17 +82,10 @@ function outsideTextures(img, guestLine, family, inviteLine, script, design={}) 
     gold.addColorStop(0, '#b89a5c'); gold.addColorStop(0.45, '#ecd9a4'); gold.addColorStop(0.55, '#d8bd7f'); gold.addColorStop(1, '#a8874a');
     g.fillStyle = gold; g.fillText(guestLine, x, y); g.restore();
   }
+  if(!guestLine){g.save();g.fillStyle=design.ink||'#46513e';g.textAlign='center';g.font=`${pocket.width*.05}px Georgia`;g.fillText(ornamentGlyph(design.ornament),...toPx(pocket,0,-.302));g.restore();}
   g = flap.getContext('2d');
   drawPaper(g, img, flap);
-  // the flap's folded edge: a soft light line just inside, a darker line at the cut
-  flapPath(g, flap,0,0,design.pageLayout); g.save(); g.clip();
-  // a pale sage border along the V edges, the way the flap paper is cut and folded
-  { const px = flap.width / W; g.lineJoin = 'round';
-    g.strokeStyle = design.paper || 'rgba(206,214,180,.82)'; g.lineWidth = 0.026 * px; gumPath(g, flap, 0.013, design.pageLayout); g.stroke();
-    g.strokeStyle = 'rgba(236,238,214,.5)'; g.lineWidth = 0.004 * px; gumPath(g, flap, 0.025, design.pageLayout); g.stroke(); }
-  g.strokeStyle = 'rgba(246,240,216,.7)'; g.lineWidth = 6; flapPath(g, flap,0,0,design.pageLayout); g.stroke();
-  g.strokeStyle = 'rgba(16,22,12,.45)'; g.lineWidth = 2.5; flapPath(g, flap,0,0,design.pageLayout); g.stroke();
-  g.restore();
+  flapPath(g,flap,0,0,design.pageLayout);g.save();g.clip();g.strokeStyle='#ede8cfbb';g.lineWidth=flap.width*14/600;g.stroke();g.restore();
   return { pocket, flap };
 }
 
@@ -274,9 +243,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   back.receiveShadow = true; shell.add(back);
   // pocket: the front of the envelope below the V opening
   const pocketShape = new THREE.Shape();
-  pocketShape.moveTo(-W / 2, -H / 2); pocketShape.lineTo(W / 2, -H / 2); pocketShape.lineTo(W / 2, V_SIDE);
-  pocketShape.quadraticCurveTo(0.03, V_DIP + 0.012, 0, V_DIP); pocketShape.quadraticCurveTo(-0.03, V_DIP + 0.012, -W / 2, V_SIDE);
-  pocketShape.closePath();
+  traceSagePocket(pocketShape,W,H,V_SIDE,V_DIP,design.pageLayout);
   const pocket = new THREE.Mesh(envUV(new THREE.ShapeGeometry(pocketShape, 24)), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped:false }));
   pocket.position.z = 0.009; pocket.castShadow = true; pocket.receiveShadow = true; shell.add(pocket);
 

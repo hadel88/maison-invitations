@@ -32,3 +32,14 @@ export function traceSageFlap(pen,width,length,layout='arch'){
  }
  pen.closePath();
 }
+// The pocket's opening uses the same lower decorative contour, compressed to the
+// envelope mouth. Its centre dip stays unchanged, so the existing card rise fits.
+export function traceSagePocket(pen,width,height,side,dip,layout='arch'){
+ const p=sageEnvelopeProfiles[layout]||sageEnvelopeProfiles.arch;
+ const factor=(side-dip)/(p.tip-p.side),length=1;
+ const y=value=>side+(value+p.side)*factor;
+ let lines=0;
+ pen.moveTo(-width/2,-height/2);pen.lineTo(width/2,-height/2);pen.lineTo(width/2,side);
+ const lower={moveTo(){},lineTo(x,v){if(++lines===1)return;if(lines===2)return;pen.lineTo(x,y(v));},bezierCurveTo(a,b,c,d,e,f){pen.bezierCurveTo(a,y(b),c,y(d),e,y(f))},closePath(){}};
+ traceSageFlap(lower,width,length,layout);pen.closePath();
+}
