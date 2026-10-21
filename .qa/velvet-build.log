@@ -1,0 +1,42 @@
+
+> maison-invitations@1.0.0 build
+> vite build
+
+vite v7.1.7 building for production...
+transforming...
+✓ 1667 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                              1.13 kB │ gzip:   0.59 kB
+dist/assets/Dashboard-DtslAYC-.css           1.72 kB │ gzip:   0.72 kB
+dist/assets/PhotoAlbum-6NEkwLJ6.css          9.35 kB │ gzip:   2.84 kB
+dist/assets/BeachDemo-CFA70iOH.css          10.17 kB │ gzip:   3.12 kB
+dist/assets/index-BfXjCIwn.css             281.97 kB │ gzip:  59.00 kB
+dist/assets/arrow-left-B0jb-hr5.js           0.33 kB │ gzip:   0.27 kB
+dist/assets/lock-Dn9-51RL.js                 0.38 kB │ gzip:   0.29 kB
+dist/assets/download-49RPHYmc.js             0.43 kB │ gzip:   0.32 kB
+dist/assets/pen-line-OpP11Gyv.js             0.45 kB │ gzip:   0.33 kB
+dist/assets/shield-check-B9LXgHAc.js         0.49 kB │ gzip:   0.35 kB
+dist/assets/calendar-days-Dj8wFwCV.js        0.66 kB │ gzip:   0.37 kB
+dist/assets/AlbumPreview-1B7JRdrn.js         1.11 kB │ gzip:   0.64 kB
+dist/assets/RoomEnvironment-B9A22pej.js      2.06 kB │ gzip:   0.88 kB
+dist/assets/AuthDialog-CG2PQcoI.js           4.42 kB │ gzip:   1.95 kB
+dist/assets/PhotoAlbum-C-VkIfcM.js           5.84 kB │ gzip:   2.39 kB
+dist/assets/ribbonSatin-T0j6O0nb.js          6.61 kB │ gzip:   3.24 kB
+dist/assets/Dialogs-DuITCMHX.js              6.95 kB │ gzip:   2.83 kB
+dist/assets/SharedCelebration-CUWN2KoC.js    7.12 kB │ gzip:   2.80 kB
+dist/assets/Guest-C_J6w4Tv.js               14.29 kB │ gzip:   5.29 kB
+dist/assets/ExpertSpace-DbuRV39t.js         15.22 kB │ gzip:   4.61 kB
+dist/assets/Editor-B5fNOJXS.js              16.56 kB │ gzip:   5.29 kB
+dist/assets/sageEnvelope-CXqW6-YY.js        16.67 kB │ gzip:   7.12 kB
+dist/assets/BeachDemo-CKEfORrT.js           31.22 kB │ gzip:  12.39 kB
+dist/assets/Dashboard-C2eFF7yI.js           60.30 kB │ gzip:  19.02 kB
+dist/assets/nearestCity-DJL4hbuH.js         61.17 kB │ gzip:  24.59 kB
+dist/assets/three.module-C4zT-hBi.js       574.06 kB │ gzip: 145.78 kB
+dist/assets/index-D6m13iV0.js              725.79 kB │ gzip: 241.78 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 17.85s
