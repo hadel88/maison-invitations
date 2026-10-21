@@ -13,9 +13,10 @@ import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js
 // Light and soft shadows come from one directional light, so flap, seal and card shade
 // each other as they move.
 
-// envelope size in world units: portrait on phones, as wide as the screen on tablets and desktops
-let W = 0.6; const H = 1;
-export const envelopeWidth = (aspect) => Math.max(0.6, aspect * 1.005);
+// One artwork coordinate system for gallery, cover and 3D. Resize the drawing buffer,
+// not the geometry or camera framing, when mobile browser chrome changes height.
+const W = 0.6, H = 1;
+export const envelopeWidth = () => W;
 const TOP = H / 2;
 // the flap's sides start partway down the envelope, so the V is wide (tip ≈ 100°)
 const V_DIP = TOP - 0.3;                   // lowest point of the pocket's V opening
@@ -199,8 +200,6 @@ export async function drawSageCard(card) {
 }
 
 export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSeal, onShape, design = {} }) {
-  { const r0 = canvasEl.getBoundingClientRect(); if (r0.width && r0.height) W = envelopeWidth(r0.width / r0.height); }
-  const builtW = W;
   const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -312,12 +311,12 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   let aspect = 1, cssW = 1, cssH = 1;
   function views() {
     // closed, the envelope fills the whole screen
-    const vh0 = Math.min(H, W / aspect) * 0.985;
+    const vh0 = H;
     const c0 = 0;
     // no zoom-out while opening: the camera only glides up with the card, so everything stays big
     const vh1 = vh0;
     const c1 = CARD_RISEN_Y + CARD_H / 2 + 0.05 * vh1 - vh1 / 2;
-    const vhz = Math.min(Math.max(CARD_W / (0.97 * aspect), CARD_H / 0.9), vh1 * 0.9); // always in front of the envelope
+    const vhz = Math.min(Math.max(CARD_W / (0.97 * W / H), CARD_H / 0.9), vh1 * 0.9); // always in front of the envelope
     return { vh0, c0, vh1, c1, vhz };
   }
   let cardLoaded = false;
@@ -374,10 +373,10 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     cssW = r.width; cssH = r.height; aspect = r.width / r.height;
     renderer.setPixelRatio(Math.min(2.5, Math.max(1.5, window.devicePixelRatio || 1)));
     renderer.setSize(r.width, r.height, false);
-    camera.aspect = aspect; camera.updateProjectionMatrix();
+    // Match the preview canvas fill policy, preserving normalized artwork positions.
+    camera.aspect = W / H; camera.updateProjectionMatrix();
     render();
     if (t === 0) onSeal?.(seal2D());
-    if (Math.abs(envelopeWidth(aspect) - builtW) / builtW > 0.06) onShape?.();
   }
   const ro = new ResizeObserver(resize); ro.observe(canvasEl);
 
