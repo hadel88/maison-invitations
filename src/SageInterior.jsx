@@ -3,6 +3,7 @@ import {dateLabel} from './catalog';
 import './sageInterior.css';
 import './sageWorlds.css';
 import './additionalOccasions.css';
+import {ProposalMoment} from './ProposalRing.jsx';
 
 const captions={
  proposal:['One beautiful question','Eine wunderschöne Frage','Une si belle question'],
@@ -47,7 +48,7 @@ function SageWorldContent({layout,theme,event,lang}){
  const number=String(event.date||'').split('-')[2]||'19';
  const names=event.names.split(/\s*&\s*/);
  switch(layout){
-  case 'proposal':return <div className="sage-proposal-letter"><div className="sage-proposal-fold" style={stock}/><article><span className="sage-world-kicker">{caption}</span><i>♡</i>{title}<p className="sage-proposal-question">{event.subtitle}</p>{date}{venue}</article><div className="sage-proposal-petal" style={stock}/></div>;
+  case 'proposal':return <ProposalMoment><span className="sage-world-kicker">{caption}</span>{title}<p className="sage-proposal-question">{event.subtitle}</p>{date}{venue}</ProposalMoment>;
   case 'workshop':return <div className="sage-workshop-book"><aside style={stock}><span>MAISON / ATELIER</span></aside><article><span className="sage-world-kicker">{caption}</span>{title}{date}<ol>{event.timeline?.map((item,i)=><li key={i}><b>{item.time}</b><span>{item.title}</span></li>)}</ol>{venue}</article></div>;
   case 'opening':return <div className="sage-launch"><article><span className="sage-world-kicker">{caption}</span><b>OPEN</b>{title}{date}{venue}</article><div className="sage-launch-door left" style={stock}/><div className="sage-launch-door right" style={stock}/><i className="sage-launch-ribbon"/></div>;
   case 'newyear':return <div className="sage-midnight"><div className="sage-midnight-clock" aria-hidden="true"><span>XII</span><span>III</span><span>VI</span><span>IX</span><i/><b/></div><article><span className="sage-world-kicker">{caption}</span>{title}{date}{venue}<p>{event.subtitle}</p></article></div>;

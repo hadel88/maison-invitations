@@ -1,6 +1,6 @@
 import {occasionScenes, occasionEvent} from './occasionScenes.js';
 
-const stocks=Object.fromEntries(Object.entries({'Marriage proposal':'proposal','Workshops & seminars':'workshop','Store & business opening':'opening','New Year’s Eve':'newyear',Wedding:'wedding',Birthday:'birthday',Engagement:'engagement','Baby shower':'baby',Graduation:'graduation','Dinner party':'dinner',Anniversary:'anniversary','Corporate event':'corporate',Christening:'christening','Seasonal celebration':'seasonal'}).map(([occasion,key])=>[occasion,'sage-original-'+key]));
+const stocks=Object.fromEntries(Object.entries({'Marriage proposal':'proposal','Workshops & seminars':'workshop','Store & business opening':'opening','New Year’s Eve':'newyear-v2',Wedding:'wedding',Birthday:'birthday',Engagement:'engagement','Baby shower':'baby',Graduation:'graduation','Dinner party':'dinner',Anniversary:'anniversary','Corporate event':'corporate',Christening:'christening','Seasonal celebration':'christmas-v2'}).map(([occasion,key])=>[occasion,'sage-original-'+key]));
 
 const palettes = [
  ['Wedding','sage','A Secret in Sage','#788164','#eae9db','#46513e','#a99563','botanical','atelier-sage',0],
@@ -12,7 +12,7 @@ const palettes = [
  ['Anniversary','sage-anniversary','Champagne Letters','#b6a088','#faf1e5','#71543d','#b49755','medallion','cinema-palace',30],
  ['Corporate event','sage-corporate','Midnight Correspondence','#454d5b','#eef0f3','#303a4a','#a8b5c8','geometric','cinema-noir',-125],
  ['Christening','sage-christening','An Ivory Blessing','#c6c3ac','#faf8ee','#6d6956','#bcab7d','cross','occasion-christening-inside',40],
- ['Seasonal celebration','sage-seasonal','A Winter Letter','#70464d','#f6ece8','#623b43','#bfa164','snowflake','occasion-seasonal-inside',0],
+ ['Seasonal celebration','sage-seasonal','The Christmas Letter','#70464d','#f6ece8','#623b43','#bfa164','snowflake','occasion-seasonal-inside',0],
  ['Marriage proposal','sage-proposal','The Secret Question','#744660','#f5e8ed','#653e59','#be9865','botanical','occasion-proposal-inside',-12],
  ['Workshops & seminars','sage-workshop','The Letter of Ideas','#a8896b','#f0e6d8','#5b4a39','#ad7849','geometric','occasion-workshop-inside',30],
  ['Store & business opening','sage-opening','The First Chapter','#346e65','#e1efea','#28584f','#c0a36a','diamonds','occasion-opening-inside',-100],

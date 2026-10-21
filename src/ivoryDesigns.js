@@ -18,7 +18,7 @@ const rows = [
  ['ivory-christening','The Little Blessing','Christening','Neutral','christening-neutral','#f4f0e6','#66624e','#ab985e','olive','Noah'],
  ['ivory-christening-boy','The Blue Olive Blessing','Christening','Boys','christening-boy','#e8eef2','#516575','#a49a70','olive','Oliver'],
  ['ivory-christening-girl','The Blossom Blessing','Christening','Girls','christening-girl','#f4e9e6','#7b5a60','#b29b67','blossoms','Sophie'],
- ['ivory-seasonal','The Evergreen Letter','Seasonal celebration','Neutral','seasonal','#e6eadd','#425b47','#a9914e','evergreen','A winter gathering'],
+ ['ivory-seasonal','The Christmas Keepsake','Seasonal celebration','Neutral','seasonal','#e6eadd','#425b47','#a9914e','evergreen','A winter gathering'],
  ['ivory-proposal','The Gardenia Question','Marriage proposal','Neutral','proposal','#f5e8ed','#653e59','#be9865','botanical','Emma & Louis'],
  ['ivory-workshop','The Paper Atelier','Workshops & seminars','Neutral','workshop','#f0e6d8','#5b4a39','#ad7849','geometry','The Creative Atelier'],
  ['ivory-opening','The Opening Arch','Store & business opening','Neutral','opening','#e1efea','#28584f','#c0a36a','geometry','Atelier Maison'],
@@ -28,7 +28,7 @@ const rows = [
 export const ivoryThemes=rows.map(([id,name,occasion,audience,art,paper,ink,gold,motif,names])=>{
  const base=occasionScene(occasion);
  return {...base,id,name,occasion,audience,kind:'ivory',family:'ivory',ivoryCollection:true,
-  cover:art==='ivory'?'atelier-ivory-cover':'ivory-'+art+'-cover',
+  cover:art==='seasonal'?'ivory-christmas-cover-v2':art==='newyear'?'ivory-newyear-cover-v2':art==='ivory'?'atelier-ivory-cover':'ivory-'+art+'-cover',
   image:art==='ivory'?'atelier-ivory':art==='birthday-boy'?'cinema-cosmos':art==='birthday-girl'?'cinema-candy':art==='birthday-neutral'?'cinema-garden':art==='baby-boy'?'atelier-sage':art==='baby-neutral'?'cinema-garden':base.image,paper,ink,gold,motif,names,color:gold,
   plaqueShape:art,
   tag:'EMBROIDERED PAPER · '+(audience==='Neutral'?occasion.toUpperCase():audience.toUpperCase()),
