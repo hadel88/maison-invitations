@@ -355,6 +355,7 @@ function App() {
       <Suspense fallback={<Loading />}>
         {view === "cinema" ? (
           <>
+            <div className="home-hero-with-occasions">
             <RoyalHero
               heroOnly
               occasion={worldOccasion}
@@ -367,7 +368,8 @@ function App() {
               onExperts={() => show('experts')}
               onExperience={() => setExperience({ ...firstEvent(), worldTheme })}
             />
-            <HomeOccasions lang={lang} onSelect={occasion=>{if(occasion!=='All designs')setWorldOccasion(occasion);setFilter(occasion);setSearch('');setFavOnly(false);go('designs')}}/>
+            <HomeOccasions compact lang={lang} onSelect={occasion=>{if(occasion!=='All designs')setWorldOccasion(occasion);setFilter(occasion);setSearch('');setFavOnly(false);go('designs')}}/>
+            </div>
             <div id="designs" />
             <CinemaCollection
               occasion={filter}

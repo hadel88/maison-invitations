@@ -35,21 +35,21 @@
 }
 @media(prefers-reduced-motion:reduce) { .home-occasion-arch,.home-occasion-spark,.home-occasion-label svg { transition: none; } }
 
-/* On the homepage the occasions sit at the end of the hero picture: the night scene flows on
-   behind them, so the occasion frames read as part of the opening image. */
-.royal-hero + .home-occasions {
-  margin-top: -1px; padding-top: 34px; z-index: 1; border-bottom: 0;
-  background:
-    radial-gradient(ellipse at 50% 100%, #f2d49a14, transparent 60%),
-    linear-gradient(180deg, var(--royal-night, #101b2d) 0, var(--royal-night, #101b2d) calc(100% - 70px), #fcf7ef 100%);
+/* Homepage: the occasion frames sit inside the bottom of the hero picture, visible on arrival. */
+.home-hero-with-occasions { position: relative; }
+.home-hero-with-occasions .hero-story-note { display: none; }
+@media (max-width: 799px) { .home-hero-with-occasions .royal-hero { padding-bottom: 270px; } }
+.home-occasions-compact { position: absolute; z-index: 4; left: 16px; right: 0; bottom: 108px; }
+.home-occasions-compact h2 { display: flex; align-items: center; gap: 7px; margin: 0 0 10px; font: 600 9px/1.4 'DM Sans', system-ui, sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #e5c88f; text-shadow: 0 1px 8px #0009; }
+.home-occasions-compact .home-occasion-row { display: flex; gap: 12px; max-width: none; margin: 0; padding: 4px 16px 6px 2px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+.home-occasions-compact .home-occasion-row::-webkit-scrollbar { display: none; }
+.home-occasions-compact .home-occasion { flex: 0 0 74px; gap: 7px; scroll-snap-align: start; color: #f8ecd5; }
+.home-occasions-compact .home-occasion-arch { height: 96px; box-shadow: 0 8px 20px #0007, 0 0 0 2px #f0d39a33; }
+.home-occasions-compact .home-occasion-label { font-size: 13px; min-height: 0; text-shadow: 0 1px 8px #000c; white-space: nowrap; }
+.home-occasions-compact .home-occasion-spark { display: none; }
+@media (min-width: 800px) {
+  .home-occasions-compact { left: auto; right: 7%; width: min(48%, 640px); bottom: 112px; }
+  .home-occasions-compact .home-occasion { flex-basis: 92px; }
+  .home-occasions-compact .home-occasion-arch { height: 118px; }
+  .home-occasions-compact .home-occasion-label { font-size: 15px; }
 }
-.royal-hero + .home-occasions .home-occasions-heading h2 { color: #fff4df; }
-.royal-hero + .home-occasions .home-occasions-heading p { color: #e9d9bdcc; }
-.royal-hero + .home-occasions .home-occasions-flourish { color: #e0bf82; }
-.royal-hero + .home-occasions .home-occasions-flourish i { background: linear-gradient(90deg, transparent, #e0bf82); }
-.royal-hero + .home-occasions .home-occasion { color: #f6ead2; }
-.royal-hero + .home-occasions .home-occasion-arch { box-shadow: 0 10px 26px #00000055, 0 0 0 3px #e9cf9a22; }
-.royal-hero + .home-occasions .home-occasion-hint { color: #d9c7a6; }
-.royal-hero + .home-occasions .home-more-occasions { border-top-color: #e0bf8240; }
-.royal-hero + .home-occasions .home-occasions-all { color: #f0d9ad; }
-.royal-hero + .home-occasions { padding-bottom: 90px; }

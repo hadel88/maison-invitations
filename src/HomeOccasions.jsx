@@ -26,7 +26,7 @@ const words = {
   fr: { title: 'Choisissez votre occasion', line: 'Un petit monde merveilleux pour chaque moment à célébrer.', more: 'Autres', all: 'Découvrir toutes les occasions', hint: 'Faites défiler pour découvrir votre occasion', explore: 'Découvrir', invitations: 'invitations', labels: { Wedding: 'Mariage', Birthday: 'Anniversaire', 'Baby shower': 'Baby shower', Engagement: 'Fiançailles', Graduation: 'Diplôme', Anniversary: 'Anniversaire de mariage', 'Corporate event': 'Entreprise', 'Dinner party': 'Dîner', Christening: 'Baptême', 'Seasonal celebration': 'Fête de saison', 'Marriage proposal': 'Demande en mariage', 'Workshops & seminars': 'Ateliers & séminaires', 'Store & business opening': 'Inauguration', 'New Year’s Eve': 'Réveillon' } },
 };
 
-export function HomeOccasions({ onSelect, lang = 'en' }) {
+export function HomeOccasions({ onSelect, lang = 'en', compact = false }) {
   const [expanded, setExpanded] = useState(false), c = words[lang] || words.en;
   function card([occasion, image, position]) {
     const label = c.labels[occasion] || occasion;
@@ -38,6 +38,11 @@ export function HomeOccasions({ onSelect, lang = 'en' }) {
       <span className="home-occasion-label">{label}</span>
     </button>;
   }
+  // On the homepage the frames sit inside the hero picture: one gliding row with every occasion.
+  if (compact) return <section className="home-occasions-compact" aria-labelledby="home-occasions-title">
+    <h2 id="home-occasions-title"><Sparkles size={12} strokeWidth={1.2}/>{c.title}</h2>
+    <nav className="home-occasion-row" aria-label={c.title}>{[...occasions, ...moreOccasions].map(card)}</nav>
+  </section>;
   return <section className="home-occasions" aria-labelledby="home-occasions-title">
     <header className="home-occasions-heading">
       <span className="home-occasions-flourish" aria-hidden="true"><i/><Sparkles size={17} strokeWidth={1}/><i/></span>
