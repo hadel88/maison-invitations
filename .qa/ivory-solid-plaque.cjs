@@ -1,0 +1,1 @@
+const fs=require('node:fs');let s=fs.readFileSync('src/ivory.css','utf8').replace(';filter:brightness(.83)','');s+='\n.ivory-open:disabled{opacity:1;cursor:default}\n.ivory-plaque-depth{backface-visibility:hidden}\n';fs.writeFileSync('src/ivory.css',s);

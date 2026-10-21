@@ -9,14 +9,16 @@ import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js
 // Light and soft shadows come from one directional light, so flap, seal and card shade
 // each other as they move.
 
-const W = 0.6, H = 1;                 // envelope size in world units (portrait)
+// envelope size in world units: portrait on phones, as wide as the screen on tablets and desktops
+let W = 0.6; const H = 1;
+export const envelopeWidth = (aspect) => Math.max(0.6, aspect * 1.005);
 const TOP = H / 2;
 const V_DIP = 0.23;                   // lowest point of the pocket's V opening
 const V_SIDE = TOP - 0.035;           // the pocket edge at the envelope's sides
 const FLAP_L = 0.56;                  // hinge → flap tip
 const FLAP_SIDE = 0.1;                // hinge → where the flap's sides turn to the tip
 const SEAL = 0.19;                    // seal diameter
-const CARD_W = W * 0.8, CARD_H = CARD_W * 1.4, CARD_T = 0.0025;
+const CARD_W = 0.48, CARD_H = CARD_W * 1.4, CARD_T = 0.0025;
 const CARD_HIDDEN_Y = V_DIP - 0.012 - CARD_H / 2;
 const CARD_RISEN_Y = 0.43 + CARD_H / 2;
 const FOV = 32, TAN = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
@@ -39,10 +41,19 @@ function canvas(w, h) { const c = document.createElement('canvas'); c.width = w;
 // envelope coordinates (x ∈ [-W/2, W/2], y ∈ [-H/2, H/2]) → texture canvas pixels
 function toPx(c, x, y) { return [(x / W + 0.5) * c.width, (0.5 - y / H) * c.height]; }
 // the cover photo is a little narrower than the envelope: use its full width, crop height
+// one photo width = 0.6 world units; on a wider envelope the paper repeats, mirrored, so it stays seamless
 function drawPaper(g, img, c) {
-  const s = c.width / img.width, ih = img.height * s;
-  g.drawImage(img, 0, (c.height - ih) / 2, c.width, ih);
+  const tw = c.width * 0.6 / W, th = img.height * tw / img.width, y = (c.height - th) / 2;
+  const n = Math.ceil((c.width / tw - 1) / 2) + 1;
+  for (let i = -n; i <= n; i++) {
+    const x = c.width / 2 - tw / 2 + i * tw;
+    if (x > c.width || x + tw < 0) continue;
+    g.save();
+    if (i % 2) { g.translate(x + tw, 0); g.scale(-1, 1); g.drawImage(img, 0, y, tw, th); } else g.drawImage(img, x, y, tw, th);
+    g.restore();
+  }
 }
+const texW = (base) => Math.min(base * 2.5, Math.round(base * W / 0.6));
 
 function flapPath(g, c, ox = 0, oy = 0) {
   const p = (x, y) => toPx(c, x + ox, y + oy);
@@ -56,7 +67,7 @@ function flapPath(g, c, ox = 0, oy = 0) {
 
 // green embossed paper for the outside, with the seams of a folded envelope
 function outsideTextures(img, guestLine, family) {
-  const c = canvas(1024, Math.round(1024 * H / W));
+  const c = canvas(texW(1024), Math.round(texW(1024) * H / W));
   const pocket = canvas(c.width, c.height), flap = canvas(c.width, c.height);
   let g = pocket.getContext('2d');
   drawPaper(g, img, pocket);
@@ -88,7 +99,7 @@ function outsideTextures(img, guestLine, family) {
 
 // the liner: the same emboss turned into ivory paper
 function linerTexture(img) {
-  const c = canvas(512, Math.round(512 * H / W)), g = c.getContext('2d');
+  const c = canvas(texW(512), Math.round(texW(512) * H / W)), g = c.getContext('2d');
   drawPaper(g, img, c);
   const d = g.getImageData(0, 0, c.width, c.height), p = d.data;
   let sum = 0; for (let i = 0; i < p.length; i += 4) sum += p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11;
@@ -147,7 +158,9 @@ export async function drawSageCard(card) {
   return c;
 }
 
-export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
+export function createSageEnvelope(canvasEl, { card, guestLine, onSeal, onShape }) {
+  { const r0 = canvasEl.getBoundingClientRect(); if (r0.width && r0.height) W = envelopeWidth(r0.width / r0.height); }
+  const builtW = W;
   const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -161,7 +174,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
   sun.position.set(-0.55, 1.35, 2.2); sun.target.position.set(0, 0.35, 0);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
-  Object.assign(sun.shadow.camera, { left: -0.9, right: 0.9, top: 1.3, bottom: -1.0, near: 0.5, far: 5 });
+  Object.assign(sun.shadow.camera, { left: -(W / 2 + 0.6), right: W / 2 + 0.6, top: 1.3, bottom: -1.0, near: 0.5, far: 5 });
   sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.002; sun.shadow.radius = 5; sun.shadow.blurSamples = 16;
   scene.add(sun, sun.target);
 
@@ -170,9 +183,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
     if (aniso) t.anisotropy = renderer.capabilities.getMaxAnisotropy();
     return t;
   };
-  const paperMat = (map, bump, edge = false) => new THREE.MeshStandardMaterial({
-    map, bumpMap: bump, bumpScale: edge ? 0.003 : 0.012, roughness: edge ? 0.98 : 0.94, metalness: 0,
-  });
+  const paperMat = (map, bump) => new THREE.MeshStandardMaterial({ map, bumpMap: bump, bumpScale: 0.9, roughness: 0.88, metalness: 0 });
   const envUV = (geo, oy = 0) => { // uv from envelope coordinates
     const pos = geo.attributes.position, uv = new Float32Array(pos.count * 2);
     for (let i = 0; i < pos.count; i++) { uv[i * 2] = pos.getX(i) / W + 0.5; uv[i * 2 + 1] = (pos.getY(i) + oy) / H + 0.5; }
@@ -182,17 +193,14 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
 
   const env = new THREE.Group(); scene.add(env);
   // back panel (its inside is the liner)
-  const back = new THREE.Mesh(envUV(new THREE.PlaneGeometry(W, H)), new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.96 }));
+  const back = new THREE.Mesh(envUV(new THREE.PlaneGeometry(W, H)), new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.92 }));
   back.receiveShadow = true; env.add(back);
   // pocket: the front of the envelope below the V opening
   const pocketShape = new THREE.Shape();
   pocketShape.moveTo(-W / 2, -H / 2); pocketShape.lineTo(W / 2, -H / 2); pocketShape.lineTo(W / 2, V_SIDE);
   pocketShape.quadraticCurveTo(0.03, V_DIP + 0.012, 0, V_DIP); pocketShape.quadraticCurveTo(-0.03, V_DIP + 0.012, -W / 2, V_SIDE);
   pocketShape.closePath();
-  const pocket = new THREE.Mesh(envUV(new THREE.ExtrudeGeometry(pocketShape, { depth: .006, bevelEnabled: true, bevelSegments: 2, bevelSize: .0015, bevelThickness: .0015, curveSegments: 24 })), [
-    new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: .94 }),
-    new THREE.MeshStandardMaterial({ color: 0x4f5940, roughness: .98 }),
-  ]);
+  const pocket = new THREE.Mesh(envUV(new THREE.ShapeGeometry(pocketShape, 24)), new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: 0.9 }));
   pocket.position.z = 0.009; pocket.castShadow = true; pocket.receiveShadow = true; env.add(pocket);
 
   // flap, hinged at the top edge. Tessellated so it can bend like paper.
@@ -202,20 +210,14 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
   flapShape.quadraticCurveTo(0, -FLAP_L - 0.002, -0.012, -FLAP_L + 0.004);
   flapShape.quadraticCurveTo(-W * 0.16, -FLAP_L * 0.78, -W / 2, -FLAP_SIDE);
   flapShape.closePath();
-  let flapGeo = new THREE.ExtrudeGeometry(flapShape, { depth: .005, bevelEnabled: true, bevelSegments: 2, bevelSize: .001, bevelThickness: .0015, curveSegments: 28 });
+  let flapGeo = new THREE.ShapeGeometry(flapShape, 20);
   flapGeo = new TessellateModifier(0.035, 8).modify(flapGeo);
   envUV(flapGeo, TOP);
   flapGeo.computeVertexNormals();
   const flapRest = Float32Array.from(flapGeo.attributes.position.array);
   const hinge = new THREE.Group(); hinge.position.set(0, TOP, 0.0005); env.add(hinge);
-  const flapFront = new THREE.Mesh(flapGeo, [
-    new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: .94, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }),
-    new THREE.MeshStandardMaterial({ color: 0x4f5940, roughness: .98, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }),
-  ]);
-  const flapBack = new THREE.Mesh(flapGeo, [
-    new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: .96, side: THREE.BackSide, name: 'flapLiner' }),
-    new THREE.MeshStandardMaterial({ color: 0xbeb59f, roughness: .99, side: THREE.BackSide }),
-  ]);
+  const flapFront = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: 0.88, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }));
+  const flapBack = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.92, side: THREE.BackSide, name: 'flapLiner' }));
   flapFront.castShadow = true; flapFront.receiveShadow = true; flapBack.receiveShadow = true;
   const flap = new THREE.Group(); flap.position.z = 0.022; flap.add(flapFront, flapBack); hinge.add(flap);
 
@@ -237,10 +239,10 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
   // views: closed (envelope fills the screen), opened (envelope low, room for the card) and the card in front
   let aspect = 1, cssW = 1, cssH = 1;
   function views() {
-    const phone = aspect < 0.78;
-  const vh0 = phone ? Math.min(H, W / aspect) * 0.955 : H / 0.9;
-    const vh1 = Math.max(1.277, W / (aspect * 0.97));
-    const c1 = 1.202 - vh1 / 2 + (vh1 - 1.277) * 0.08;
+    // the envelope always covers the full width (and, closed, the full screen): no empty sides
+    const vh0 = Math.min(H, W / aspect) * 0.985;
+    const vh1 = Math.min(1.277, W / aspect * 0.985);
+    const c1 = 1.202 - vh1 / 2;
     const vhz = Math.max(CARD_W / (0.86 * aspect), CARD_H / 0.8);
     return { vh0, c0: 0, vh1, c1, vhz };
   }
@@ -258,7 +260,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
     const pos = flapGeo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const y = flapRest[i * 3 + 1] / FLAP_L; // 0 … -1
-      pos.setZ(i, flapRest[i * 3 + 2] - bend * y * y * FLAP_L * 0.55);
+      pos.setZ(i, -bend * y * y * FLAP_L * 0.55);
     }
     pos.needsUpdate = true; flapGeo.computeVertexNormals();
     const ty = SEAL_Y / FLAP_L, tz = -bend * ty * ty * FLAP_L * 0.55, slope = -bend * 2 * ty * 0.55;
@@ -286,7 +288,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
     return { x: (p.x + 1) / 2 * cssW, y: (1 - p.y) / 2 * cssH, r: Math.abs(top.y - p.y) / 2 * cssH };
   }
 
-  let t = 0, start = 0, raf = 0, playing = false, playRate = 1, onDone = null, dead = false;
+  let t = 0, start = 0, raf = 0, playing = false, onDone = null, dead = false;
   function render() { pose(t); renderer.render(scene, camera); }
   function resize() {
     const r = canvasEl.getBoundingClientRect();
@@ -297,13 +299,14 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
     camera.aspect = aspect; camera.updateProjectionMatrix();
     render();
     if (t === 0) onSeal?.(seal2D());
+    if (Math.abs(envelopeWidth(aspect) - builtW) / builtW > 0.06) onShape?.();
   }
   const ro = new ResizeObserver(resize); ro.observe(canvasEl);
 
   function frame(now) {
     if (!playing || dead) return;
     if (!start) start = now - t * 1000;
-    t = (now - start) / 1000 * playRate;
+    t = (now - start) / 1000;
     if (t >= SAGE_TIMES.done) { t = SAGE_TIMES.done; playing = false; render(); onDone?.(); return; }
     render();
     raf = requestAnimationFrame(frame);
@@ -317,13 +320,8 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
     if (guestLine) { try { await document.fonts.load(`italic 400 64px ${family}`); } catch { /* system font */ } }
     const { pocket: pc, flap: fc } = outsideTextures(cover, guestLine, family);
     const liner = tex(linerTexture(cover));
-    const pocketMap = tex(pc), flapMap = tex(fc);
-    for (const [m, map] of [[pocket.material[0], pocketMap], [flapFront.material[0], flapMap]]) {
-      m.map = map; m.bumpMap = map; m.bumpScale = .012; m.color.set(0xffffff); m.needsUpdate = true;
-    }
-    for (const [m, color] of [[back.material, 0xffffff], [flapBack.material[0], 0xe9e2cf]]) {
-      m.map = liner; m.bumpMap = liner; m.bumpScale = .005; m.color.set(color); m.needsUpdate = true;
-    }
+    for (const [m, map] of [[pocket.material, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.bumpMap = map; m.bumpScale = 1.2; m.color.set(0xffffff); m.needsUpdate = true; }
+    for (const m of [back.material, flapBack.material]) { m.map = liner; m.bumpMap = liner; m.bumpScale = 0.6; m.color.set(m === flapBack.material ? 0xe9e2cf : 0xffffff); m.needsUpdate = true; }
     const waxTex = tex(wax);
     sealLayers.forEach((m) => { m.material.map = waxTex; m.material.needsUpdate = true; });
     const cardCanvas = await drawSageCard(card);
@@ -336,7 +334,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal }) {
   if (import.meta.env?.DEV) window.__sageSeek = (s) => { playing = false; cancelAnimationFrame(raf); t = s; render(); };
   return {
     ready,
-    play(done, rate = 1) { onDone = done; if (playing) return; playRate = rate; playing = true; start = 0; raf = requestAnimationFrame(frame); },
+    play(done) { onDone = done; if (playing) return; playing = true; start = 0; raf = requestAnimationFrame(frame); },
     reset() { playing = false; cancelAnimationFrame(raf); t = 0; render(); onSeal?.(seal2D()); },
     finish() { playing = false; cancelAnimationFrame(raf); t = SAGE_TIMES.done; render(); },
     seek(s) { playing = false; cancelAnimationFrame(raf); t = s; render(); },

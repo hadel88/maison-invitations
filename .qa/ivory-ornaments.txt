@@ -1,0 +1,12 @@
+  {ornament!=='rococo'&&<g stroke={'url(#'+id+'gold)'} fill="none" strokeWidth="1.6" strokeLinecap="round" filter={'url(#'+id+'emboss)'}>
+   {ornament==='geometry'?<path d="M40 94V75H62M160 94V75H138M40 186V205H62M160 186V205H138M77 79L100 65L123 79"/>:
+    ornament==='laurel'?<>{[-1,1].map(side=><g key={side} transform={side===1?'translate(200 0) scale(-1 1)':undefined}><path d="M53 195Q23 140 61 83"/>{[0,1,2,3,4].map(i=><ellipse key={i} cx={44-Math.sin(i/4*Math.PI)*9} cy={100+i*17} rx="4" ry="9" transform={`rotate(-35 ${44-Math.sin(i/4*Math.PI)*9} ${100+i*17})`}/>)}</g>)}</>:
+    ornament==='moon'?<path d="M105 67C83 65 78 93 99 102C111 106 122 99 125 91C102 98 92 79 105 67Z"/>:
+    ornament==='cloud'?<path d="M72 95C60 95 58 79 70 76C70 60 96 60 100 74C118 57 139 76 128 87C140 96 122 103 115 98H79Z"/>:
+    ornament==='butterfly'?<path d="M100 98V75M100 85C74 57 73 96 95 92C75 98 91 110 100 98C109 110 125 98 105 92C127 96 126 57 100 85Z"/>:
+    ornament==='stars'?<><path d="M100 62L105 76L120 76L108 85L113 100L100 91L87 100L92 85L80 76H95Z"/><path d="M49 101V111M44 106H54M150 181V191M145 186H155"/></>:
+    ornament==='snowflake'?<path d="M100 63V99M84 72L116 90M84 90L116 72M95 65L100 70L105 65M87 73L92 74L91 69M87 89L92 87L91 94M105 97L100 92L95 97"/>:
+    ornament==='dove'?<path d="M75 95Q88 84 90 72Q105 76 107 86Q119 77 129 80Q123 92 111 96Q102 109 89 98L75 95M91 93L85 84M111 86L119 87"/>:
+    ornament==='blossom'?<><circle cx="100" cy="84" r="5"/>{[0,60,120,180,240,300].map(angle=><ellipse key={angle} cx="100" cy="72" rx="5" ry="8" transform={`rotate(${angle} 100 84)`}/>)}</>:
+    <><path d="M72 99Q100 88 126 68M77 97Q64 77 82 82Q90 86 90 91M93 88Q86 67 101 74Q109 78 107 81M109 78Q111 60 124 63"/><path d="M78 202Q100 193 122 202"/></>}
+  </g>}

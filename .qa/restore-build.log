@@ -1,0 +1,40 @@
+
+> maison-invitations@1.0.0 build
+> vite build
+
+vite v7.1.7 building for production...
+transforming...
+✓ 1662 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                              1.13 kB │ gzip:   0.59 kB
+dist/assets/Dashboard-DtslAYC-.css           1.72 kB │ gzip:   0.72 kB
+dist/assets/PhotoAlbum-6NEkwLJ6.css          9.35 kB │ gzip:   2.84 kB
+dist/assets/BeachDemo-CFA70iOH.css          10.17 kB │ gzip:   3.12 kB
+dist/assets/index-BbANd8Xe.css             278.44 kB │ gzip:  58.38 kB
+dist/assets/arrow-left-Du6H5aQH.js           0.33 kB │ gzip:   0.27 kB
+dist/assets/lock-DCXuwTzv.js                 0.38 kB │ gzip:   0.29 kB
+dist/assets/download-C_9H2tRS.js             0.43 kB │ gzip:   0.32 kB
+dist/assets/pen-line-BcxTUAw4.js             0.45 kB │ gzip:   0.33 kB
+dist/assets/shield-check-BhwpxW-o.js         0.49 kB │ gzip:   0.35 kB
+dist/assets/calendar-days-Cw8sMkN7.js        0.66 kB │ gzip:   0.37 kB
+dist/assets/AlbumPreview-ER1atOOE.js         1.11 kB │ gzip:   0.64 kB
+dist/assets/AuthDialog-B1tSXsPV.js           4.42 kB │ gzip:   1.95 kB
+dist/assets/PhotoAlbum-5Hfh3gTf.js           5.84 kB │ gzip:   2.39 kB
+dist/assets/ribbonSatin-Dtl9nq4c.js          6.51 kB │ gzip:   3.21 kB
+dist/assets/Dialogs-dCSiUQ4J.js              6.95 kB │ gzip:   2.83 kB
+dist/assets/SharedCelebration-D4CT0RfB.js    7.12 kB │ gzip:   2.80 kB
+dist/assets/Guest-mmBxa5vo.js               14.25 kB │ gzip:   5.28 kB
+dist/assets/ExpertSpace-DCfzpGmq.js         15.22 kB │ gzip:   4.61 kB
+dist/assets/Editor-CZWeD366.js              16.56 kB │ gzip:   5.29 kB
+dist/assets/BeachDemo-DEjmpLMo.js           31.18 kB │ gzip:  12.37 kB
+dist/assets/Dashboard-BTYbCMc7.js           60.30 kB │ gzip:  19.02 kB
+dist/assets/nearestCity-DJL4hbuH.js         61.17 kB │ gzip:  24.59 kB
+dist/assets/RoomEnvironment-BNHTJYF5.js    574.62 kB │ gzip: 146.22 kB
+dist/assets/index-B0n9E1V1.js              718.14 kB │ gzip: 238.89 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 16.56s

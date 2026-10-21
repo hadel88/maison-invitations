@@ -1,0 +1,1 @@
+const fs=require('node:fs');let s=fs.readFileSync('src/Cinema.jsx','utf8').replace('width="600" height="1066" decoding="async"','width="600" height="1066" loading="lazy" decoding="async"');fs.writeFileSync('src/Cinema.jsx',s);

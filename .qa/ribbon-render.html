@@ -1,0 +1,5 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Local ribbon asset render</title><style>body{margin:0;background:#f5e9e1;font:14px system-ui}button{position:fixed;top:15px;left:15px;z-index:10;padding:15px}canvas{width:480px;height:900px;display:block;margin:auto}pre{height:40px;overflow:hidden;white-space:nowrap}</style></head><body><button id="save">Prepare the exact bow render</button><pre id="output" aria-label="Rendered bow PNG"></pre><canvas id="bow"></canvas><script type="module">
+import {createRibbonRenderer} from '/src/ribbonSatin.js';
+const engine=createRibbonRenderer(document.querySelector('canvas'),{static:true});
+document.querySelector('button').onclick=()=>{document.querySelector('pre').textContent=engine.capture()};
+</script></body></html>

@@ -1,0 +1,2 @@
+const fs=require('node:fs');let s=fs.readFileSync('src/ivoryDesigns.js','utf8').replace("(scene.audience||'Neutral')===audience", "(['Boys','Girls'].includes(scene.audience)?scene.audience:'Neutral')===audience");fs.writeFileSync('src/ivoryDesigns.js',s);
+s=fs.readFileSync('src/ivory.css','utf8').replace('font:12px/1.4 inherit;','font-family:inherit;font-size:12px;line-height:1.4;');fs.writeFileSync('src/ivory.css',s);

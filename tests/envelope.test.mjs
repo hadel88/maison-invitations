@@ -22,3 +22,14 @@ test('the invitation stays hidden until the seal opens the flap, then rises as o
   assert.match(styles, /background:\s*color-mix\(in srgb, var\(--occasion-paper,[^)]+\)\s*98%, white\)/);
   assert.match(styles, /backdrop-filter:\s*none/);
 });
+
+test('Sage opens as a real 3D envelope: flap on a hinge, seal on the flap, card slides out and comes forward', () => {
+  const gl = readFileSync(new URL('../src/sageEnvelope.js', import.meta.url), 'utf8');
+  assert.match(cinema, /import\('\.\/sageEnvelope'\)/);
+  assert.match(cinema, /className="sage-envelope-canvas"/);
+  assert.match(gl, /hinge\.add\(flap\)/);
+  assert.match(gl, /flap\.add\(seal\)/);
+  assert.match(gl, /mix\(0, 186, inOut\(f\)\)/);
+  assert.match(gl, /CARD_HIDDEN_Y, CARD_RISEN_Y/);
+  assert.match(styles, /\.sage-envelope-scene\.sage-3d > :not\(canvas\)\s*\{\s*display: none;/);
+});

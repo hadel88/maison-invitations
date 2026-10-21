@@ -1,0 +1,3 @@
+const fs=require('node:fs');let s=fs.readFileSync('src/ivory.css','utf8').replace('filter:brightness(.83)','filter:none');fs.writeFileSync('src/ivory.css',s);
+const ignore=fs.readFileSync('.vercelignore','utf8');fs.writeFileSync('.vercelignore',ignore.trimEnd()+'\n.qa\ndocs\ntests\n.env*\n');
+s=fs.readFileSync('src/ivoryDesigns.js','utf8').replace("String(names).split", "String(names||'').split");s=s.replace("dressCode:'Garden elegance'}", "dressCode:'Garden elegance',timeline:[{time:'16:00',title:'A warm welcome',note:'Meet us among the gardens.'},{time:'16:30',title:'The ceremony',note:'A little promise, made forever.'},{time:'18:00',title:'A toast to our story',note:'Dinner, laughter and our favourite people.'}]}");fs.writeFileSync('src/ivoryDesigns.js',s);
