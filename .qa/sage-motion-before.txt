@@ -1,0 +1,35 @@
+  function pose(t) {
+    const v = views();
+    // seal press and the flap's journey
+    const press = span(t, SAGE_TIMES.press);
+    const f = span(t, SAGE_TIMES.flap);
+    const lift = Math.sin(press * Math.PI) * 0.06;
+    const angle = THREE.MathUtils.degToRad(mix(0, 186, inOut(f)) + lift * 40 * (1 - f));
+    hinge.rotation.x = -angle;
+    // paper bends while it moves: the tip lags behind
+    const bend = Math.sin(f * Math.PI) * 0.075 + lift * 0.4;
+    const pos = flapGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const y = flapRest[i * 3 + 1] / FLAP_L; // 0 … -1
+      pos.setZ(i, -bend * y * y * FLAP_L * 0.55);
+    }
+    pos.needsUpdate = true; flapGeo.computeVertexNormals();
+    const ty = SEAL_Y / FLAP_L, tz = -bend * ty * ty * FLAP_L * 0.55, slope = -bend * 2 * ty * 0.55;
+    seal.position.set(0, SEAL_Y, tz); seal.rotation.x = Math.atan(slope);
+    const s = 1 - Math.sin(press * Math.PI) * 0.035; seal.scale.set(s, s, 1);
+    // camera steps back
+    const k = sine(span(t, SAGE_TIMES.camera));
+    const vh = mix(v.vh0, v.vh1, k), cy = mix(v.c0, v.c1, k);
+    camera.position.set(0, cy, vh / (2 * TAN)); camera.lookAt(0, cy, 0);
+    // the card rises out of the pocket, then comes forward
+    const r = span(t, SAGE_TIMES.rise), fw = span(t, SAGE_TIMES.forward);
+    const ry = mix(CARD_HIDDEN_Y, CARD_RISEN_Y, inOut(r));
+    const d1 = v.vh1 / (2 * TAN), zc = d1 - v.vhz / (2 * TAN);
+    const fz = outCubic(clamp01(fw * 1.35)), fy = inOut(fw);
+    cardGroup.position.set(0, mix(ry, v.c1 + 0.04 * v.vhz, fy), mix(0.0045, zc, fz) + Math.sin(fw * Math.PI) * 0.05);
+    cardGroup.rotation.set(Math.sin(fw * Math.PI) * -0.16, 0, Math.sin(fw * Math.PI) * 0.035 + Math.sin(r * Math.PI) * 0.012);
+    cardGroup.visible = cardLoaded && t >= SAGE_TIMES.flap[0];
+    // the light softens on the envelope once the card is presented
+    sun.intensity = mix(2.3, 2.0, fy);
+  }
+
