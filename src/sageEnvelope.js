@@ -10,17 +10,18 @@ import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js
 // each other as they move.
 
 // envelope size in world units: portrait on phones, as wide as the screen on tablets and desktops
-let W = 0.6; const H = 0.82;          // real 5×7 invitation envelope proportions (portrait)
+let W = 0.6; const H = 1;
 export const envelopeWidth = (aspect) => Math.max(0.6, aspect * 1.005);
 const TOP = H / 2;
-const V_DIP = TOP - 0.12;                   // lowest point of the pocket's V opening
+const V_DIP = TOP - 0.36;                   // lowest point of the pocket's V opening
 const V_SIDE = TOP - 0.035;           // the pocket edge at the envelope's sides
-const FLAP_L = 0.46;                  // hinge → flap tip
-const FLAP_SIDE = 0.08;                // hinge → where the flap's sides turn to the tip
+const FLAP_L = 0.63;                  // hinge → flap tip
+const FLAP_SIDE = 0.1;                // hinge → where the flap's sides turn to the tip
 const SEAL = 0.19;                    // seal diameter
-const CARD_W = 0.48, CARD_H = CARD_W * 1.4, CARD_T = 0.0025;
+const CARD_W = 0.44, CARD_H = CARD_W * 1.4, CARD_T = 0.0025;
 const CARD_HIDDEN_Y = V_DIP - 0.012 - CARD_H / 2;
-const CARD_RISEN_Y = V_SIDE - 0.005 + CARD_H / 2;
+// the card's bottom corners must clear the pocket's edge before it comes forward
+const CARD_RISEN_Y = V_DIP + (V_SIDE - V_DIP) * (CARD_W / W) + 0.012 + CARD_H / 2;
 const FOV = 32, TAN = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
 
 // timeline (seconds)
@@ -80,7 +81,7 @@ function outsideTextures(img, guestLine, family) {
   line([[-W / 2, V_SIDE - 0.002], [0, V_DIP - 0.002], [W / 2, V_SIDE - 0.002]], 'rgba(238,232,206,.55)', 2.4);
   if (guestLine) {
     g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
-    const [x, y] = toPx(pocket, 0, -0.27);
+    const [x, y] = toPx(pocket, 0, -0.32);
     g.font = `italic 400 64px ${family}`;
     g.fillStyle = 'rgba(16,20,12,.35)'; g.fillText(guestLine, x + 1.5, y + 2.5);
     const gold = g.createLinearGradient(x - 220, y - 40, x + 220, y + 40);
@@ -276,9 +277,9 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal, onShape 
   // views: closed (envelope fills the screen), opened (envelope low, room for the card) and the card in front
   let aspect = 1, cssW = 1, cssH = 1;
   function views() {
-    // the envelope covers the full width; closed, it lies a little low so the flap opens in view
-    const vh0 = Math.max(H * 1.15, W / aspect * 0.985);
-    const c0 = TOP + 0.3 * vh0 - vh0 / 2;
+    // closed, the envelope fills the whole screen
+    const vh0 = Math.min(H, W / aspect) * 0.985;
+    const c0 = 0;
     const vh1 = Math.min(1.4, W / aspect * 0.985);
     const c1 = CARD_RISEN_Y + CARD_H / 2 + 0.08 * vh1 - vh1 / 2;
     const vhz = Math.max(CARD_W / (0.86 * aspect), CARD_H / 0.8);
