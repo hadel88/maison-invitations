@@ -1,4 +1,6 @@
 // Coordinates describe the actual flap cut; renderer and gallery share this outline.
+// The flap starts on the body's fold line, with only its free edge lifted over the pocket.
+export const sageFlapLift=(localY,length)=>Math.max(0,Math.min(1,-localY/length))*.025;
 export const sageEnvelopeProfiles={
  arch:{name:'botanical petal',side:.55,curve:.83,tip:.985},
  ticket:{name:'festival scallop',side:.48,curve:.6,tip:1,scallop:true},

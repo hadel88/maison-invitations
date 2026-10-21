@@ -1,5 +1,5 @@
 import {paperStock,paperRelief,ornamentGlyph,waxStock} from './invitationMaterials';
-import {traceSageFlap} from './sageEnvelopeProfiles.js';
+import {traceSageFlap,sageFlapLift} from './sageEnvelopeProfiles.js';
 import {paintSageLetter} from './paintSageLetter.js';
 import * as THREE from 'three';
 import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js';
@@ -286,13 +286,15 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   let flapGeo = new THREE.ShapeGeometry(flapShape, 20);
   flapGeo = new TessellateModifier(0.035, 8).modify(flapGeo);
   envUV(flapGeo, TOP);
+  const flapPositions=flapGeo.attributes.position;
+  for(let i=0;i<flapPositions.count;i++)flapPositions.setZ(i,sageFlapLift(flapPositions.getY(i),FLAP_L));
   flapGeo.computeVertexNormals();
   const flapRest = Float32Array.from(flapGeo.attributes.position.array);
   const hinge = new THREE.Group(); hinge.position.set(0, TOP, 0.0005); shell.add(hinge);
   const flapFront = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: 0.88, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }));
   const flapBack = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.92, side: THREE.BackSide, name: 'flapLiner' }));
   flapFront.castShadow = true; flapFront.receiveShadow = true; flapBack.receiveShadow = true;
-  const flap = new THREE.Group(); flap.position.z = 0.045; flap.add(flapFront, flapBack); hinge.add(flap);
+  const flap = new THREE.Group(); flap.add(flapFront, flapBack); hinge.add(flap);
 
   // the wax seal: a few stacked layers give it body when it tilts
   const seal = new THREE.Group(); flap.add(seal);
@@ -355,10 +357,10 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     const pos = flapGeo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const y = flapRest[i * 3 + 1] / FLAP_L; // 0 … -1
-      pos.setZ(i, -bend * y * y * FLAP_L * 0.55);
+      pos.setZ(i, flapRest[i * 3 + 2] - bend * y * y * FLAP_L * 0.55);
     }
     pos.needsUpdate = true; flapGeo.computeVertexNormals();
-    const ty = SEAL_Y / FLAP_L, tz = -bend * ty * ty * FLAP_L * 0.55, slope = -bend * 2 * ty * 0.55;
+    const ty = SEAL_Y / FLAP_L, tz = sageFlapLift(SEAL_Y,FLAP_L) - bend * ty * ty * FLAP_L * 0.55, slope = -.025/FLAP_L - bend * 2 * ty * 0.55;
     seal.position.set(0, SEAL_Y, tz); seal.rotation.x = Math.atan(slope);
     const s = 1 - Math.sin(press * Math.PI) * 0.035; seal.scale.set(s, s, 1);
     // camera steps back

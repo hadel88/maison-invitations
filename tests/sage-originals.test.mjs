@@ -1,8 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {sageEnvelopeProfiles,traceSageFlap} from '../src/sageEnvelopeProfiles.js';
+import {sageEnvelopeProfiles,traceSageFlap,sageFlapLift} from '../src/sageEnvelopeProfiles.js';
 import {paintSageLetter} from '../src/paintSageLetter.js';
 import {sageThemes} from '../src/sageDesigns.js';
+
+test('flap fold stays attached to the envelope body throughout rotation',()=>{
+ const rootLift=sageFlapLift(0,.54);
+ assert.equal(rootLift,0,'the hinge edge must not float in front of the body');
+ for(let degrees=0;degrees<=186;degrees+=3){
+  const angle=degrees*Math.PI/180;
+  assert.equal(Math.abs(rootLift*Math.sin(angle)),0,'no vertical tear at any opening angle');
+ }
+ assert.ok(sageFlapLift(-.54,.54)>.009,'the free edge must clear the closed pocket');
+ assert.ok(sageFlapLift(-.27,.54)<sageFlapLift(-.54,.54),'lift should taper smoothly back to the fold');
+});
 
 test('original Sage artwork never borrows an Ivory door asset',()=>{
  assert.equal(sageThemes.length,16);
