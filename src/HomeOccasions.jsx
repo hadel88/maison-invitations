@@ -15,11 +15,15 @@ const moreOccasions = [
   ['Dinner party', 'dinner', '50% 65%'],
   ['Christening', 'christening', '50% 60%'],
   ['Seasonal celebration', 'seasonal', '78% 50%'],
+  ['Marriage proposal', '/occasion-proposal-door-sm.webp', '50% 45%'],
+  ['Workshops & seminars', '/occasion-workshop-door-sm.webp', '50% 45%'],
+  ['Store & business opening', '/occasion-opening-door-sm.webp', '50% 45%'],
+  ['New Year’s Eve', '/occasion-newyear-door-v2-sm.webp', '50% 45%'],
 ];
 const words = {
-  en: { title: 'Choose your occasion', line: 'A little world of wonder for every reason to celebrate.', more: 'More', all: 'Explore all occasions', hint: 'Swipe to discover your occasion', explore: 'Explore', invitations: 'invitations', labels: { 'Baby shower': 'Baby Shower', 'Corporate event': 'Corporate' } },
-  de: { title: 'Wähle deinen Anlass', line: 'Eine kleine Welt voller Zauber für jeden Grund zum Feiern.', more: 'Mehr', all: 'Alle Anlässe entdecken', hint: 'Wischen und deinen Anlass entdecken', explore: 'Entdecke', invitations: 'Einladungen', labels: { Wedding: 'Hochzeit', Birthday: 'Geburtstag', 'Baby shower': 'Babyparty', Engagement: 'Verlobung', Graduation: 'Abschluss', Anniversary: 'Jubiläum', 'Corporate event': 'Firmenfeier', 'Dinner party': 'Dinnerparty', Christening: 'Taufe', 'Seasonal celebration': 'Saisonale Feier' } },
-  fr: { title: 'Choisissez votre occasion', line: 'Un petit monde merveilleux pour chaque moment à célébrer.', more: 'Autres', all: 'Découvrir toutes les occasions', hint: 'Faites défiler pour découvrir votre occasion', explore: 'Découvrir', invitations: 'invitations', labels: { Wedding: 'Mariage', Birthday: 'Anniversaire', 'Baby shower': 'Baby shower', Engagement: 'Fiançailles', Graduation: 'Diplôme', Anniversary: 'Anniversaire de mariage', 'Corporate event': 'Entreprise', 'Dinner party': 'Dîner', Christening: 'Baptême', 'Seasonal celebration': 'Fête de saison' } },
+  en: { title: 'Choose your occasion', line: 'A little world of wonder for every reason to celebrate.', more: 'More', all: 'Explore all occasions', hint: 'Swipe to discover your occasion', explore: 'Explore', invitations: 'invitations', labels: { 'Baby shower': 'Baby Shower', 'Corporate event': 'Corporate', 'Workshops & seminars': 'Workshops', 'Store & business opening': 'Grand opening' } },
+  de: { title: 'Wähle deinen Anlass', line: 'Eine kleine Welt voller Zauber für jeden Grund zum Feiern.', more: 'Mehr', all: 'Alle Anlässe entdecken', hint: 'Wischen und deinen Anlass entdecken', explore: 'Entdecke', invitations: 'Einladungen', labels: { Wedding: 'Hochzeit', Birthday: 'Geburtstag', 'Baby shower': 'Babyparty', Engagement: 'Verlobung', Graduation: 'Abschluss', Anniversary: 'Jubiläum', 'Corporate event': 'Firmenfeier', 'Dinner party': 'Dinnerparty', Christening: 'Taufe', 'Seasonal celebration': 'Saisonale Feier', 'Marriage proposal': 'Heiratsantrag', 'Workshops & seminars': 'Workshops & Seminare', 'Store & business opening': 'Eröffnung', 'New Year’s Eve': 'Silvester' } },
+  fr: { title: 'Choisissez votre occasion', line: 'Un petit monde merveilleux pour chaque moment à célébrer.', more: 'Autres', all: 'Découvrir toutes les occasions', hint: 'Faites défiler pour découvrir votre occasion', explore: 'Découvrir', invitations: 'invitations', labels: { Wedding: 'Mariage', Birthday: 'Anniversaire', 'Baby shower': 'Baby shower', Engagement: 'Fiançailles', Graduation: 'Diplôme', Anniversary: 'Anniversaire de mariage', 'Corporate event': 'Entreprise', 'Dinner party': 'Dîner', Christening: 'Baptême', 'Seasonal celebration': 'Fête de saison', 'Marriage proposal': 'Demande en mariage', 'Workshops & seminars': 'Ateliers & séminaires', 'Store & business opening': 'Inauguration', 'New Year’s Eve': 'Réveillon' } },
 };
 
 export function HomeOccasions({ onSelect, lang = 'en' }) {
@@ -28,7 +32,7 @@ export function HomeOccasions({ onSelect, lang = 'en' }) {
     const label = c.labels[occasion] || occasion;
     return <button className="home-occasion" key={occasion} onClick={() => onSelect(occasion)} aria-label={`${c.explore} ${label} ${c.invitations}`}>
       <span className="home-occasion-arch">
-        <img src={`/occasion-arches/${image}.webp`} width="240" height="320" alt="" loading="lazy" decoding="async" style={{ objectPosition: position }} />
+        <img src={image.startsWith('/') ? image : `/occasion-arches/${image}.webp`} width="240" height="320" alt="" loading="lazy" decoding="async" style={{ objectPosition: position }} />
         <span className="home-occasion-spark" aria-hidden="true">✦</span>
       </span>
       <span className="home-occasion-label">{label}</span>

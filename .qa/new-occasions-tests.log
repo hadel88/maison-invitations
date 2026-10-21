@@ -1,0 +1,518 @@
+
+> maison-invitations@1.0.0 test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: sign-in accepts existing short passwords, normalizes email, and returns HttpOnly cookies without tokens
+ok 1 - sign-in accepts existing short passwords, normalizes email, and returns HttpOnly cookies without tokens
+  ---
+  duration_ms: 8.1384
+  type: 'test'
+  ...
+# Subtest: cross-origin mutation is rejected before authentication
+ok 2 - cross-origin mutation is rejected before authentication
+  ---
+  duration_ms: 0.5781
+  type: 'test'
+  ...
+# Subtest: recovery rejects foreign links without calling an external service
+ok 3 - recovery rejects foreign links without calling an external service
+  ---
+  duration_ms: 0.7773
+  type: 'test'
+  ...
+# Subtest: missing payment credentials cannot enable checkout
+ok 4 - missing payment credentials cannot enable checkout
+  ---
+  duration_ms: 0.5695
+  type: 'test'
+  ...
+# Subtest: venues & experts search is open to visitors and forwards only city, category and language
+ok 5 - venues & experts search is open to visitors and forwards only city, category and language
+  ---
+  duration_ms: 58.1273
+  type: 'test'
+  ...
+# Subtest: the public fixed-city preview is read-only
+ok 6 - the public fixed-city preview is read-only
+  ---
+  duration_ms: 0.7242
+  type: 'test'
+  ...
+# Subtest: invitation journey is saved per invitation under a private key
+ok 7 - invitation journey is saved per invitation under a private key
+  ---
+  duration_ms: 10.6238
+  type: 'test'
+  ...
+# Subtest: wall rejects non-JPEG data and reports a missing table clearly
+ok 8 - wall rejects non-JPEG data and reports a missing table clearly
+  ---
+  duration_ms: 3.2006
+  type: 'test'
+  ...
+# Subtest: experts-list returns approved listings with photo thumbs and sanitises the city filter
+ok 9 - experts-list returns approved listings with photo thumbs and sanitises the city filter
+  ---
+  duration_ms: 2.6187
+  type: 'test'
+  ...
+# Subtest: experts-list ignores unknown categories without calling the database
+ok 10 - experts-list ignores unknown categories without calling the database
+  ---
+  duration_ms: 1.2635
+  type: 'test'
+  ...
+# Subtest: a quote request without an account needs email or phone, and the honeypot is rejected
+ok 11 - a quote request without an account needs email or phone, and the honeypot is rejected
+  ---
+  duration_ms: 3.5965
+  type: 'test'
+  ...
+# Subtest: the expert business space requires sign-in
+ok 12 - the expert business space requires sign-in
+  ---
+  duration_ms: 0.4999
+  type: 'test'
+  ...
+# Subtest: A Little Wonder is a separate baby shower film with matching video and assets
+ok 13 - A Little Wonder is a separate baby shower film with matching video and assets
+  ---
+  duration_ms: 60.3886
+  type: 'test'
+  ...
+# Subtest: four memories cover the gallery and the personalised card covers its entire final shot
+ok 14 - four memories cover the gallery and the personalised card covers its entire final shot
+  ---
+  duration_ms: 1.2831
+  type: 'test'
+  ...
+# Subtest: baby film quads stay finite, clockwise and nondegenerate through motion
+ok 15 - baby film quads stay finite, clockwise and nondegenerate through motion
+  ---
+  duration_ms: 3.8208
+  type: 'test'
+  ...
+# Subtest: the beach demo follows exactly five guest interactions in order
+ok 16 - the beach demo follows exactly five guest interactions in order
+  ---
+  duration_ms: 4.0593
+  type: 'test'
+  ...
+# Subtest: unrelated or repeated taps cannot skip chapters or advance a completed demo
+ok 17 - unrelated or repeated taps cannot skip chapters or advance a completed demo
+  ---
+  duration_ms: 0.3342
+  type: 'test'
+  ...
+# Subtest: the gift panels open around their fixed bottom edges after the lid releases
+ok 18 - the gift panels open around their fixed bottom edges after the lid releases
+  ---
+  duration_ms: 6.0833
+  type: 'test'
+  ...
+# Subtest: graduation paper unrolls into a flat diploma and lifts clear before revealing the invitation
+ok 19 - graduation paper unrolls into a flat diploma and lifts clear before revealing the invitation
+  ---
+  duration_ms: 1.5022
+  type: 'test'
+  ...
+# Subtest: graduation has its own occasion, cap opening and celebration schedule
+ok 20 - graduation has its own occasion, cap opening and celebration schedule
+  ---
+  duration_ms: 1.5322
+  type: 'test'
+  ...
+# Subtest: the birthday design creates a birthday event with a birthday schedule and its own RSVP date
+ok 21 - the birthday design creates a birthday event with a birthday schedule and its own RSVP date
+  ---
+  duration_ms: 1.1568
+  type: 'test'
+  ...
+# Subtest: the complete birthday cake fits below the closed lid and only grows after the panels open
+ok 22 - the complete birthday cake fits below the closed lid and only grows after the panels open
+  ---
+  duration_ms: 4.3921
+  type: 'test'
+  ...
+# Subtest: the crimson graduation curtain is an additional theme with graduation content
+ok 23 - the crimson graduation curtain is an additional theme with graduation content
+  ---
+  duration_ms: 0.8087
+  type: 'test'
+  ...
+# Subtest: every occasion has multiple designs with unique identifiers
+ok 24 - every occasion has multiple designs with unique identifiers
+  ---
+  duration_ms: 2.5437
+  type: 'test'
+  ...
+# Subtest: invitation dates remain the selected calendar day in all locales
+ok 25 - invitation dates remain the selected calendar day in all locales
+  ---
+  duration_ms: 49.4187
+  type: 'test'
+  ...
+# Subtest: calendar preserves European event timezone and escapes injected lines
+ok 26 - calendar preserves European event timezone and escapes injected lines
+  ---
+  duration_ms: 2.5088
+  type: 'test'
+  ...
+# Subtest: Stripe webhook rejects tampering, stale signatures and missing secrets
+ok 27 - Stripe webhook rejects tampering, stale signatures and missing secrets
+  ---
+  duration_ms: 1.9605
+  type: 'test'
+  ...
+# Subtest: packages: plain invitation has no dashboard, Journey and Print do
+ok 28 - packages: plain invitation has no dashboard, Journey and Print do
+  ---
+  duration_ms: 5.4843
+  type: 'test'
+  ...
+# Subtest: craft countdown follows the event timezone, including summer time, and stops at zero
+ok 29 - craft countdown follows the event timezone, including summer time, and stops at zero
+  ---
+  duration_ms: 45.6339
+  type: 'test'
+  ...
+# Subtest: curtain leaves meet along the entire closed seam before the pull begins
+ok 30 - curtain leaves meet along the entire closed seam before the pull begins
+  ---
+  duration_ms: 2.9444
+  type: 'test'
+  ...
+# Subtest: gathered fabric clears the text, remains finite, and settles without a position jump
+ok 31 - gathered fabric clears the text, remains finite, and settles without a position jump
+  ---
+  duration_ms: 7.354
+  type: 'test'
+  ...
+# Subtest: Sage cover is a real layered envelope with the wax attached to its flap
+ok 32 - Sage cover is a real layered envelope with the wax attached to its flap
+  ---
+  duration_ms: 2.9016
+  type: 'test'
+  ...
+# Subtest: the invitation stays hidden until the seal opens the flap, then rises as opaque paper
+ok 33 - the invitation stays hidden until the seal opens the flap, then rises as opaque paper
+  ---
+  duration_ms: 0.8362
+  type: 'test'
+  ...
+# Subtest: Sage opens as a real 3D envelope: flap on a hinge, seal on the flap, card slides out and comes forward
+ok 34 - Sage opens as a real 3D envelope: flap on a hinge, seal on the flap, card slides out and comes forward
+  ---
+  duration_ms: 1.6931
+  type: 'test'
+  ...
+# Subtest: the Castle Gates film design is in the collection and its files ship with the site
+ok 35 - the Castle Gates film design is in the collection and its files ship with the site
+  ---
+  duration_ms: 8.6446
+  type: 'test'
+  ...
+# Subtest: the second frame photo must be an uploaded image like the first
+ok 36 - the second frame photo must be an uploaded image like the first
+  ---
+  duration_ms: 44.9729
+  type: 'test'
+  ...
+# Subtest: Once Upon a Castle ships its film, stills and tracked surfaces
+ok 37 - Once Upon a Castle ships its film, stills and tracked surfaces
+  ---
+  duration_ms: 18.2608
+  type: 'test'
+  ...
+# Subtest: event phase follows the event timezone across midnight
+ok 38 - event phase follows the event timezone across midnight
+  ---
+  duration_ms: 38.2291
+  type: 'test'
+  ...
+# Subtest: meal details stay in the private response note and declines omit them
+ok 39 - meal details stay in the private response note and declines omit them
+  ---
+  duration_ms: 0.6206
+  type: 'test'
+  ...
+# Subtest: Ivory covers every existing occasion with complete cover and reveal assets
+ok 40 - Ivory covers every existing occasion with complete cover and reveal assets
+  ---
+  duration_ms: 66.1572
+  type: 'test'
+  ...
+# Subtest: gender-relevant occasions have boys, girls and neutral embroidery, not only recolours
+ok 41 - gender-relevant occasions have boys, girls and neutral embroidery, not only recolours
+  ---
+  duration_ms: 0.9893
+  type: 'test'
+  ...
+# Subtest: every Ivory design has its own plaque silhouette and an ornament
+ok 42 - every Ivory design has its own plaque silhouette and an ornament
+  ---
+  duration_ms: 1.245
+  type: 'test'
+  ...
+# Subtest: combined filters never mix families, occasions or intended audiences
+ok 43 - combined filters never mix families, occasions or intended audiences
+  ---
+  duration_ms: 1.0665
+  type: 'test'
+  ...
+# Subtest: personalised monograms use the names instead of hard-coded wedding initials
+ok 44 - personalised monograms use the names instead of hard-coded wedding initials
+  ---
+  duration_ms: 1.8134
+  type: 'test'
+  ...
+# Subtest: occasion samples replace inherited wedding content and set suitable local times
+ok 45 - occasion samples replace inherited wedding content and set suitable local times
+  ---
+  duration_ms: 1.0241
+  type: 'test'
+  ...
+# Subtest: memory contributions reject missing consent, invalid image types and missing guest links before DB access
+ok 46 - memory contributions reject missing consent, invalid image types and missing guest links before DB access
+  ---
+  duration_ms: 7.7488
+  type: 'test'
+  ...
+# Subtest: wish contributes through capability RPC and revoked capability is denied
+ok 47 - wish contributes through capability RPC and revoked capability is denied
+  ---
+  duration_ms: 2.6196
+  type: 'test'
+  ...
+# Subtest: seating mutations require a signed-in host
+ok 48 - seating mutations require a signed-in host
+  ---
+  duration_ms: 1.0281
+  type: 'test'
+  ...
+# Subtest: photo reads require both the guest capability and the photo ID
+ok 49 - photo reads require both the guest capability and the photo ID
+  ---
+  duration_ms: 0.6761
+  type: 'test'
+  ...
+# Subtest: every existing occasion has a distinct door, reveal and chiffon palette
+ok 50 - every existing occasion has a distinct door, reveal and chiffon palette
+  ---
+  duration_ms: 49.1748
+  type: 'test'
+  ...
+# Subtest: filters include only the chosen occasion and never hide its bow invitation
+ok 51 - filters include only the chosen occasion and never hide its bow invitation
+  ---
+  duration_ms: 2.6458
+  type: 'test'
+  ...
+# Subtest: occasion samples retain the selected occasion and replace inherited wedding content
+ok 52 - occasion samples retain the selected occasion and replace inherited wedding content
+  ---
+  duration_ms: 2.1099
+  type: 'test'
+  ...
+# Subtest: Pearl & Promise tracking is locked to its own exact video, independently of Castle films
+ok 53 - Pearl & Promise tracking is locked to its own exact video, independently of Castle films
+  ---
+  duration_ms: 42.2611
+  type: 'test'
+  ...
+# Subtest: the opening book, all four portraits, and the last invitation each have tracked surfaces
+ok 54 - the opening book, all four portraits, and the last invitation each have tracked surfaces
+  ---
+  duration_ms: 3.3526
+  type: 'test'
+  ...
+# Subtest: tracked surfaces never contain invalid coordinates or opacity
+ok 55 - tracked surfaces never contain invalid coordinates or opacity
+  ---
+  duration_ms: 2.5683
+  type: 'test'
+  ...
+# Subtest: Pearl never fades back to source portraits during rotations or page turns
+ok 56 - Pearl never fades back to source portraits during rotations or page turns
+  ---
+  duration_ms: 3.8146
+  type: 'test'
+  ...
+# Subtest: Pearl photos keep continuous physical frame paths through the orbit
+ok 57 - Pearl photos keep continuous physical frame paths through the orbit
+  ---
+  duration_ms: 3.319
+  type: 'test'
+  ...
+# Subtest: ribbon releases before gravity starts and has fallen clear before reveal
+ok 58 - ribbon releases before gravity starts and has fallen clear before reveal
+  ---
+  duration_ms: 1.9842
+  type: 'test'
+  ...
+# Subtest: ribbon surfaces remain finite throughout untying, including mesh edges
+ok 59 - ribbon surfaces remain finite throughout untying, including mesh edges
+  ---
+  duration_ms: 11.2968
+  type: 'test'
+  ...
+# Subtest: rose chiffon cloth stays finite through the complete preserved untying sequence
+ok 60 - rose chiffon cloth stays finite through the complete preserved untying sequence
+  ---
+  duration_ms: 36.0631
+  type: 'test'
+  ...
+# Subtest: the wrapped knot has a closed fabric seam before it unravels
+ok 61 - the wrapped knot has a closed fabric seam before it unravels
+  ---
+  duration_ms: 0.7913
+  type: 'test'
+  ...
+# Subtest: rose cloth falls clear rather than disappearing during its release
+ok 62 - rose cloth falls clear rather than disappearing during its release
+  ---
+  duration_ms: 0.262
+  type: 'test'
+  ...
+# Subtest: Sage suites differ in structure and artwork, with no shared reveal backgrounds
+ok 63 - Sage suites differ in structure and artwork, with no shared reveal backgrounds
+  ---
+  duration_ms: 19.2097
+  type: 'test'
+  ...
+# Subtest: every existing occasion has a Sage envelope with available reveal art and matching stationery
+ok 64 - every existing occasion has a Sage envelope with available reveal art and matching stationery
+  ---
+  duration_ms: 11.4619
+  type: 'test'
+  ...
+# Subtest: Sage occasion and audience filters keep boys, girls and neutral envelopes distinct
+ok 65 - Sage occasion and audience filters keep boys, girls and neutral envelopes distinct
+  ---
+  duration_ms: 1.1524
+  type: 'test'
+  ...
+# Subtest: paper stock covers the full panel without transparent top or bottom bands
+ok 66 - paper stock covers the full panel without transparent top or bottom bands
+  ---
+  duration_ms: 2.325
+  type: 'test'
+  ...
+# Subtest: loading fallback uses the chosen design, never a hardcoded green stock
+ok 67 - loading fallback uses the chosen design, never a hardcoded green stock
+  ---
+  duration_ms: 2.2943
+  type: 'test'
+  ...
+# Subtest: flap fold stays attached to the envelope body throughout rotation
+ok 68 - flap fold stays attached to the envelope body throughout rotation
+  ---
+  duration_ms: 0.4235
+  type: 'test'
+  ...
+# Subtest: original Sage artwork never borrows an Ivory door asset
+ok 69 - original Sage artwork never borrows an Ivory door asset
+  ---
+  duration_ms: 0.2786
+  type: 'test'
+  ...
+# Subtest: the ten envelope flap outlines are distinct and remain inside physical paper bounds
+ok 70 - the ten envelope flap outlines are distinct and remain inside physical paper bounds
+  ---
+  duration_ms: 2.2988
+  type: 'test'
+  ...
+# Subtest: each first invitation sheet has a different composition and preserves editable event details
+ok 71 - each first invitation sheet has a different composition and preserves editable event details
+  ---
+  duration_ms: 3.0867
+  type: 'test'
+  ...
+# Subtest: suggestions keep each party together and use the best fitting table
+ok 72 - suggestions keep each party together and use the best fitting table
+  ---
+  duration_ms: 18.4217
+  type: 'test'
+  ...
+# Subtest: parties are left unseated when no table can hold them
+ok 73 - parties are left unseated when no table can hold them
+  ---
+  duration_ms: 1.4644
+  type: 'test'
+  ...
+# Subtest: server rejects overcapacity, unknown guests, duplicate tables and invalid capacities
+ok 74 - server rejects overcapacity, unknown guests, duplicate tables and invalid capacities
+  ---
+  duration_ms: 1.045
+  type: 'test'
+  ...
+# Subtest: declining after assignment removes the party from the saved plan
+ok 75 - declining after assignment removes the party from the saved plan
+  ---
+  duration_ms: 0.4949
+  type: 'test'
+  ...
+# Subtest: shared dashboard requires a guest capability and cannot be written
+ok 76 - shared dashboard requires a guest capability and cannot be written
+  ---
+  duration_ms: 6.2173
+  type: 'test'
+  ...
+# Subtest: shared dashboard rechecks permission for every request and maps revoked access to 403
+ok 77 - shared dashboard rechecks permission for every request and maps revoked access to 403
+  ---
+  duration_ms: 2.2014
+  type: 'test'
+  ...
+# Subtest: anonymous callers cannot grant dashboard access
+ok 78 - anonymous callers cannot grant dashboard access
+  ---
+  duration_ms: 1.6177
+  type: 'test'
+  ...
+# Subtest: printable stationery escapes guest content and rejects CSS injection
+ok 79 - printable stationery escapes guest content and rejects CSS injection
+  ---
+  duration_ms: 0.7704
+  type: 'test'
+  ...
+# Subtest: every event world has multiple invitations and its own checklist
+ok 80 - every event world has multiple invitations and its own checklist
+  ---
+  duration_ms: 1.9369
+  type: 'test'
+  ...
+# Subtest: world progress comes from published invitation, scoped RSVPs and saved experts
+ok 81 - world progress comes from published invitation, scoped RSVPs and saved experts
+  ---
+  duration_ms: 4.4878
+  type: 'test'
+  ...
+# Subtest: an empty world does not fabricate invitation or RSVP progress
+ok 82 - an empty world does not fabricate invitation or RSVP progress
+  ---
+  duration_ms: 0.2401
+  type: 'test'
+  ...
+# Subtest: legacy saved invitations retain the occasion of their design
+ok 83 - legacy saved invitations retain the occasion of their design
+  ---
+  duration_ms: 0.28
+  type: 'test'
+  ...
+# Subtest: external websites reject executable schemes and directory URLs are secure
+ok 84 - external websites reject executable schemes and directory URLs are secure
+  ---
+  duration_ms: 0.4036
+  type: 'test'
+  ...
+1..84
+# tests 84
+# suites 0
+# pass 84
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 629.1102
