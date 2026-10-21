@@ -7,7 +7,7 @@ function clothTexture() {
   canvas.width = canvas.height = 256;
   const ctx = canvas.getContext('2d'), pixels = ctx.createImageData(256, 256);
   for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
-    const weave = ((x + y) & 1) ? 2.4 : -2.4;
+    const weave = Math.sin(x * 1.7) * 5 + Math.sin(y * 1.7) * 4 + (((x + y) & 1) ? 2.4 : -2.4);
     const grain = Math.sin(x * .21 + Math.sin(y * .08)) * 1.8 + Math.cos(y * .18) * 1.5;
     const value = 246 + weave + grain;
     const i = (y * 256 + x) * 4;
@@ -72,13 +72,13 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
   const weave = clothTexture();
   const relief = clothReliefTexture();
   const material = new THREE.MeshPhysicalMaterial({
-    color: '#d8a5ad', map: weave, metalness: 0, roughness: .44,
-    specularIntensity: .7,
-    sheen: .92, sheenColor: '#f7e5e3', sheenRoughness: .34,
+    color: '#d8a5ad', map: weave, metalness: 0, roughness: .76,
+    specularIntensity: .3,
+    sheen: .92, sheenColor: '#f7e5e3', sheenRoughness: .72,
     anisotropy: .24, anisotropyRotation: Math.PI / 2,
-    bumpMap: relief, bumpScale: .018, side: THREE.DoubleSide,
-    clearcoat: .07, clearcoatRoughness: .52,
-    envMapIntensity: .52,
+    bumpMap: relief, bumpScale: .028, side: THREE.DoubleSide,
+    clearcoat: 0, clearcoatRoughness: 1,
+    envMapIntensity: .3,
   });
   material.shadowSide = THREE.DoubleSide;
   const nu = 96, nv = 18, indices = [];

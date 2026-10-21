@@ -1,3 +1,4 @@
+import SagePreview from './SagePreview';
 import React,{useEffect,useRef,useState} from 'react';
 import {ArrowDown,ArrowRight,RotateCcw,Copy,Check} from 'lucide-react';
 import {cinemaThemes,sceneFor,cinemaEvent} from './cinemaThemes';
@@ -48,7 +49,7 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
    <span className="atelier-place">{event.venue}</span>
   </div>
   {theme.kind==='rose'&&<><img className="ribbon-stage-still" src="/rose-ribbon-still.png" alt="" aria-hidden="true"/><canvas className="atelier-ribbon-canvas" ref={ribbonCanvas} aria-hidden="true"/></>}
-  {theme.kind==='sage'?<SageEnvelope opened={opened} onComplete={setRevealed} stage={root} inviteLine={{en:'You are invited',de:'Du bist eingeladen',fr:'Vous êtes invité'}[lang]||'You are invited'} guestLine={guest?.name?({en:'For ',de:'Für ',fr:'Pour '}[lang]||'For ')+guest.name:''} card={{overline:theme.overline||c.invited,names:event.names,subtitle:event.subtitle||c.celebrate,date:dateLabel(event.date,lang)+(event.time?' · '+event.time:''),venue:event.venue||'',font:event.font&&event.font!=='classic'?font.family:null}}/>:<div className="atelier-curtains" aria-hidden="true"><div className="atelier-leaf leaf-left" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/><div className="atelier-leaf leaf-right" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/></div>}
+  {theme.kind==='sage'?<SageEnvelope design={theme} opened={opened} onComplete={setRevealed} stage={root} inviteLine={{en:'You are invited',de:'Du bist eingeladen',fr:'Vous êtes invité'}[lang]||'You are invited'} guestLine={guest?.name?({en:'For ',de:'Für ',fr:'Pour '}[lang]||'For ')+guest.name:''} card={{design:theme,overline:theme.overline||c.invited,names:event.names,subtitle:event.subtitle||c.celebrate,date:dateLabel(event.date,lang)+(event.time?' · '+event.time:''),venue:event.venue||'',font:event.font&&event.font!=='classic'?font.family:null}}/>:<div className="atelier-curtains" aria-hidden="true"><div className="atelier-leaf leaf-left" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/><div className="atelier-leaf leaf-right" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/></div>}
   {!opened&&<button className={`atelier-open-control ${theme.kind==='rose'?'with-ribbon':''}`} onClick={onOpen} aria-label={c.open}>
     {theme.kind==='rose'?null:theme.kind==='sage'?<span className="sage-seal-hitarea" aria-hidden="true"/>:<span className="atelier-monogram">{names.map(n=>n.trim()[0]).join(' & ')}</span>}
     <span className="atelier-touch">{c.touch}</span>
@@ -58,7 +59,7 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
   {revealed&&<button className="atelier-replay" aria-label={c.replay} onClick={()=>{onReplay();if(theme.kind==='rose'||theme.kind==='sage')root.current?.closest('.guest-experience')?.scrollTo({top:0,behavior:'instant'})}}><RotateCcw size={15}/></button>}
  </section>
 }
-function SageEnvelope({opened,onComplete,stage,card,guestLine,inviteLine}){
+function SageEnvelope({design,opened,onComplete,stage,card,guestLine,inviteLine}){
  // A real 3D envelope (see sageEnvelope.js). The layered CSS envelope below stays as the fallback
  // when WebGL is not available.
  const canvas=useRef(null),engine=useRef(null),openedRef=useRef(opened),[gl,setGl]=useState(false),[shape,setShape]=useState(0);
@@ -67,12 +68,12 @@ function SageEnvelope({opened,onComplete,stage,card,guestLine,inviteLine}){
  const placeSeal=(p)=>{const el=stage.current;if(!el||!p)return;el.style.setProperty('--sage-seal-x',p.x+'px');el.style.setProperty('--sage-seal-y',p.y+'px');el.style.setProperty('--sage-seal-r',p.r+'px')};
  useEffect(()=>{let dead=false;
   import('./sageEnvelope').then(async({createSageEnvelope})=>{if(dead||!canvas.current)return;
-   try{const e=createSageEnvelope(canvas.current,{card,guestLine:guestRef.current,inviteLine,onSeal:placeSeal,onShape:()=>setShape(n=>n+1)});engine.current=e;await e.ready;if(dead)return;setGl(true);
+   try{const e=createSageEnvelope(canvas.current,{design,card,guestLine:guestRef.current,inviteLine,onSeal:placeSeal,onShape:()=>setShape(n=>n+1)});engine.current=e;await e.ready;if(dead)return;setGl(true);
     if(openedRef.current){matchMedia('(prefers-reduced-motion: reduce)').matches?(e.finish(),onComplete(true)):e.play(()=>onComplete(true))}}
    catch{setGl(false)}}).catch(()=>setGl(false));
   return()=>{dead=true;engine.current?.destroy();engine.current=null};
   // eslint-disable-next-line react-hooks/exhaustive-deps
- },[shape]);
+ },[shape,design.id]);
  const first=useRef(true);
  useEffect(()=>{if(first.current){first.current=false;return}engine.current?.setCard(card)
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,12 +96,12 @@ function SageEnvelope({opened,onComplete,stage,card,guestLine,inviteLine}){
 }
 export function CinemaCollection({onPreview,onCreate,notify,onBeachDemo,occasion='All designs',onOccasionChange,lang='en'}){
  const [copied,setCopied]=useState(''),[showAll,setShowAll]=useState(true);
- const [family,setFamily]=useState(()=>new URLSearchParams(location.search).get('collection')==='ivory'?'ivory':'all');
+ const [family,setFamily]=useState(()=>{const requested=new URLSearchParams(location.search).get('collection');return ['ivory','sage','ribbon'].includes(requested)?requested:'all'});
  const [audienceChoice,setAudienceChoice]=useState({occasion,audience:'all'});
  const audience=audienceChoice.occasion===occasion?audienceChoice.audience:'all';
  const matching=filterInvitationDesigns(cinemaThemes,{occasion,family,audience});
- const labels={de:{'All designs':'Alle Anlässe',Wedding:'Hochzeit',Birthday:'Geburtstag',Engagement:'Verlobung','Baby shower':'Babyparty',Graduation:'Abschluss','Dinner party':'Dinnerparty',Anniversary:'Jubiläum','Corporate event':'Firmenevent',Christening:'Taufe','Seasonal celebration':'Saisonfest',all:'Alle Designs',ribbon:'Schleifen & Türen',ivory:'Elfenbein & Papier',other:'Filme & mehr',Boys:'Jungen',Girls:'Mädchen',Neutral:'Neutral'},fr:{'All designs':'Toutes les occasions',Wedding:'Mariage',Birthday:'Anniversaire',Engagement:'Fiançailles','Baby shower':'Fête prénatale',Graduation:'Remise de diplôme','Dinner party':'Dîner',Anniversary:'Anniversaire de mariage','Corporate event':'Événement professionnel',Christening:'Baptême','Seasonal celebration':'Fête de saison',all:'Tous les modèles',ribbon:'Rubans & portes',ivory:'Ivoire & papier',other:'Films & plus',Boys:'Garçons',Girls:'Filles',Neutral:'Neutre'}};
- const familyLabels={all:'All styles',ribbon:'Ribbon & doors',ivory:'Ivory & paper',other:'Films & more'};
+ const labels={de:{'All designs':'Alle Anlässe',Wedding:'Hochzeit',Birthday:'Geburtstag',Engagement:'Verlobung','Baby shower':'Babyparty',Graduation:'Abschluss','Dinner party':'Dinnerparty',Anniversary:'Jubiläum','Corporate event':'Firmenevent',Christening:'Taufe','Seasonal celebration':'Saisonfest',all:'Alle Designs',ribbon:'Schleifen & Türen',sage:'Siegel & Umschläge',ivory:'Elfenbein & Papier',other:'Filme & mehr',Boys:'Jungen',Girls:'Mädchen',Neutral:'Neutral'},fr:{'All designs':'Toutes les occasions',Wedding:'Mariage',Birthday:'Anniversaire',Engagement:'Fiançailles','Baby shower':'Fête prénatale',Graduation:'Remise de diplôme','Dinner party':'Dîner',Anniversary:'Anniversaire de mariage','Corporate event':'Événement professionnel',Christening:'Baptême','Seasonal celebration':'Fête de saison',all:'Tous les modèles',ribbon:'Rubans & portes',sage:'Sceaux & enveloppes',ivory:'Ivoire & papier',other:'Films & plus',Boys:'Garçons',Girls:'Filles',Neutral:'Neutre'}};
+ const familyLabels={all:'All styles',ribbon:'Ribbon & doors',sage:'Wax & envelopes',ivory:'Ivory & paper',other:'Films & more'};
  const label=o=>labels[lang]?.[o]||o;
  const eventFor=t=>cinemaEvent(t,defaultEvent(templates.find(x=>x.occasion===t.occasion)||templates[0]));
  async function copy(t){try{await navigator.clipboard.writeText(location.origin+'/?cinema='+t.id);setCopied(t.id);notify('Preview link copied')}catch{notify('Open the invitation and copy its address')}}
@@ -113,7 +114,7 @@ export function CinemaCollection({onPreview,onCreate,notify,onBeachDemo,occasion
   <div className="atelier-three">{(showAll?matching:matching.slice(0,6)).map((t,i)=><article key={t.id}>
    <button className={'atelier-poster poster-'+t.kind} style={sceneVariables(t)} onClick={()=>onPreview(eventFor(t))} aria-label={'Experience '+t.name}>
     <img src={'/'+t.cover+'-sm.webp'} srcSet={'/'+t.cover+'-sm.webp 600w, /'+t.cover+'.webp 941w'} sizes="(max-width: 760px) 90vw, 30vw" width="600" height="1066" loading="lazy" decoding="async" alt={t.name+' invitation artwork'}/>
-    {t.kind==='rose'?<RibbonPreview/>:t.kind==='sage'?<img className="atelier-wax" src="/maison-wax-seal.png" alt=""/>:t.kind==='ivory'?<IvoryPlaque names={t.names} shape={t.plaqueShape||(t.id==='woodland-wish'?'woodland-keepsake':'ivory')} palette={t}/>:null}
+    {t.kind==='rose'?<RibbonPreview/>:t.kind==='sage'?<SagePreview theme={t}/>:t.kind==='ivory'?<IvoryPlaque names={t.names} shape={t.plaqueShape||(t.id==='woodland-wish'?'woodland-keepsake':'ivory')} palette={t}/>:null}
     {['graduation','graduation-curtain'].includes(t.kind)&&<span className="birthday-poster-title graduation-poster-title"><small>THE FUTURE IS YOURS</small>{t.kind==='graduation-curtain'?'The Crimson Ovation':'The next chapter'}</span>}
     {t.kind==='birthday'&&<><span className="birthday-poster-title"><small>A LITTLE SOMETHING JUST FOR YOU</small>A birthday worth the noise</span><span className="birthday-poster-gift" aria-hidden="true">✦</span></>}
     {['film','story'].includes(t.kind)&&<span className="film-poster-title"><small>{t.kind==='film'?'A FILM INVITATION':'A FAIRYTALE FILM'}</small>{t.name}</span>}

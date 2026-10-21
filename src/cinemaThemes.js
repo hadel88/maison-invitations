@@ -1,3 +1,4 @@
+import {sageThemes,sageEvent} from './sageDesigns.js';
 import {ivoryThemes,ivoryEvent} from './ivoryDesigns.js';
 import {occasionScenes,goldOccasionScenes,occasionEvent} from './occasionScenes.js';
 const originalThemes = [
@@ -16,13 +17,15 @@ const originalThemes = [
  {id:'rose-engagement',name:'The Rose Promise',occasion:'Engagement',audience:'Romantic',kind:'rose',image:'atelier-rose',cover:'atelier-rose-cover',color:'#c29789',ink:'#634b45',names:'Emma & Louis',line:'The beginning of our forever.',tag:'ROSES · RIBBON · OUR NEXT CHAPTER',motif:'ribbon'},
 ];
 export const cinemaThemes = [
+ ...sageThemes,
  ...[...occasionScenes,...goldOccasionScenes].map(scene=>({...scene,kind:'rose',audience:'Celebration',color:scene.ink,motif:'ribbon',occasionDoor:true,tag:scene.bow.toUpperCase()+' CHIFFON · '+scene.occasion.toUpperCase()})),
  ...ivoryThemes,
- ...originalThemes.filter(theme=>![...occasionScenes,...ivoryThemes].some(scene=>scene.id===theme.id))
+ ...originalThemes.filter(theme=>theme.kind!=='sage'&&![...occasionScenes,...ivoryThemes].some(scene=>scene.id===theme.id))
 ];
 export const cinemaGroups=['The collection'];
 export function sceneFor(event={}){return cinemaThemes.find(t=>t.id===event.scene)||cinemaThemes[0]}
 export function cinemaEvent(theme,base={}){
+ if(theme.sageCollection)return sageEvent(theme,base);
  if(theme.ivoryCollection)return ivoryEvent(theme,base);
  if(theme.occasionDoor)return occasionEvent(theme,base);
  const event={...base,scene:theme.id,occasion:theme.occasion,names:theme.names,subtitle:theme.line,music:'soft',worldTheme:'garden'};

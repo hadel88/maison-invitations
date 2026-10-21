@@ -27,7 +27,7 @@ export function sceneVariables(scene={}) {
  const special=scene.kind==='sage'?{paper:'#e9eddc',ink:'#46513e',accent:'#a99563'}:scene.kind==='graduation-curtain'?{paper:'#f0e2e3',ink:'#5b2e3b',accent:'#9d5260'}:{};
  const paper=scene.paper||special.paper||base.paper,ink=scene.ink||special.ink||base.ink;
  const accent=scene.gold||(scene.bow==='Gold'?'#b58a48':scene.color||special.accent||base.color||ink);
- return {'--ribbon-filter':scene.ribbonFilter||'none','--occasion-paper':paper,'--occasion-ink':ink,'--occasion-accent':accent};
+ return {'--stationery-radius':(scene.radius??16)+'px','--ribbon-filter':scene.ribbonFilter||'none','--occasion-paper':paper,'--occasion-ink':ink,'--occasion-accent':accent};
 }
 export function occasionEvent(theme,base={}) {
  const hour=['Baby shower','Christening'].includes(theme.occasion)?'14':'18';
