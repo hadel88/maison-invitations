@@ -43,6 +43,20 @@ function clothReliefTexture() {
   return texture;
 }
 
+// Short, raised pile follows the existing cloth surface. These sparse fibres
+// soften its silhouette rather than painting a darker colour onto the bow.
+function velvetPileTexture() {
+  const c=document.createElement('canvas');c.width=c.height=512;
+  const g=c.getContext('2d');g.fillStyle='#000';g.fillRect(0,0,512,512);
+  for(let i=0;i<26000;i++){
+    const hash=n=>{const v=Math.sin(n*127.1+91.7)*43758.5453;return v-Math.floor(v)};
+    const x=hash(i*3)*512,y=hash(i*3+1)*512;
+    g.strokeStyle=`rgba(255,255,255,${.4+hash(i*3+2)*.6})`;
+    g.lineWidth=.6;g.beginPath();g.moveTo(x,y);g.lineTo(x+.45,y+1.5+hash(i)*2);g.stroke();
+  }
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(3,1.8);return t;
+}
+
 export function createRibbonRenderer(canvas, { onReady, onComplete, onError, static: still = false } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: still, powerPreference: 'low-power' });
   renderer.setClearColor(0x000000, 0);
@@ -79,11 +93,21 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
     specularIntensity: .16,
     sheen: 1, sheenColor: '#e8bcc6', sheenRoughness: .88,
     anisotropy: 0, anisotropyRotation: Math.PI / 2,
-    bumpMap: relief, bumpScale: .009, side: THREE.DoubleSide,
+    bumpMap: relief, bumpScale: .014, side: THREE.DoubleSide,
     clearcoat: 0, clearcoatRoughness: 1,
     envMapIntensity: .2,
   });
   material.shadowSide = THREE.DoubleSide;
+  const pileTexture=velvetPileTexture();
+  const pileMaterials=[.006,.012,.02].map((height,index)=>{
+    const pile=new THREE.MeshPhysicalMaterial({color:'#d8a5ad',alphaMap:pileTexture,transparent:true,
+      opacity:.42-index*.08,alphaTest:.09,depthWrite:false,roughness:1,metalness:0,
+      sheen:1,sheenColor:'#e8bcc6',sheenRoughness:.9,side:THREE.DoubleSide,envMapIntensity:.2});
+    pile.onBeforeCompile=shader=>{shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',
+      `#include <begin_vertex>\n transformed += normalize(objectNormal) * ${height.toFixed(3)};`)};
+    pile.customProgramCacheKey=()=>`maison-raised-velvet-${height}`;
+    return pile;
+  });
   const nu = 96, nv = 18, indices = [];
   for (let u = 0; u < nu; u++) for (let v = 0; v < nv; v++) {
     const a = u * (nv + 1) + v;
@@ -104,6 +128,10 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
     const mesh = new THREE.Mesh(geometry, material);
     mesh.castShadow = mesh.receiveShadow = true;
     mesh.frustumCulled = false;
+    // Shared animated geometry: no independent movement, timing or new bow shape.
+    for(const pileMaterial of pileMaterials){
+      const fibres=new THREE.Mesh(geometry,pileMaterial);fibres.frustumCulled=false;mesh.add(fibres);
+    }
     scene.add(mesh); surfaces.push({ geometry, positions, side, type, mesh });
   }
   for (const side of [-1, 1]) for (const type of ['band', 'tail', 'loop']) addSurface(side, type);
@@ -171,7 +199,7 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
       disposed = true; cancelAnimationFrame(raf); observer.disconnect();
       canvas.removeEventListener('webglcontextlost', lost);
       for (const s of surfaces) s.geometry.dispose();
-      material.dispose(); weave.dispose(); relief.dispose(); shadowGeometry.dispose(); shadowMaterial.dispose();
+      material.dispose(); weave.dispose(); relief.dispose(); pileTexture.dispose(); pileMaterials.forEach(m=>m.dispose()); shadowGeometry.dispose(); shadowMaterial.dispose();
       environment.dispose(); light.shadow.map?.dispose(); renderer.dispose();
     },
   };
