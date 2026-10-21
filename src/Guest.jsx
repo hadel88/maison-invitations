@@ -1,3 +1,4 @@
+import {SageInterior,SageReplyHeading} from './SageInterior';
 import React, { useState, useEffect, useRef } from "react";
 import {
   ArrowUpRight,
@@ -184,7 +185,7 @@ export function GuestExperience({
       <CinemaStage event={event} guest={guest} opened={opened} onOpen={()=>setOpened(true)} onReplay={()=>setOpened(false)} onAnswer={(r)=>{if(r){setResponse(r);setSaved(false);}setTimeout(()=>document.querySelector('.cinema-detail-sheet .rsvp')?.scrollIntoView({behavior:'smooth',block:'start'}),60)}} lang={lang} preview={preview}/>
       {opened && (
         <div className="cinema-detail-sheet" aria-label="Invitation details and RSVP">
-        <div className="opened-invite">
+        <div className="opened-invite">{sceneFor(event).kind === 'sage' && <SageInterior theme={sceneFor(event)} event={event} lang={lang}/> }
           {sceneFor(event).kind==='ivory'&&<IvoryDetailsHeading event={event} theme={sceneFor(event)}/>}
           <div className="guest-phase-message">{{en:{before:'The lovely anticipation begins.',today:'Today is the day. We are so happy you are here.',after:'Thank you for being part of our story.'},de:{before:'Die Vorfreude beginnt.',today:'Heute ist der große Tag. Schön, dass du da bist.',after:'Danke, dass du Teil unserer Geschichte bist.'},fr:{before:'Le bonheur de se retrouver approche.',today:'Le grand jour est arrivé. Quel bonheur de vous retrouver.',after:'Merci de faire partie de notre histoire.'}}[lang]?.[eventPhase(event)]}</div>
           {crafted ? <CraftWelcome event={event} lang={lang} /> : <p className="guest-message">{event.message}</p>}
@@ -286,7 +287,7 @@ export function GuestExperience({
               </ul>
             </section>
           )}
-          <section className="rsvp">
+          <section className="rsvp">{sceneFor(event).kind === 'sage' && <SageReplyHeading theme={sceneFor(event)} lang={lang}/> }
             <span className="eyebrow">WE SAVED YOU A PLACE</span>
             <h2>{c.rsvp}</h2>
             <p>{dateLabel(event.rsvpDeadline, lang)}</p>

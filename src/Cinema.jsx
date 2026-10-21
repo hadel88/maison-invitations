@@ -1,3 +1,4 @@
+import {SageAtmosphere} from './SageInterior';
 import SagePreview from './SagePreview';
 import React,{useEffect,useRef,useState} from 'react';
 import {ArrowDown,ArrowRight,RotateCcw,Copy,Check} from 'lucide-react';
@@ -39,7 +40,7 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
  if(theme.kind==='craft')return toned(<CraftStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>);
  return <section ref={root} className={`atelier-stage atelier-${theme.kind} ${opened?'atelier-opening':''} ${revealed?'atelier-revealed':''} ${ribbonReady?'ribbon-ready':''} ${theme.occasionDoor?'occasion-door':''}`} aria-label={theme.name+' invitation'} style={{'--atelier-ink':theme.ink,...sceneVariables(theme)}}>
   <div className="atelier-landscape" style={{backgroundImage:`url(/${theme.image}.webp)`}}/>
-  <div className="atelier-light" aria-hidden="true"/>
+  <div className="atelier-light" aria-hidden="true"/>{theme.kind === 'sage' && <SageAtmosphere theme={theme} active={revealed}/> }
   <div className="atelier-petals" aria-hidden="true">{Array.from({length:9},(_,i)=><i key={i} style={{left:`${i*13%100}%`,animationDelay:`${-i*2.3}s`,animationDuration:`${14+i}s`}}/>)}</div>
   <div className="atelier-inscription" aria-hidden={!revealed}>
    <span className="atelier-overline">{guest?.name?`FOR ${guest.name.toUpperCase()}`:(theme.overline||c.invited)}</span>

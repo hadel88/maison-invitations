@@ -2,6 +2,8 @@
 export function paperStock(image, design={}){
  const c=document.createElement('canvas');c.width=image.width;c.height=image.height;
  const g=c.getContext('2d');g.drawImage(image,0,0);
+ // Sculpted floral stocks retain their original relief and photographed highlights.
+ if(design.materialCover)return c;
  if(design.envelopePattern && design.envelopePattern!=='botanical'){
   paintOccasionPaper(g,c.width,c.height,design);return c;
  }

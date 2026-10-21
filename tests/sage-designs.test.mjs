@@ -14,8 +14,13 @@ test('Sage suites differ in structure and artwork, with no shared reveal backgro
  assert.ok(new Set(neutral.map(t=>t.sealShape)).size>=5,'wax dies need different outlines');
  for(const theme of sageThemes){
   assert.ok(theme.pageLayout&&theme.envelopePattern&&theme.sealShape,theme.id);
+  assert.ok(existsSync(new URL(`../public/${theme.materialCover}.webp`,import.meta.url)),`${theme.id}: sculpted paper artwork`);
   const parent=neutral.find(t=>t.occasion===theme.occasion);
   assert.equal(theme.pageLayout,parent.pageLayout,'audience variants retain their occasion format');
+ }
+ assert.equal(new Set(neutral.map(t=>t.materialCover)).size,neutral.length,'every occasion has distinct relief artwork');
+ for(const occasion of ['Birthday','Baby shower','Christening']){
+  assert.equal(new Set(sageThemes.filter(t=>t.occasion===occasion).map(t=>t.materialCover)).size,3,'audience artwork must differ beyond tint');
  }
 });
 

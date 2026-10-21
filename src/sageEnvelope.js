@@ -79,7 +79,7 @@ function flapPath(g, c, ox = 0, oy = 0) {
 }
 
 // green embossed paper for the outside, with the seams of a folded envelope
-function outsideTextures(img, guestLine, family, inviteLine, script) {
+function outsideTextures(img, guestLine, family, inviteLine, script, design={}) {
   const c = canvas(texW(1024), Math.round(texW(1024) * H / W));
   const pocket = canvas(c.width, c.height), flap = canvas(c.width, c.height);
   let g = pocket.getContext('2d');
@@ -116,7 +116,7 @@ function outsideTextures(img, guestLine, family, inviteLine, script) {
   flapPath(g, flap); g.save(); g.clip();
   // a pale sage border along the V edges, the way the flap paper is cut and folded
   { const px = flap.width / W; g.lineJoin = 'round';
-    g.strokeStyle = 'rgba(206,214,180,.82)'; g.lineWidth = 0.026 * px; gumPath(g, flap, 0.013); g.stroke();
+    g.strokeStyle = design.paper || 'rgba(206,214,180,.82)'; g.lineWidth = 0.026 * px; gumPath(g, flap, 0.013); g.stroke();
     g.strokeStyle = 'rgba(236,238,214,.5)'; g.lineWidth = 0.004 * px; gumPath(g, flap, 0.025); g.stroke(); }
   g.strokeStyle = 'rgba(246,240,216,.7)'; g.lineWidth = 6; flapPath(g, flap); g.stroke();
   g.strokeStyle = 'rgba(16,22,12,.45)'; g.lineWidth = 2.5; flapPath(g, flap); g.stroke();
@@ -316,7 +316,24 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
 
   // the card
   const cardMats = [0, 1, 2, 3, 4, 5].map((i) => new THREE.MeshStandardMaterial({ color: i === 4 ? 0xffffff : 0xf3eedf, roughness: 0.82, transparent: true, opacity: i === 4 ? 1 : .55, depthWrite: false }));
-  const cardMesh = new THREE.Mesh(new THREE.BoxGeometry(CARD_W, CARD_H, CARD_T), cardMats);
+  // Die-cut paper has a physical edge and casts its own silhouette, rather than a box behind a transparent image.
+  const paperShape = new THREE.Shape(), layout=design.pageLayout||'arch', x=CARD_W/2, y=CARD_H/2;
+  if(layout==='cameo')paperShape.absellipse(0,0,x*.98,y*.98,0,Math.PI*2,false,0);
+  else if(['arch','chapel','cloud'].includes(layout)){
+    const rise=layout==='cloud'?y*.6:y*.72;
+    paperShape.moveTo(-x,-y);paperShape.lineTo(x,-y);paperShape.lineTo(x,rise);
+    paperShape.bezierCurveTo(x,y*1.14,-x,y*1.14,-x,rise);paperShape.closePath();
+  }else if(layout==='diamond'){
+    paperShape.moveTo(0,y);paperShape.lineTo(x,y*.78);paperShape.lineTo(x,-y*.78);paperShape.lineTo(0,-y);paperShape.lineTo(-x,-y*.78);paperShape.lineTo(-x,y*.78);paperShape.closePath();
+  }else if(layout==='ticket'){
+    const notch=CARD_W*.045,cut=-y*.65;
+    paperShape.moveTo(-x,-y);paperShape.lineTo(x,-y);paperShape.lineTo(x,cut-notch);paperShape.absarc(x,cut,notch,-Math.PI/2,-Math.PI*1.5,true);paperShape.lineTo(x,y);paperShape.lineTo(-x,y);paperShape.lineTo(-x,cut+notch);paperShape.absarc(-x,cut,notch,Math.PI/2,-Math.PI/2,true);paperShape.closePath();
+  }else{paperShape.moveTo(-x,-y);paperShape.lineTo(x,-y);paperShape.lineTo(x,y);paperShape.lineTo(-x,y);paperShape.closePath();}
+  const paperGeo=new THREE.ExtrudeGeometry(paperShape,{depth:CARD_T,bevelEnabled:false,curveSegments:48});paperGeo.translate(0,0,-CARD_T/2);
+  const paperPos=paperGeo.attributes.position,paperUV=paperGeo.attributes.uv;
+  for(let i=0;i<paperPos.count;i++)paperUV.setXY(i,paperPos.getX(i)/CARD_W+.5,paperPos.getY(i)/CARD_H+.5);
+  paperGeo.groups.forEach(group=>{group.materialIndex=group.materialIndex===0?4:0});
+  const cardMesh = new THREE.Mesh(paperGeo, cardMats);
   cardMesh.castShadow = true; cardMesh.receiveShadow = true;
   const cardGroup = new THREE.Group(); cardGroup.add(cardMesh); cardGroup.scale.setScalar(.78); env.add(cardGroup);
 
@@ -403,14 +420,14 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
 
   // textures
   const ready = (async () => {
-    const [coverImage, wax] = await Promise.all([loadImage('/atelier-sage-cover.webp'), loadImage('/maison-wax-seal.png')]);
+    const [coverImage, wax] = await Promise.all([loadImage(`/${design.materialCover || 'atelier-sage-cover'}.webp`), loadImage('/maison-wax-seal.png')]);
     if (dead) return;
     const cover=paperStock(coverImage,design);
     const family = "'Cormorant Garamond', Georgia, serif";
     if (guestLine) { try { await document.fonts.load(`italic 400 64px ${family}`); } catch { /* system font */ } }
     const script = "'Great Vibes', 'Parisienne', cursive";
     if (inviteLine) await loadScript();
-    const { pocket: pc, flap: fc } = outsideTextures(cover, guestLine, family, inviteLine, script);
+    const { pocket: pc, flap: fc } = outsideTextures(cover, guestLine, family, inviteLine, script, design);
     const linerCanvas = linerTexture(cover), liner = tex(linerCanvas);
     const gum = flapLinerTextures(linerCanvas), gumTex = tex(gum.color), gumRough = new THREE.CanvasTexture(gum.rough);
     for (const [m, map] of [[pocket.material, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.bumpMap = new THREE.CanvasTexture(paperRelief(map.image)); m.bumpScale = .018; m.roughness = .92; m.color.set(0xffffff); m.needsUpdate = true; }

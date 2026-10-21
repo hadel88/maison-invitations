@@ -3,7 +3,7 @@ import {paperStock,ornamentGlyph,invitationScript,waxStock} from './invitationMa
 const load=src=>new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=src});
 export default function SagePreview({theme}){
  const ref=useRef(null);
- useEffect(()=>{let dead=false;Promise.all([load('/atelier-sage-cover.webp'),load('/maison-wax-seal.png'),invitationScript()]).then(([cover,wax])=>{
+ useEffect(()=>{let dead=false;Promise.all([load(`/${theme.materialCover || 'atelier-sage-cover'}.webp`),load('/maison-wax-seal.png'),invitationScript()]).then(([cover,wax])=>{
   if(dead)return;const c=ref.current,g=c.getContext('2d');c.width=600;c.height=1066;
   const stock=paperStock(cover,theme);g.drawImage(stock,0,0,c.width,c.height);
   g.save();g.beginPath();g.moveTo(0,0);g.lineTo(600,0);g.lineTo(600,320);g.quadraticCurveTo(450,460,300,576);g.quadraticCurveTo(150,460,0,320);g.closePath();
