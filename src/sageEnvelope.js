@@ -13,10 +13,12 @@ import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js
 let W = 0.6; const H = 1;
 export const envelopeWidth = (aspect) => Math.max(0.6, aspect * 1.005);
 const TOP = H / 2;
+// the flap's sides start partway down the envelope, so the V is wide (tip ≈ 100°)
 const V_DIP = TOP - 0.36;                   // lowest point of the pocket's V opening
-const V_SIDE = TOP - 0.035;           // the pocket edge at the envelope's sides
-const FLAP_L = 0.63;                  // hinge → flap tip
-const FLAP_SIDE = 0.1;                // hinge → where the flap's sides turn to the tip
+const V_SIDE = TOP - 0.2;           // the pocket edge at the envelope's sides
+const FLAP_L = 0.62;                  // hinge → flap tip
+const FLAP_SIDE = 0.38;                // hinge → where the flap's sides turn to the tip
+const FLAP_MID = (FLAP_SIDE + FLAP_L) / 2 + 0.012; // a gentle outward curve along each edge
 const SEAL = 0.19;                    // seal diameter
 const CARD_W = 0.44, CARD_H = CARD_W * 1.4, CARD_T = 0.0025;
 const CARD_HIDDEN_Y = V_DIP - 0.012 - CARD_H / 2;
@@ -60,9 +62,9 @@ function flapPath(g, c, ox = 0, oy = 0) {
   const p = (x, y) => toPx(c, x + ox, y + oy);
   g.beginPath();
   g.moveTo(...p(-W / 2, TOP)); g.lineTo(...p(W / 2, TOP)); g.lineTo(...p(W / 2, TOP - FLAP_SIDE));
-  g.quadraticCurveTo(...p(W * 0.16, TOP - FLAP_L * 0.78), ...p(0.012, TOP - FLAP_L + 0.004));
+  g.quadraticCurveTo(...p(W * 0.25, TOP - FLAP_MID), ...p(0.012, TOP - FLAP_L + 0.004));
   g.quadraticCurveTo(...p(0, TOP - FLAP_L - 0.002), ...p(-0.012, TOP - FLAP_L + 0.004));
-  g.quadraticCurveTo(...p(-W * 0.16, TOP - FLAP_L * 0.78), ...p(-W / 2, TOP - FLAP_SIDE));
+  g.quadraticCurveTo(...p(-W * 0.25, TOP - FLAP_MID), ...p(-W / 2, TOP - FLAP_SIDE));
   g.closePath();
 }
 
@@ -119,8 +121,8 @@ function gumPath(g, c, inset) {
   const p = (x, y) => toPx(c, x, y);
   g.beginPath();
   g.moveTo(...p(W / 2 - inset * 0.2, TOP - FLAP_SIDE + inset * 0.15));
-  g.quadraticCurveTo(...p(W * 0.16 - inset * 0.3, TOP - FLAP_L * 0.78 + inset * 0.6), ...p(0, TOP - FLAP_L + inset * 1.05));
-  g.quadraticCurveTo(...p(-W * 0.16 + inset * 0.3, TOP - FLAP_L * 0.78 + inset * 0.6), ...p(-W / 2 + inset * 0.2, TOP - FLAP_SIDE + inset * 0.15));
+  g.quadraticCurveTo(...p(W * 0.25 - inset * 0.3, TOP - FLAP_MID + inset * 0.8), ...p(0, TOP - FLAP_L + inset * 1.05));
+  g.quadraticCurveTo(...p(-W * 0.25 + inset * 0.3, TOP - FLAP_MID + inset * 0.8), ...p(-W / 2 + inset * 0.2, TOP - FLAP_SIDE + inset * 0.15));
 }
 function flapLinerTextures(linerCanvas) {
   const c = canvas(linerCanvas.width, linerCanvas.height), g = c.getContext('2d');
@@ -244,9 +246,9 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal, onShape 
   // flap, hinged at the top edge. Tessellated so it can bend like paper.
   const flapShape = new THREE.Shape();
   flapShape.moveTo(-W / 2, 0); flapShape.lineTo(W / 2, 0); flapShape.lineTo(W / 2, -FLAP_SIDE);
-  flapShape.quadraticCurveTo(W * 0.16, -FLAP_L * 0.78, 0.012, -FLAP_L + 0.004);
+  flapShape.quadraticCurveTo(W * 0.25, -FLAP_MID, 0.012, -FLAP_L + 0.004);
   flapShape.quadraticCurveTo(0, -FLAP_L - 0.002, -0.012, -FLAP_L + 0.004);
-  flapShape.quadraticCurveTo(-W * 0.16, -FLAP_L * 0.78, -W / 2, -FLAP_SIDE);
+  flapShape.quadraticCurveTo(-W * 0.25, -FLAP_MID, -W / 2, -FLAP_SIDE);
   flapShape.closePath();
   let flapGeo = new THREE.ShapeGeometry(flapShape, 20);
   flapGeo = new TessellateModifier(0.035, 8).modify(flapGeo);
