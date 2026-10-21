@@ -48,7 +48,7 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
    <span className="atelier-place">{event.venue}</span>
   </div>
   {theme.kind==='rose'&&<><img className="ribbon-stage-still" src="/rose-ribbon-still.png" alt="" aria-hidden="true"/><canvas className="atelier-ribbon-canvas" ref={ribbonCanvas} aria-hidden="true"/></>}
-  {theme.kind==='sage'?<SageEnvelope opened={opened} onComplete={setRevealed} stage={root} guestLine={guest?.name?({en:'For ',de:'Für ',fr:'Pour '}[lang]||'For ')+guest.name:''} card={{overline:theme.overline||c.invited,names:event.names,subtitle:event.subtitle||c.celebrate,date:dateLabel(event.date,lang)+(event.time?' · '+event.time:''),venue:event.venue||'',font:event.font&&event.font!=='classic'?font.family:null}}/>:<div className="atelier-curtains" aria-hidden="true"><div className="atelier-leaf leaf-left" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/><div className="atelier-leaf leaf-right" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/></div>}
+  {theme.kind==='sage'?<SageEnvelope opened={opened} onComplete={setRevealed} stage={root} inviteLine={{en:'You are invited',de:'Du bist eingeladen',fr:'Vous êtes invité'}[lang]||'You are invited'} guestLine={guest?.name?({en:'For ',de:'Für ',fr:'Pour '}[lang]||'For ')+guest.name:''} card={{overline:theme.overline||c.invited,names:event.names,subtitle:event.subtitle||c.celebrate,date:dateLabel(event.date,lang)+(event.time?' · '+event.time:''),venue:event.venue||'',font:event.font&&event.font!=='classic'?font.family:null}}/>:<div className="atelier-curtains" aria-hidden="true"><div className="atelier-leaf leaf-left" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/><div className="atelier-leaf leaf-right" style={{backgroundImage:`url(/${theme.cover}.webp)`}}/></div>}
   {!opened&&<button className={`atelier-open-control ${theme.kind==='rose'?'with-ribbon':''}`} onClick={onOpen} aria-label={c.open}>
     {theme.kind==='rose'?null:theme.kind==='sage'?<span className="sage-seal-hitarea" aria-hidden="true"/>:<span className="atelier-monogram">{names.map(n=>n.trim()[0]).join(' & ')}</span>}
     <span className="atelier-touch">{c.touch}</span>
@@ -58,7 +58,7 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
   {revealed&&<button className="atelier-replay" aria-label={c.replay} onClick={()=>{onReplay();if(theme.kind==='rose'||theme.kind==='sage')root.current?.closest('.guest-experience')?.scrollTo({top:0,behavior:'instant'})}}><RotateCcw size={15}/></button>}
  </section>
 }
-function SageEnvelope({opened,onComplete,stage,card,guestLine}){
+function SageEnvelope({opened,onComplete,stage,card,guestLine,inviteLine}){
  // A real 3D envelope (see sageEnvelope.js). The layered CSS envelope below stays as the fallback
  // when WebGL is not available.
  const canvas=useRef(null),engine=useRef(null),openedRef=useRef(opened),[gl,setGl]=useState(false),[shape,setShape]=useState(0);
@@ -67,7 +67,7 @@ function SageEnvelope({opened,onComplete,stage,card,guestLine}){
  const placeSeal=(p)=>{const el=stage.current;if(!el||!p)return;el.style.setProperty('--sage-seal-x',p.x+'px');el.style.setProperty('--sage-seal-y',p.y+'px');el.style.setProperty('--sage-seal-r',p.r+'px')};
  useEffect(()=>{let dead=false;
   import('./sageEnvelope').then(async({createSageEnvelope})=>{if(dead||!canvas.current)return;
-   try{const e=createSageEnvelope(canvas.current,{card,guestLine:guestRef.current,onSeal:placeSeal,onShape:()=>setShape(n=>n+1)});engine.current=e;await e.ready;if(dead)return;setGl(true);
+   try{const e=createSageEnvelope(canvas.current,{card,guestLine:guestRef.current,inviteLine,onSeal:placeSeal,onShape:()=>setShape(n=>n+1)});engine.current=e;await e.ready;if(dead)return;setGl(true);
     if(openedRef.current){matchMedia('(prefers-reduced-motion: reduce)').matches?(e.finish(),onComplete(true)):e.play(()=>onComplete(true))}}
    catch{setGl(false)}}).catch(()=>setGl(false));
   return()=>{dead=true;engine.current?.destroy();engine.current=null};

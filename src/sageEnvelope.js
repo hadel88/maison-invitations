@@ -14,10 +14,10 @@ let W = 0.6; const H = 1;
 export const envelopeWidth = (aspect) => Math.max(0.6, aspect * 1.005);
 const TOP = H / 2;
 // the flap's sides start partway down the envelope, so the V is wide (tip ≈ 100°)
-const V_DIP = TOP - 0.36;                   // lowest point of the pocket's V opening
-const V_SIDE = TOP - 0.2;           // the pocket edge at the envelope's sides
-const FLAP_L = 0.62;                  // hinge → flap tip
-const FLAP_SIDE = 0.38;                // hinge → where the flap's sides turn to the tip
+const V_DIP = TOP - 0.3;                   // lowest point of the pocket's V opening
+const V_SIDE = TOP - 0.16;           // the pocket edge at the envelope's sides
+const FLAP_L = 0.54;                  // hinge → flap tip
+const FLAP_SIDE = 0.3;                // hinge → where the flap's sides turn to the tip
 const FLAP_MID = (FLAP_SIDE + FLAP_L) / 2 + 0.012; // a gentle outward curve along each edge
 const SEAL = 0.19;                    // seal diameter
 const CARD_W = 0.44, CARD_H = CARD_W * 1.4, CARD_T = 0.0025;
@@ -38,6 +38,15 @@ const mix = (a, b, x) => a + (b - a) * x;
 
 function loadImage(src) {
   return new Promise((ok, no) => { const i = new Image(); i.decoding = 'async'; i.onload = () => ok(i); i.onerror = no; i.src = src; });
+}
+// the script font for "You are invited" ships with the site (Great Vibes, OFL)
+async function loadScript() {
+  try {
+    if (![...document.fonts].some((f) => f.family.replace(/['"]/g, '') === 'Great Vibes')) {
+      const f = new FontFace('Great Vibes', "url(/fonts/great-vibes-400.woff2) format('woff2')");
+      document.fonts.add(await f.load());
+    }
+  } catch { /* falls back to the next script font */ }
 }
 function canvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 
@@ -69,7 +78,7 @@ function flapPath(g, c, ox = 0, oy = 0) {
 }
 
 // green embossed paper for the outside, with the seams of a folded envelope
-function outsideTextures(img, guestLine, family) {
+function outsideTextures(img, guestLine, family, inviteLine, script) {
   const c = canvas(texW(1024), Math.round(texW(1024) * H / W));
   const pocket = canvas(c.width, c.height), flap = canvas(c.width, c.height);
   let g = pocket.getContext('2d');
@@ -81,9 +90,19 @@ function outsideTextures(img, guestLine, family) {
   }
   // the pocket's cut edge catches the light
   line([[-W / 2, V_SIDE - 0.002], [0, V_DIP - 0.002], [W / 2, V_SIDE - 0.002]], 'rgba(238,232,206,.55)', 2.4);
+  if (inviteLine) { // pressed into the paper in dark ink, like a letterpress line
+    g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
+    const [x, y] = toPx(pocket, 0, -0.19), px = pocket.width / W;
+    let size = 0.052 * px; g.font = `${size}px ${script}`;
+    while (g.measureText(inviteLine).width > 0.4 * px && size > 20) { size -= 2; g.font = `${size}px ${script}`; }
+    g.fillStyle = 'rgba(236,232,206,.22)'; g.fillText(inviteLine, x + 1, y + 3);
+    g.fillStyle = 'rgba(14,17,9,.95)'; g.strokeStyle = 'rgba(14,17,9,.8)'; g.lineWidth = Math.max(1.5, size * 0.025);
+    g.fillText(inviteLine, x, y); g.strokeText(inviteLine, x, y);
+    g.restore();
+  }
   if (guestLine) {
     g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
-    const [x, y] = toPx(pocket, 0, -0.32);
+    const [x, y] = toPx(pocket, 0, -0.29);
     g.font = `italic 400 64px ${family}`;
     g.fillStyle = 'rgba(16,20,12,.35)'; g.fillText(guestLine, x + 1.5, y + 2.5);
     const gold = g.createLinearGradient(x - 220, y - 40, x + 220, y + 40);
@@ -94,7 +113,11 @@ function outsideTextures(img, guestLine, family) {
   drawPaper(g, img, flap);
   // the flap's folded edge: a soft light line just inside, a darker line at the cut
   flapPath(g, flap); g.save(); g.clip();
-  g.strokeStyle = 'rgba(246,240,216,.7)'; g.lineWidth = 9; flapPath(g, flap); g.stroke();
+  // a pale sage border along the V edges, the way the flap paper is cut and folded
+  { const px = flap.width / W; g.lineJoin = 'round';
+    g.strokeStyle = 'rgba(206,214,180,.82)'; g.lineWidth = 0.026 * px; gumPath(g, flap, 0.013); g.stroke();
+    g.strokeStyle = 'rgba(236,238,214,.5)'; g.lineWidth = 0.004 * px; gumPath(g, flap, 0.025); g.stroke(); }
+  g.strokeStyle = 'rgba(246,240,216,.7)'; g.lineWidth = 6; flapPath(g, flap); g.stroke();
   g.strokeStyle = 'rgba(16,22,12,.45)'; g.lineWidth = 2.5; flapPath(g, flap); g.stroke();
   g.restore();
   return { pocket, flap };
@@ -193,7 +216,7 @@ export async function drawSageCard(card) {
   return c;
 }
 
-export function createSageEnvelope(canvasEl, { card, guestLine, onSeal, onShape }) {
+export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSeal, onShape }) {
   { const r0 = canvasEl.getBoundingClientRect(); if (r0.width && r0.height) W = envelopeWidth(r0.width / r0.height); }
   const builtW = W;
   const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -259,7 +282,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal, onShape 
   const flapFront = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: 0.88, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }));
   const flapBack = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.92, side: THREE.BackSide, name: 'flapLiner' }));
   flapFront.castShadow = true; flapFront.receiveShadow = true; flapBack.receiveShadow = true;
-  const flap = new THREE.Group(); flap.position.z = 0.022; flap.add(flapFront, flapBack); hinge.add(flap);
+  const flap = new THREE.Group(); flap.position.z = 0.045; flap.add(flapFront, flapBack); hinge.add(flap);
 
   // the wax seal: a few stacked layers give it body when it tilts
   const seal = new THREE.Group(); flap.add(seal);
@@ -359,7 +382,9 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal, onShape 
     if (dead) return;
     const family = "'Cormorant Garamond', Georgia, serif";
     if (guestLine) { try { await document.fonts.load(`italic 400 64px ${family}`); } catch { /* system font */ } }
-    const { pocket: pc, flap: fc } = outsideTextures(cover, guestLine, family);
+    const script = "'Great Vibes', 'Parisienne', cursive";
+    if (inviteLine) await loadScript();
+    const { pocket: pc, flap: fc } = outsideTextures(cover, guestLine, family, inviteLine, script);
     const linerCanvas = linerTexture(cover), liner = tex(linerCanvas);
     const gum = flapLinerTextures(linerCanvas), gumTex = tex(gum.color), gumRough = new THREE.CanvasTexture(gum.rough);
     for (const [m, map] of [[pocket.material, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.bumpMap = map; m.bumpScale = 1.2; m.color.set(0xffffff); m.needsUpdate = true; }
