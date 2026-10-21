@@ -287,7 +287,7 @@
   transition: opacity .55s ease;
 }
 .atelier-opening .sage-envelope-print { opacity: .72; }
-.atelier-sage .sage-flap-seam { z-index: 8; transition: opacity .5s ease .26s; }
+.atelier-sage .sage-flap-seam { z-index: 2; transition: opacity .5s ease .26s; }
 .atelier-sage.atelier-opening .sage-flap-seam { opacity: 0; transform: none; }
 .atelier-sage .atelier-open-control { top: 48.5%; transform: translate(-50%, -84px); }
 .invitation-screen .atelier-sage .atelier-open-control { top: 48.5%; transform: translate(-50%, -84px); }
