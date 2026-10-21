@@ -2,9 +2,9 @@ import React,{useEffect,useState} from 'react';
 
 let clothStill;
 function captureCloth(){
- if(!clothStill)clothStill=import('./ribbonSatin').then(({createRibbonRenderer})=>{
+ if(!clothStill)clothStill=import('./ribbonSatin').then(async({createRibbonRenderer})=>{
   const c=document.createElement('canvas');Object.assign(c.style,{position:'fixed',left:'-2000px',top:'0',width:'600px',height:'1066px',pointerEvents:'none'});document.body.appendChild(c);
-  let renderer;try{renderer=createRibbonRenderer(c,{static:true});return renderer.capture()}finally{renderer?.dispose();c.remove()}
+  let renderer;try{renderer=createRibbonRenderer(c,{static:true});if(!await renderer.ready)throw Error('Velvet texture unavailable');return renderer.capture()}finally{renderer?.dispose();c.remove()}
  });
  return clothStill;
 }

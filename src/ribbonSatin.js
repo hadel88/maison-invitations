@@ -88,6 +88,7 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
 
   const weave = clothTexture();
   const relief = clothReliefTexture();
+  let velvetMap = null;
   const material = new THREE.MeshPhysicalMaterial({
     color: '#d8a5ad', map: weave, metalness: 0, roughness: .94,
     specularIntensity: .16,
@@ -188,10 +189,26 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
     camera.updateProjectionMatrix(); schedule();
   }
   const observer = new ResizeObserver(resize); observer.observe(canvas);
-  resize(); render(0); onReady?.();
+  resize(); render(0);
+  // Wait for the actual pile photograph before marking this bow as ready.
+  // The cropped repeat keeps individual fibres visible at phone resolution.
+  const ready = new Promise(resolve => {
+    new THREE.TextureLoader().load('/velvet-pile-v3.png', texture => {
+      if (disposed) { texture.dispose(); resolve(false); return; }
+      velvetMap = texture;
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(.8, .18);
+      texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      material.map = texture; material.bumpMap = texture; material.bumpScale = .045;
+      material.needsUpdate = true;
+      render(elapsed); onReady?.(); resolve(true);
+    }, undefined, () => { if (!disposed) onError?.(); resolve(false); });
+  });
   const lost = event => { event.preventDefault(); cancelAnimationFrame(raf); running = false; onError?.(); };
   canvas.addEventListener('webglcontextlost', lost);
   return {
+    ready,
     capture() { render(elapsed); return canvas.toDataURL('image/png'); },
     open() { if (still || running || complete) return; running = true; started = performance.now(); schedule(); },
     reset() { running = false; complete = false; elapsed = 0; started = 0; schedule(); },
@@ -199,7 +216,7 @@ export function createRibbonRenderer(canvas, { onReady, onComplete, onError, sta
       disposed = true; cancelAnimationFrame(raf); observer.disconnect();
       canvas.removeEventListener('webglcontextlost', lost);
       for (const s of surfaces) s.geometry.dispose();
-      material.dispose(); weave.dispose(); relief.dispose(); pileTexture.dispose(); pileMaterials.forEach(m=>m.dispose()); shadowGeometry.dispose(); shadowMaterial.dispose();
+      material.dispose(); weave.dispose(); relief.dispose(); velvetMap?.dispose(); pileTexture.dispose(); pileMaterials.forEach(m=>m.dispose()); shadowGeometry.dispose(); shadowMaterial.dispose();
       environment.dispose(); light.shadow.map?.dispose(); renderer.dispose();
     },
   };
