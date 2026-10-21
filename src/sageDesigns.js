@@ -1,6 +1,6 @@
 import {occasionScenes, occasionEvent} from './occasionScenes.js';
 
-const stocks={Wedding:'atelier-sage-cover',Birthday:'ivory-birthday-neutral-cover',Engagement:'ivory-engagement-cover','Baby shower':'ivory-baby-neutral-cover',Graduation:'ivory-graduation-neutral-cover','Dinner party':'ivory-dinner-cover',Anniversary:'ivory-anniversary-cover','Corporate event':'ivory-corporate-cover',Christening:'ivory-christening-neutral-cover','Seasonal celebration':'ivory-seasonal-cover'};
+const stocks=Object.fromEntries(Object.entries({Wedding:'wedding',Birthday:'birthday',Engagement:'engagement','Baby shower':'baby',Graduation:'graduation','Dinner party':'dinner',Anniversary:'anniversary','Corporate event':'corporate',Christening:'christening','Seasonal celebration':'seasonal'}).map(([occasion,key])=>[occasion,'sage-original-'+key]));
 
 const palettes = [
  ['Wedding','sage','A Secret in Sage','#788164','#eae9db','#46513e','#a99563','botanical','atelier-sage',0],
@@ -25,7 +25,7 @@ for(const occasion of ['Birthday','Baby shower','Christening']){
  for(const [audience,envelope,paper,ink,waxHue,ornament] of [
   ['Boys','#8caec2','#edf3f8','#395b78',-115,'stars'],
   ['Girls','#c5a1b0','#fcf0f3','#79495d',-12,'blossom'],
- ]) {const art=`ivory-${occasion==='Birthday'?'birthday':occasion==='Baby shower'?'baby':'christening'}-${audience==='Boys'?'boy':'girl'}-cover`;
+ ]) {const art=`sage-original-${occasion==='Birthday'?'birthday':occasion==='Baby shower'?'baby':'christening'}-${audience.toLowerCase()}`;
  const image=occasion==='Birthday'?(audience==='Boys'?'cinema-cosmos':'cinema-candy'):occasion==='Baby shower'?(audience==='Boys'?'atelier-sage':'cinema-garden'):(audience==='Boys'?'cinema-garden':'cinema-palace');
  sageThemes.push({...base,id:base.id+'-'+audience.toLowerCase(),name:base.name+(audience==='Boys'?' · Blue':' · Rose'),audience,envelope,paper,ink,waxHue,ornament,image,cover:art,materialCover:art});}
 }

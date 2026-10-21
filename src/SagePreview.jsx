@@ -1,12 +1,13 @@
 import React,{useEffect,useRef} from 'react';
 import {paperStock,ornamentGlyph,invitationScript,waxStock} from './invitationMaterials';
+import {traceSageFlap} from './sageEnvelopeProfiles.js';
 const load=src=>new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=src});
 export default function SagePreview({theme}){
  const ref=useRef(null);
  useEffect(()=>{let dead=false;Promise.all([load(`/${theme.materialCover || 'atelier-sage-cover'}.webp`),load('/maison-wax-seal.png'),invitationScript()]).then(([cover,wax])=>{
   if(dead)return;const c=ref.current,g=c.getContext('2d');c.width=600;c.height=1066;
   const stock=paperStock(cover,theme);g.drawImage(stock,0,0,c.width,c.height);
-  g.save();g.beginPath();g.moveTo(0,0);g.lineTo(600,0);g.lineTo(600,320);g.quadraticCurveTo(450,460,300,576);g.quadraticCurveTo(150,460,0,320);g.closePath();
+  g.save();g.beginPath();g.save();g.translate(300,0);g.scale(1,-1);traceSageFlap(g,600,576,theme.pageLayout);g.restore();
   g.shadowColor='#162014aa';g.shadowBlur=24;g.shadowOffsetY=13;g.fillStyle=theme.envelope;g.fill();g.clip();g.drawImage(stock,0,0,600,1066);
   g.shadowColor='transparent';g.strokeStyle='#ede8cfbb';g.lineWidth=14;g.stroke();g.restore();
   g.save();g.shadowColor='#15201099';g.shadowBlur=18;g.shadowOffsetY=12;g.drawImage(waxStock(wax,theme),195,407,210,192);g.restore();

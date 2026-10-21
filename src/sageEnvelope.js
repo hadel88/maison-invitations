@@ -1,4 +1,6 @@
 import {paperStock,paperRelief,ornamentGlyph,waxStock} from './invitationMaterials';
+import {traceSageFlap} from './sageEnvelopeProfiles.js';
+import {paintSageLetter} from './paintSageLetter.js';
 import * as THREE from 'three';
 import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js';
 
@@ -68,14 +70,8 @@ function drawPaper(g, img, c) {
 }
 const texW = (base) => Math.min(base * 2.5, Math.round(base * W / 0.6));
 
-function flapPath(g, c, ox = 0, oy = 0) {
-  const p = (x, y) => toPx(c, x + ox, y + oy);
-  g.beginPath();
-  g.moveTo(...p(-W / 2, TOP)); g.lineTo(...p(W / 2, TOP)); g.lineTo(...p(W / 2, TOP - FLAP_SIDE));
-  g.quadraticCurveTo(...p(W * 0.25, TOP - FLAP_MID), ...p(0.012, TOP - FLAP_L + 0.004));
-  g.quadraticCurveTo(...p(0, TOP - FLAP_L - 0.002), ...p(-0.012, TOP - FLAP_L + 0.004));
-  g.quadraticCurveTo(...p(-W * 0.25, TOP - FLAP_MID), ...p(-W / 2, TOP - FLAP_SIDE));
-  g.closePath();
+function flapPath(g, c, ox = 0, oy = 0, layout='arch') {
+  const scale=c.width/W;g.beginPath();g.save();g.translate(...toPx(c,ox,TOP+oy));g.scale(scale,-scale);traceSageFlap(g,W,FLAP_L,layout);g.restore();
 }
 
 // green embossed paper for the outside, with the seams of a folded envelope
@@ -113,13 +109,13 @@ function outsideTextures(img, guestLine, family, inviteLine, script, design={}) 
   g = flap.getContext('2d');
   drawPaper(g, img, flap);
   // the flap's folded edge: a soft light line just inside, a darker line at the cut
-  flapPath(g, flap); g.save(); g.clip();
+  flapPath(g, flap,0,0,design.pageLayout); g.save(); g.clip();
   // a pale sage border along the V edges, the way the flap paper is cut and folded
   { const px = flap.width / W; g.lineJoin = 'round';
-    g.strokeStyle = design.paper || 'rgba(206,214,180,.82)'; g.lineWidth = 0.026 * px; gumPath(g, flap, 0.013); g.stroke();
-    g.strokeStyle = 'rgba(236,238,214,.5)'; g.lineWidth = 0.004 * px; gumPath(g, flap, 0.025); g.stroke(); }
-  g.strokeStyle = 'rgba(246,240,216,.7)'; g.lineWidth = 6; flapPath(g, flap); g.stroke();
-  g.strokeStyle = 'rgba(16,22,12,.45)'; g.lineWidth = 2.5; flapPath(g, flap); g.stroke();
+    g.strokeStyle = design.paper || 'rgba(206,214,180,.82)'; g.lineWidth = 0.026 * px; gumPath(g, flap, 0.013, design.pageLayout); g.stroke();
+    g.strokeStyle = 'rgba(236,238,214,.5)'; g.lineWidth = 0.004 * px; gumPath(g, flap, 0.025, design.pageLayout); g.stroke(); }
+  g.strokeStyle = 'rgba(246,240,216,.7)'; g.lineWidth = 6; flapPath(g, flap,0,0,design.pageLayout); g.stroke();
+  g.strokeStyle = 'rgba(16,22,12,.45)'; g.lineWidth = 2.5; flapPath(g, flap,0,0,design.pageLayout); g.stroke();
   g.restore();
   return { pocket, flap };
 }
@@ -141,25 +137,21 @@ function linerTexture(img) {
 }
 
 // the gummed strip along the inside of the flap's V edges: the sticky part that held it closed
-function gumPath(g, c, inset) {
-  const p = (x, y) => toPx(c, x, y);
-  g.beginPath();
-  g.moveTo(...p(W / 2 - inset * 0.2, TOP - FLAP_SIDE + inset * 0.15));
-  g.quadraticCurveTo(...p(W * 0.25 - inset * 0.3, TOP - FLAP_MID + inset * 0.8), ...p(0, TOP - FLAP_L + inset * 1.05));
-  g.quadraticCurveTo(...p(-W * 0.25 + inset * 0.3, TOP - FLAP_MID + inset * 0.8), ...p(-W / 2 + inset * 0.2, TOP - FLAP_SIDE + inset * 0.15));
+function gumPath(g, c, inset, layout='arch') {
+  g.beginPath();g.save();g.translate(...toPx(c,0,TOP));g.scale(c.width/W,-c.width/W);traceSageFlap(g,W-inset*2,FLAP_L-inset,layout);g.restore();
 }
-function flapLinerTextures(linerCanvas) {
+function flapLinerTextures(linerCanvas,design={}) {
   const c = canvas(linerCanvas.width, linerCanvas.height), g = c.getContext('2d');
   g.drawImage(linerCanvas, 0, 0);
   g.fillStyle = 'rgba(70,60,40,.05)'; g.fillRect(0, 0, c.width, c.height);
   const px = c.width / W, band = 0.042 * px;
-  g.save(); flapPath(g, c); g.clip();
+  g.save(); flapPath(g, c,0,0,design.pageLayout); g.clip();
   g.lineJoin = 'round'; g.lineCap = 'round';
   // the dried glue: a slightly amber, glassy band with a soft inner edge
-  g.strokeStyle = 'rgba(200,170,105,.42)'; g.lineWidth = band; gumPath(g, c, 0.021); g.stroke();
-  g.strokeStyle = 'rgba(178,146,86,.22)'; g.lineWidth = band * 0.55; gumPath(g, c, 0.017); g.stroke();
-  g.strokeStyle = 'rgba(255,250,232,.5)'; g.lineWidth = Math.max(1.5, 0.003 * px); gumPath(g, c, 0.04); g.stroke();
-  g.strokeStyle = 'rgba(120,98,58,.28)'; g.lineWidth = Math.max(1, 0.002 * px); gumPath(g, c, 0.043); g.stroke();
+  g.strokeStyle = 'rgba(200,170,105,.42)'; g.lineWidth = band; gumPath(g, c, 0.021, design.pageLayout); g.stroke();
+  g.strokeStyle = 'rgba(178,146,86,.22)'; g.lineWidth = band * 0.55; gumPath(g, c, 0.017, design.pageLayout); g.stroke();
+  g.strokeStyle = 'rgba(255,250,232,.5)'; g.lineWidth = Math.max(1.5, 0.003 * px); gumPath(g, c, 0.04, design.pageLayout); g.stroke();
+  g.strokeStyle = 'rgba(120,98,58,.28)'; g.lineWidth = Math.max(1, 0.002 * px); gumPath(g, c, 0.043, design.pageLayout); g.stroke();
   g.restore();
   // a top fold crease where the flap meets the envelope
   const [, y] = toPx(c, 0, TOP - 0.004);
@@ -168,7 +160,7 @@ function flapLinerTextures(linerCanvas) {
   // roughness: the gum is shinier than the paper (green channel = roughness)
   const r = canvas(Math.round(c.width / 2), Math.round(c.height / 2)), q = r.getContext('2d');
   q.fillStyle = 'rgb(240,240,240)'; q.fillRect(0, 0, r.width, r.height);
-  q.save(); flapPath(q, r); q.clip(); q.lineJoin = 'round'; q.strokeStyle = 'rgb(95,95,95)'; q.lineWidth = band / 2; gumPath(q, r, 0.021); q.stroke(); q.restore();
+  q.save(); flapPath(q, r,0,0,design.pageLayout); q.clip(); q.lineJoin = 'round'; q.strokeStyle = 'rgb(95,95,95)'; q.lineWidth = band / 2; gumPath(q, r, 0.021,design.pageLayout); q.stroke(); q.restore();
   return { color: c, rough: r };
 }
 
@@ -195,6 +187,7 @@ export async function drawSageCard(card) {
   const n = g.getImageData(0, 0, w, h), p = n.data;
   for (let i = 0; i < p.length; i += 4) { const r = (Math.random() - 0.5) * 7; p[i] += r; p[i + 1] += r; p[i + 2] += r; }
   g.putImageData(n, 0, 0);
+  if(paintSageLetter(g,w,h,card,design))return c;
   const gold = (y0, y1) => { const gr = g.createLinearGradient(0, y0, w, y1); gr.addColorStop(0, design.color||'#a78b52'); gr.addColorStop(0.5, '#d8c08a'); gr.addColorStop(1, '#9c8049'); return gr; };
   g.strokeStyle = gold(0, h); g.lineWidth = 3; g.beginPath();g.roundRect(46,46,w-92,h-92,(design.radius||0)*2);g.stroke();
   g.lineWidth = 1.2; g.beginPath();g.roundRect(62,62,w-124,h-124,(design.radius||0)*1.8);g.stroke();
@@ -289,11 +282,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
 
   // flap, hinged at the top edge. Tessellated so it can bend like paper.
   const flapShape = new THREE.Shape();
-  flapShape.moveTo(-W / 2, 0); flapShape.lineTo(W / 2, 0); flapShape.lineTo(W / 2, -FLAP_SIDE);
-  flapShape.quadraticCurveTo(W * 0.25, -FLAP_MID, 0.012, -FLAP_L + 0.004);
-  flapShape.quadraticCurveTo(0, -FLAP_L - 0.002, -0.012, -FLAP_L + 0.004);
-  flapShape.quadraticCurveTo(-W * 0.25, -FLAP_MID, -W / 2, -FLAP_SIDE);
-  flapShape.closePath();
+  traceSageFlap(flapShape,W,FLAP_L,design.pageLayout);
   let flapGeo = new THREE.ShapeGeometry(flapShape, 20);
   flapGeo = new TessellateModifier(0.035, 8).modify(flapGeo);
   envUV(flapGeo, TOP);
@@ -429,7 +418,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     if (inviteLine) await loadScript();
     const { pocket: pc, flap: fc } = outsideTextures(cover, guestLine, family, inviteLine, script, design);
     const linerCanvas = linerTexture(cover), liner = tex(linerCanvas);
-    const gum = flapLinerTextures(linerCanvas), gumTex = tex(gum.color), gumRough = new THREE.CanvasTexture(gum.rough);
+    const gum = flapLinerTextures(linerCanvas,design), gumTex = tex(gum.color), gumRough = new THREE.CanvasTexture(gum.rough);
     for (const [m, map] of [[pocket.material, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.bumpMap = new THREE.CanvasTexture(paperRelief(map.image)); m.bumpScale = .018; m.roughness = .92; m.color.set(0xffffff); m.needsUpdate = true; }
     back.material.map = liner; back.material.bumpMap = liner; back.material.bumpScale = .007; back.material.color.set(0xffffff); back.material.needsUpdate = true;
     Object.assign(flapBack.material, { map: gumTex, bumpMap: gumTex, bumpScale: .007, roughnessMap: gumRough, roughness: 1 }); flapBack.material.color.set(0xf4eee0); flapBack.material.needsUpdate = true;
