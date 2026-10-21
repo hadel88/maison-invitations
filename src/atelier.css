@@ -413,3 +413,10 @@
 .cinema-sage[data-stationery="festive"] :is(.event-details,.rsvp) { border-radius:8px;border:6px double var(--occasion-accent);box-shadow:0 12px 35px #623b4314; }
 .cinema-sage[data-stationery] .guest-links { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; }
 .cinema-sage[data-stationery] .guest-links .btn { width:100%;min-width:0;white-space:normal;min-height:48px; }
+
+/* While the 3D envelope loads, only its paper shows; the flat fallback appears only if WebGL fails. */
+.sage-envelope-scene.sage-loading > :not(canvas) { visibility: hidden; }
+.sage-envelope-scene .sage-envelope-canvas { transition: opacity .45s ease; }
+.sage-envelope-scene.sage-loading .sage-envelope-canvas { opacity: 0; }
+.atelier-sage:has(.sage-loading) .atelier-open-control { opacity: 0; pointer-events: none; }
+.atelier-sage .atelier-open-control { transition: opacity .45s ease; }

@@ -300,8 +300,9 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   const seal = new THREE.Group(); flap.add(seal);
   const sealGeo = new THREE.PlaneGeometry(SEAL * 1312 / 1199, SEAL);
   const sealLayers = [0.55, 0.62, 0.72, 1].map((shade, i) => {
-    const m = new THREE.Mesh(sealGeo, new THREE.MeshPhysicalMaterial({ color: new THREE.Color(shade, shade, shade), transparent: false, alphaTest: 0.5, roughness: .48, metalness: 0, clearcoat: .18, clearcoatRoughness: .38 }));
-    m.position.z = 0.0018 * (i + 1); m.castShadow = true; seal.add(m); return m;
+    const m = new THREE.Mesh(sealGeo, new THREE.MeshPhysicalMaterial({ color: new THREE.Color(shade, shade, shade), transparent: false, alphaTest: 0.5, alphaToCoverage: true, roughness: .48, metalness: 0, clearcoat: .18, clearcoatRoughness: .38 }));
+    // sits clearly above the lifted flap paper, so the flap never cuts through the wax
+    m.position.z = 0.006 + 0.0018 * (i + 1); m.castShadow = true; seal.add(m); return m;
   });
   const SEAL_Y = -FLAP_L + SEAL * 0.36;
 
@@ -391,7 +392,8 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     const r = canvasEl.getBoundingClientRect();
     if (!r.width || !r.height) return;
     cssW = r.width; cssH = r.height; aspect = r.width / r.height;
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    // sharp on 3× phone screens, but never more than ~3.2 million pixels to draw
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 3, Math.sqrt(3.2e6 / (r.width * r.height))));
     renderer.setSize(r.width, r.height, false);
     camera.aspect = aspect; camera.updateProjectionMatrix();
     render();
