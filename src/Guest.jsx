@@ -44,6 +44,8 @@ import {ivoryVariables} from "./ivoryDesigns";
 import {IvoryDetailsHeading} from "./IvoryInvitation";
 import { CraftWelcome, CraftGarland, craftWords } from "./CraftInvitation";
 import { eventPhase, responseNote } from './guestPlanning';
+import { pageVoice, occasionSlug } from './occasionPages';
+import './occasionPages.css';
 
 function useSound(music, active) {
   const [muted, setMuted] = useState(false);
@@ -97,8 +99,10 @@ export function GuestExperience({
   const c = copy[lang];
   const proposal=event.occasion==='Marriage proposal',workshop=event.occasion==='Workshops & seminars';
   const animatedInterior=sceneFor(event).kind==='sage'||['proposal','workshop','opening','newyear'].includes(sceneFor(event).pageLayout);
-  const responseLabels=proposal?{en:['Will you marry me?','A thousand times yes','Let’s talk'],de:['Willst du mich heiraten?','Tausendmal ja','Lass uns reden'],fr:['Veux-tu m’épouser ?','Mille fois oui','Parlons-en']}[lang]:workshop?{en:['Reserve your place','I’ll be there','Unable to attend'],de:['Platz reservieren','Ich bin dabei','Ich kann nicht teilnehmen'],fr:['Réservez votre place','Je serai là','Je ne peux pas venir']}[lang]:null;
+  const voice=pageVoice(event.occasion,lang);
+  const responseLabels0=proposal?{en:['Will you marry me?','A thousand times yes','Let’s talk'],de:['Willst du mich heiraten?','Tausendmal ja','Lass uns reden'],fr:['Veux-tu m’épouser ?','Mille fois oui','Parlons-en']}[lang]:workshop?{en:['Reserve your place','I’ll be there','Unable to attend'],de:['Platz reservieren','Ich bin dabei','Ich kann nicht teilnehmen'],fr:['Réservez votre place','Je serai là','Je ne peux pas venir']}[lang]:null;
   const crafted = event.scene === 'embroidered-chateau';
+  const responseLabels=responseLabels0||(crafted?null:[voice.rsvp,voice.yes,voice.no]);
   const [muted, toggleSound] = useSound(event.music, opened);
   const [name, setName] = useState(guest?.name || "");
   const [response, setResponse] = useState(
@@ -154,7 +158,7 @@ export function GuestExperience({
     }
   }
   return (
-    <div className="invitation-screen"><div data-stationery={sceneFor(event).pageLayout} style={{...sceneVariables(sceneFor(event)),...ivoryVariables(sceneFor(event))}} className={"guest-experience cinema-guest " + (sceneFor(event).kind==='sage'?'cinema-sage ':sceneFor(event).kind==='rose'?'cinema-ribbon ':'') + (sceneFor(event).kind==='ivory'?'cinema-ivory ':'') + (crafted ? "cinema-craft " : ["castle-gates","castle-story","pearl-promise","little-wonder"].includes(event.scene) ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
+    <div className="invitation-screen"><div data-stationery={sceneFor(event).pageLayout} data-occasion={occasionSlug(event.occasion)} style={{...sceneVariables(sceneFor(event)),...ivoryVariables(sceneFor(event)),'--occasion-image':sceneFor(event).image?`url(/${sceneFor(event).image}.webp)`:'none'}} className={"guest-experience cinema-guest " + (sceneFor(event).kind==='sage'?'cinema-sage ':sceneFor(event).kind==='rose'?'cinema-ribbon ':'') + (sceneFor(event).kind==='ivory'?'cinema-ivory ':'') + (crafted ? "cinema-craft " : ["castle-gates","castle-story","pearl-promise","little-wonder"].includes(event.scene) ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
       <div className="guest-controls">
         <a href="/" className="brand">
           maison
@@ -190,11 +194,11 @@ export function GuestExperience({
         <div className="cinema-detail-sheet" aria-label="Invitation details and RSVP">
         <div className="opened-invite">{animatedInterior && <SageInterior theme={sceneFor(event)} event={event} lang={lang}/> }
           {sceneFor(event).kind==='ivory'&&<IvoryDetailsHeading event={event} theme={sceneFor(event)}/>}
-          <div className="guest-phase-message">{{en:{before:'The lovely anticipation begins.',today:'Today is the day. We are so happy you are here.',after:'Thank you for being part of our story.'},de:{before:'Die Vorfreude beginnt.',today:'Heute ist der große Tag. Schön, dass du da bist.',after:'Danke, dass du Teil unserer Geschichte bist.'},fr:{before:'Le bonheur de se retrouver approche.',today:'Le grand jour est arrivé. Quel bonheur de vous retrouver.',after:'Merci de faire partie de notre histoire.'}}[lang]?.[eventPhase(event)]}</div>
+          <div className="guest-phase-message">{eventPhase(event)==='before'&&!crafted?voice.phase:{en:{before:'The lovely anticipation begins.',today:'Today is the day. We are so happy you are here.',after:'Thank you for being part of our story.'},de:{before:'Die Vorfreude beginnt.',today:'Heute ist der große Tag. Schön, dass du da bist.',after:'Danke, dass du Teil unserer Geschichte bist.'},fr:{before:'Le bonheur de se retrouver approche.',today:'Le grand jour est arrivé. Quel bonheur de vous retrouver.',after:'Merci de faire partie de notre histoire.'}}[lang]?.[eventPhase(event)]}</div>
           {crafted ? <CraftWelcome event={event} lang={lang} /> : <p className="guest-message">{event.message}</p>}
           <section className="event-details">
             <span className="eyebrow">{c.details}</span>
-            <h2>{crafted ? craftWords(lang).details : ['birthday-wish','graduation-flight','graduation-curtain'].includes(event.scene) ? ({en:'Let’s celebrate.',de:'Wir feiern!',fr:'Célébrons ensemble.'}[lang] || 'Let’s celebrate.') : 'A day to remember.'}</h2>
+            <h2>{crafted ? craftWords(lang).details : ['birthday-wish','graduation-flight','graduation-curtain'].includes(event.scene) ? ({en:'Let’s celebrate.',de:'Wir feiern!',fr:'Célébrons ensemble.'}[lang] || 'Let’s celebrate.') : voice.details}</h2>
             <div>
               <CalendarDays />
               <span>
@@ -291,7 +295,7 @@ export function GuestExperience({
             </section>
           )}
           <section className="rsvp">{animatedInterior && <SageReplyHeading theme={sceneFor(event)} lang={lang}/> }
-            <span className="eyebrow">{proposal?({en:'JUST BETWEEN US',de:'NUR ZWISCHEN UNS',fr:'RIEN QU’ENTRE NOUS'}[lang]):workshop?({en:'YOUR PLACE AT THE ATELIER',de:'DEIN PLATZ IM ATELIER',fr:'VOTRE PLACE À L’ATELIER'}[lang]):'WE SAVED YOU A PLACE'}</span>
+            <span className="eyebrow">{proposal?({en:'JUST BETWEEN US',de:'NUR ZWISCHEN UNS',fr:'RIEN QU’ENTRE NOUS'}[lang]):workshop?({en:'YOUR PLACE AT THE ATELIER',de:'DEIN PLATZ IM ATELIER',fr:'VOTRE PLACE À L’ATELIER'}[lang]):(crafted?'WE SAVED YOU A PLACE':voice.eyebrow)}</span>
             <h2>{responseLabels?.[0]||c.rsvp}</h2>
             {!proposal&&<p>{dateLabel(event.rsvpDeadline, lang)}</p>}
             {saved ? (
