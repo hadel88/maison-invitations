@@ -27,7 +27,8 @@ export function sceneVariables(scene={}) {
  const special=scene.kind==='sage'?{paper:'#e9eddc',ink:'#46513e',accent:'#a99563'}:scene.kind==='graduation-curtain'?{paper:'#f0e2e3',ink:'#5b2e3b',accent:'#9d5260'}:{};
  const paper=scene.paper||special.paper||base.paper,ink=scene.ink||special.ink||base.ink;
  const accent=scene.gold||(scene.bow==='Gold'?'#b58a48':scene.color||special.accent||base.color||ink);
- return {'--stationery-radius':(scene.radius??16)+'px','--ribbon-filter':scene.ribbonFilter||'none','--occasion-paper':paper,'--occasion-ink':ink,'--occasion-accent':accent};
+ const patterns={'Wedding':'radial-gradient(ellipse at top left,#bca8871c,transparent 65%)','Birthday':'radial-gradient(circle at 15px 15px,#b49aba22 2px,transparent 3px)','Engagement':'linear-gradient(135deg,#739d7b1a,transparent 55%)','Baby shower':'radial-gradient(ellipse at top,#b0cadd33,transparent 65%)','Graduation':'linear-gradient(135deg,#c6a25520,transparent 45%)','Dinner party':'linear-gradient(95deg,#bc895a20,transparent 60%)','Anniversary':'radial-gradient(ellipse at top,#cfb78133,transparent 70%)','Corporate event':'linear-gradient(90deg,#8d99b315 1px,transparent 1px)','Christening':'radial-gradient(ellipse at top,#dfd7b333,transparent 60%)','Seasonal celebration':'radial-gradient(circle at top,#bd7e8530,transparent 70%)'};
+ return {'--occasion-pattern':patterns[scene.occasion||base.occasion]||'none','--stationery-radius':(scene.radius??16)+'px','--ribbon-filter':scene.ribbonFilter||'none','--occasion-paper':paper,'--occasion-ink':ink,'--occasion-accent':accent};
 }
 export function occasionEvent(theme,base={}) {
  const hour=['Baby shower','Christening'].includes(theme.occasion)?'14':'18';

@@ -150,7 +150,7 @@ export function GuestExperience({
     }
   }
   return (
-    <div className="invitation-screen"><div style={{...sceneVariables(sceneFor(event)),...ivoryVariables(sceneFor(event))}} className={"guest-experience cinema-guest " + (sceneFor(event).kind==='sage'?'cinema-sage ':'') + (sceneFor(event).kind==='ivory'?'cinema-ivory ':'') + (crafted ? "cinema-craft " : ["castle-gates","castle-story","pearl-promise","little-wonder"].includes(event.scene) ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
+    <div className="invitation-screen"><div style={{...sceneVariables(sceneFor(event)),...ivoryVariables(sceneFor(event))}} className={"guest-experience cinema-guest " + (sceneFor(event).kind==='sage'?'cinema-sage ':sceneFor(event).kind==='rose'?'cinema-ribbon ':'') + (sceneFor(event).kind==='ivory'?'cinema-ivory ':'') + (crafted ? "cinema-craft " : ["castle-gates","castle-story","pearl-promise","little-wonder"].includes(event.scene) ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
       <div className="guest-controls">
         <a href="/" className="brand">
           maison

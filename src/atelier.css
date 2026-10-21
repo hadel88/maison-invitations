@@ -363,28 +363,34 @@
 /* Stationery finishes do not alter the opening transform or its timeline. */
 .atelier-sage .sage-envelope-scene.sage-3d { background: transparent; }
 .sage-poster-canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-.cinema-sage .cinema-detail-sheet {
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet {
   background: linear-gradient(115deg,#ffffff54,transparent 40%),var(--occasion-paper);
   color:var(--occasion-ink); padding:52px 25px 46px;
 }
-.cinema-sage .cinema-detail-sheet::before { color:var(--occasion-accent); }
-.cinema-sage .cinema-detail-sheet .opened-invite { width:100%; max-width:100%; color:var(--occasion-ink); }
-.cinema-sage .cinema-detail-sheet .guest-message { color:var(--occasion-ink); font-size:25px; margin-bottom:35px; }
-.cinema-sage .cinema-detail-sheet .event-details,
-.cinema-sage .cinema-detail-sheet .rsvp {
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet::before { color:var(--occasion-accent); }
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .opened-invite { width:100%; max-width:100%; color:var(--occasion-ink); }
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .guest-message { color:var(--occasion-ink); font-size:25px; margin-bottom:35px; }
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .event-details,
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .rsvp {
   padding:30px 16px; border:1px solid color-mix(in srgb,var(--occasion-accent) 35%,transparent);
   background:color-mix(in srgb,var(--occasion-paper) 65%,white); border-radius:var(--stationery-radius,16px);
   box-shadow:0 7px 22px #362d2010; color:var(--occasion-ink);
 }
-.cinema-sage .cinema-detail-sheet h2 { font-size:34px; }
-.cinema-sage .event-details strong,.cinema-sage .guest-signoff { color:var(--occasion-ink); }
-.cinema-sage .guest-links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; gap:9px; }
-.cinema-sage .guest-links .btn { display:flex; align-items:center; justify-content:center; min-width:0; min-height:48px; padding:10px 8px; font-size:11px; line-height:1.4; white-space:normal; overflow-wrap:anywhere; border-radius:7px; }
-.cinema-sage .guest-links .btn svg { flex-shrink:0; }
-.cinema-sage .cinema-detail-sheet .btn.secondary { background:#fffcf580; color:var(--occasion-ink); border-color:color-mix(in srgb,var(--occasion-accent) 50%,transparent); }
-.cinema-sage .response-choice button { color:var(--occasion-ink); min-height:48px; border-radius:7px; }
-.cinema-sage .cinema-detail-sheet .response-choice .selected { background:var(--occasion-ink); border-color:var(--occasion-ink); color:#fffdf6; }
-.cinema-sage .cinema-detail-sheet .rsvp input:not([type="checkbox"]):not([type="radio"]),.cinema-sage .cinema-detail-sheet .rsvp select,.cinema-sage .cinema-detail-sheet .rsvp textarea { width:100%; min-width:0; color:var(--occasion-ink); border-color:color-mix(in srgb,var(--occasion-accent) 40%,white); background:#fffdf8; }
-.cinema-sage .cinema-detail-sheet .rsvp form>.btn { min-height:48px; border-radius:7px; }
-.cinema-sage .cinema-detail-sheet .event-details>div:not(.guest-links) { min-width:0; }
-.cinema-sage .cinema-detail-sheet .event-details>div>span { min-width:0; overflow-wrap:anywhere; }
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet h2 { font-size:34px; }
+:is(.cinema-sage,.cinema-ribbon) .event-details strong,:is(.cinema-sage,.cinema-ribbon) .guest-signoff { color:var(--occasion-ink); }
+:is(.cinema-sage,.cinema-ribbon) .guest-links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; gap:9px; }
+:is(.cinema-sage,.cinema-ribbon) .guest-links .btn { display:flex; align-items:center; justify-content:center; min-width:0; min-height:48px; padding:10px 8px; font-size:11px; line-height:1.4; white-space:normal; overflow-wrap:anywhere; border-radius:7px; }
+:is(.cinema-sage,.cinema-ribbon) .guest-links .btn svg { flex-shrink:0; }
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .btn.secondary { background:#fffcf580; color:var(--occasion-ink); border-color:color-mix(in srgb,var(--occasion-accent) 50%,transparent); }
+:is(.cinema-sage,.cinema-ribbon) .response-choice button { color:var(--occasion-ink); min-height:48px; border-radius:7px; }
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .response-choice .selected { background:var(--occasion-ink); border-color:var(--occasion-ink); color:#fffdf6; }
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .rsvp input:not([type="checkbox"]):not([type="radio"]),:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .rsvp select,:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .rsvp textarea { width:100%; min-width:0; color:var(--occasion-ink); border-color:color-mix(in srgb,var(--occasion-accent) 40%,white); background:#fffdf8; }
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .rsvp form>.btn { min-height:48px; border-radius:7px; }
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .event-details>div:not(.guest-links) { min-width:0; }
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet .event-details>div>span { min-width:0; overflow-wrap:anywhere; }
+
+/* Smaller translucent paper; the bow and door transitions are untouched. */
+.invitation-screen .atelier-rose .atelier-inscription { left:16%; right:16%; padding:24px 12px; background:color-mix(in srgb,var(--occasion-paper) 74%,transparent); backdrop-filter:blur(3px); border-radius:var(--stationery-radius,28px); }
+.invitation-screen .atelier-rose .atelier-inscription h1 { font-size:clamp(32px,5.2cqh,48px); line-height:1.1; }
+.invitation-screen .atelier-rose .atelier-inscription p { font-size:14px; }
+:is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet { background-image:var(--occasion-pattern,none),linear-gradient(115deg,#ffffff54,transparent 40%); background-color:var(--occasion-paper); }

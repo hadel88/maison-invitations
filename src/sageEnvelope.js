@@ -181,7 +181,7 @@ export async function drawSageCard(card) {
   const paper = g.createLinearGradient(0, 0, w, h);
   const design=card.design||{};
   paper.addColorStop(0, '#fffdf7'); paper.addColorStop(0.55, design.paper||'#f4efe2'); paper.addColorStop(1, design.paper||'#ece5d3');
-  g.fillStyle = paper; g.fillRect(0, 0, w, h);
+  g.globalAlpha=.72; g.fillStyle = paper; g.fillRect(0, 0, w, h); g.globalAlpha=1;
   // cotton grain
   const n = g.getImageData(0, 0, w, h), p = n.data;
   for (let i = 0; i < p.length; i += 4) { const r = (Math.random() - 0.5) * 7; p[i] += r; p[i + 1] += r; p[i + 2] += r; }
@@ -297,10 +297,10 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   const SEAL_Y = -FLAP_L + SEAL * 0.36;
 
   // the card
-  const cardMats = [0, 1, 2, 3, 4, 5].map((i) => new THREE.MeshStandardMaterial({ color: i === 4 ? 0xffffff : 0xf3eedf, roughness: 0.82 }));
+  const cardMats = [0, 1, 2, 3, 4, 5].map((i) => new THREE.MeshStandardMaterial({ color: i === 4 ? 0xffffff : 0xf3eedf, roughness: 0.82, transparent: true, opacity: i === 4 ? 1 : .55, depthWrite: false }));
   const cardMesh = new THREE.Mesh(new THREE.BoxGeometry(CARD_W, CARD_H, CARD_T), cardMats);
   cardMesh.castShadow = true; cardMesh.receiveShadow = true;
-  const cardGroup = new THREE.Group(); cardGroup.add(cardMesh); env.add(cardGroup);
+  const cardGroup = new THREE.Group(); cardGroup.add(cardMesh); cardGroup.scale.setScalar(.78); env.add(cardGroup);
 
   // views: closed (envelope fills the screen), opened (envelope low, room for the card) and the card in front
   let aspect = 1, cssW = 1, cssH = 1;
