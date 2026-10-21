@@ -10,17 +10,17 @@ import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js
 // each other as they move.
 
 // envelope size in world units: portrait on phones, as wide as the screen on tablets and desktops
-let W = 0.6; const H = 1;
+let W = 0.6; const H = 0.82;          // real 5×7 invitation envelope proportions (portrait)
 export const envelopeWidth = (aspect) => Math.max(0.6, aspect * 1.005);
 const TOP = H / 2;
-const V_DIP = 0.23;                   // lowest point of the pocket's V opening
+const V_DIP = TOP - 0.12;                   // lowest point of the pocket's V opening
 const V_SIDE = TOP - 0.035;           // the pocket edge at the envelope's sides
-const FLAP_L = 0.56;                  // hinge → flap tip
-const FLAP_SIDE = 0.1;                // hinge → where the flap's sides turn to the tip
+const FLAP_L = 0.46;                  // hinge → flap tip
+const FLAP_SIDE = 0.08;                // hinge → where the flap's sides turn to the tip
 const SEAL = 0.19;                    // seal diameter
 const CARD_W = 0.48, CARD_H = CARD_W * 1.4, CARD_T = 0.0025;
 const CARD_HIDDEN_Y = V_DIP - 0.012 - CARD_H / 2;
-const CARD_RISEN_Y = 0.43 + CARD_H / 2;
+const CARD_RISEN_Y = V_SIDE - 0.005 + CARD_H / 2;
 const FOV = 32, TAN = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
 
 // timeline (seconds)
@@ -224,6 +224,11 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal, onShape 
   };
 
   const env = new THREE.Group(); scene.add(env);
+  // a soft shadow under the envelope, so it lies in the scene instead of floating
+  { const c = canvas(256, Math.round(256 * H / W)), g = c.getContext('2d');
+    g.filter = 'blur(14px)'; g.fillStyle = 'rgba(14,18,10,.55)'; g.fillRect(26, 26, c.width - 52, c.height - 52);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(W * 1.16, H * 1.16), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+    m.position.set(0.006, -0.014, -0.004); env.add(m); }
   // back panel (its inside is the liner)
   const back = new THREE.Mesh(envUV(new THREE.PlaneGeometry(W, H)), new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.92 }));
   back.receiveShadow = true; env.add(back);
@@ -271,12 +276,13 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal, onShape 
   // views: closed (envelope fills the screen), opened (envelope low, room for the card) and the card in front
   let aspect = 1, cssW = 1, cssH = 1;
   function views() {
-    // the envelope always covers the full width (and, closed, the full screen): no empty sides
-    const vh0 = Math.min(H, W / aspect) * 0.985;
-    const vh1 = Math.min(1.277, W / aspect * 0.985);
-    const c1 = 1.202 - vh1 / 2;
+    // the envelope covers the full width; closed, it lies a little low so the flap opens in view
+    const vh0 = Math.max(H * 1.15, W / aspect * 0.985);
+    const c0 = TOP + 0.3 * vh0 - vh0 / 2;
+    const vh1 = Math.min(1.4, W / aspect * 0.985);
+    const c1 = CARD_RISEN_Y + CARD_H / 2 + 0.08 * vh1 - vh1 / 2;
     const vhz = Math.max(CARD_W / (0.86 * aspect), CARD_H / 0.8);
-    return { vh0, c0: 0, vh1, c1, vhz };
+    return { vh0, c0, vh1, c1, vhz };
   }
   let cardLoaded = false;
   function pose(t) {
