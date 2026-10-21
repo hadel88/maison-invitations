@@ -113,6 +113,38 @@ function linerTexture(img) {
   return c;
 }
 
+// the gummed strip along the inside of the flap's V edges: the sticky part that held it closed
+function gumPath(g, c, inset) {
+  const p = (x, y) => toPx(c, x, y);
+  g.beginPath();
+  g.moveTo(...p(W / 2 - inset * 0.2, TOP - FLAP_SIDE + inset * 0.15));
+  g.quadraticCurveTo(...p(W * 0.16 - inset * 0.3, TOP - FLAP_L * 0.78 + inset * 0.6), ...p(0, TOP - FLAP_L + inset * 1.05));
+  g.quadraticCurveTo(...p(-W * 0.16 + inset * 0.3, TOP - FLAP_L * 0.78 + inset * 0.6), ...p(-W / 2 + inset * 0.2, TOP - FLAP_SIDE + inset * 0.15));
+}
+function flapLinerTextures(linerCanvas) {
+  const c = canvas(linerCanvas.width, linerCanvas.height), g = c.getContext('2d');
+  g.drawImage(linerCanvas, 0, 0);
+  g.fillStyle = 'rgba(70,60,40,.05)'; g.fillRect(0, 0, c.width, c.height);
+  const px = c.width / W, band = 0.042 * px;
+  g.save(); flapPath(g, c); g.clip();
+  g.lineJoin = 'round'; g.lineCap = 'round';
+  // the dried glue: a slightly amber, glassy band with a soft inner edge
+  g.strokeStyle = 'rgba(200,170,105,.42)'; g.lineWidth = band; gumPath(g, c, 0.021); g.stroke();
+  g.strokeStyle = 'rgba(178,146,86,.22)'; g.lineWidth = band * 0.55; gumPath(g, c, 0.017); g.stroke();
+  g.strokeStyle = 'rgba(255,250,232,.5)'; g.lineWidth = Math.max(1.5, 0.003 * px); gumPath(g, c, 0.04); g.stroke();
+  g.strokeStyle = 'rgba(120,98,58,.28)'; g.lineWidth = Math.max(1, 0.002 * px); gumPath(g, c, 0.043); g.stroke();
+  g.restore();
+  // a top fold crease where the flap meets the envelope
+  const [, y] = toPx(c, 0, TOP - 0.004);
+  const cr = g.createLinearGradient(0, y - 6, 0, y + 10); cr.addColorStop(0, 'rgba(90,76,50,.25)'); cr.addColorStop(1, 'rgba(90,76,50,0)');
+  g.fillStyle = cr; g.fillRect(0, y - 6, c.width, 16);
+  // roughness: the gum is shinier than the paper (green channel = roughness)
+  const r = canvas(Math.round(c.width / 2), Math.round(c.height / 2)), q = r.getContext('2d');
+  q.fillStyle = 'rgb(240,240,240)'; q.fillRect(0, 0, r.width, r.height);
+  q.save(); flapPath(q, r); q.clip(); q.lineJoin = 'round'; q.strokeStyle = 'rgb(95,95,95)'; q.lineWidth = band / 2; gumPath(q, r, 0.021); q.stroke(); q.restore();
+  return { color: c, rough: r };
+}
+
 // the invitation card with the couple's words
 export async function drawSageCard(card) {
   const fam = card.font || "'Cormorant Garamond', Georgia, serif";
@@ -319,9 +351,11 @@ export function createSageEnvelope(canvasEl, { card, guestLine, onSeal, onShape 
     const family = "'Cormorant Garamond', Georgia, serif";
     if (guestLine) { try { await document.fonts.load(`italic 400 64px ${family}`); } catch { /* system font */ } }
     const { pocket: pc, flap: fc } = outsideTextures(cover, guestLine, family);
-    const liner = tex(linerTexture(cover));
+    const linerCanvas = linerTexture(cover), liner = tex(linerCanvas);
+    const gum = flapLinerTextures(linerCanvas), gumTex = tex(gum.color), gumRough = new THREE.CanvasTexture(gum.rough);
     for (const [m, map] of [[pocket.material, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.bumpMap = map; m.bumpScale = 1.2; m.color.set(0xffffff); m.needsUpdate = true; }
-    for (const m of [back.material, flapBack.material]) { m.map = liner; m.bumpMap = liner; m.bumpScale = 0.6; m.color.set(m === flapBack.material ? 0xe9e2cf : 0xffffff); m.needsUpdate = true; }
+    back.material.map = liner; back.material.bumpMap = liner; back.material.bumpScale = 0.6; back.material.color.set(0xffffff); back.material.needsUpdate = true;
+    Object.assign(flapBack.material, { map: gumTex, bumpMap: gumTex, bumpScale: 0.6, roughnessMap: gumRough, roughness: 1 }); flapBack.material.color.set(0xf4eee0); flapBack.material.needsUpdate = true;
     const waxTex = tex(wax);
     sealLayers.forEach((m) => { m.material.map = waxTex; m.material.needsUpdate = true; });
     const cardCanvas = await drawSageCard(card);

@@ -359,5 +359,3 @@
 .atelier-sage:has(.sage-3d) .atelier-inscription { position: absolute !important; width: 1px !important; height: 1px !important; overflow: hidden; clip-path: inset(50%); opacity: 0; }
 .atelier-sage:has(.sage-3d) .atelier-scroll-hint { z-index: 11; color: #fbf6e8; text-shadow: 0 1px 6px rgba(18, 24, 14, .7); }
 .atelier-sage:has(.sage-3d) .atelier-replay { z-index: 11; }
-/* Sage covers the whole screen, also on tablets and desktops */
-.invitation-screen > .guest-experience.cinema-guest:has(.atelier-sage) { width: 100%; max-width: none; box-shadow: none; }
