@@ -203,13 +203,13 @@
   perspective: 1500px;
   transform-style: preserve-3d;
   pointer-events: none;
-  background: url('/atelier-sage.webp') center / cover no-repeat #65704d;
+  background: var(--sage-setting, none) center / cover no-repeat var(--occasion-paper, #f1ebda);
   box-shadow: inset 0 0 55px rgba(20, 28, 17, .24);
 }
 .sage-envelope-body {
   position: absolute;
   inset: 0;
-  background: url('/atelier-sage-cover.webp') center / 100% 100% no-repeat;
+  background: var(--sage-cover, none) center / 100% 100% no-repeat;
   filter: saturate(.88) brightness(.91);
   clip-path: inset(0);
   transition: clip-path 1.25s cubic-bezier(.35,.04,.2,1) .55s;
@@ -241,7 +241,7 @@
 .sage-envelope-front {
   transform: translateZ(1px);
   backface-visibility: hidden;
-  background: url('/atelier-sage-cover.webp') center top / 100% 206.2% no-repeat;
+  background: var(--sage-cover, none) center top / 100% 206.2% no-repeat;
 }
 .sage-envelope-lining {
   transform: rotateY(180deg);
@@ -330,12 +330,12 @@
 
 /* Paper finish only: the original flap, seal and invitation motion stays intact. */
 .atelier-sage .sage-envelope-body {
-  background-image: linear-gradient(115deg, rgba(246,239,210,.12), transparent 38%, rgba(20,28,15,.14)), url('/atelier-sage-cover.webp');
+  background-image: linear-gradient(115deg, rgba(246,239,210,.12), transparent 38%, rgba(20,28,15,.14)), var(--sage-cover, none);
   background-size: 100% 100%, 100% 100%;
   background-position: center, center;
 }
 .atelier-sage .sage-envelope-front {
-  background-image: linear-gradient(115deg, rgba(255,247,218,.18), transparent 35%, rgba(18,26,13,.18)), url('/atelier-sage-cover.webp');
+  background-image: linear-gradient(115deg, rgba(255,247,218,.18), transparent 35%, rgba(18,26,13,.18)), var(--sage-cover, none);
   background-size: 100% 100%, 100% 206.2%;
   background-position: center, center top;
 }
@@ -345,14 +345,14 @@
   box-shadow: inset 0 2px 2px rgba(255,246,210,.32);
 }
 .atelier-sage .sage-wax-release img {
-  filter: contrast(1.06) saturate(.92) drop-shadow(0 1px 1px rgba(62,13,20,.38));
+  filter: hue-rotate(var(--sage-wax-hue, 0deg)) contrast(1.06) saturate(.92) drop-shadow(0 1px 1px rgba(62,13,20,.38));
 }
 
 /* Sage in 3D: the envelope, seal and card are drawn in one WebGL canvas (sageEnvelope.js). */
 .sage-envelope-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
 .sage-envelope-scene:not(.sage-3d) .sage-envelope-canvas { visibility: hidden; }
 .sage-envelope-scene.sage-3d > :not(canvas) { display: none; }
-.atelier-sage .sage-envelope-scene.sage-3d { background: url('/atelier-sage.webp') center / cover no-repeat #65704d; }
+.atelier-sage .sage-envelope-scene.sage-3d { background: var(--sage-setting, none) center / cover no-repeat var(--occasion-paper, #f1ebda); }
 .atelier-sage:has(.sage-3d) .atelier-open-control { left: var(--sage-seal-x, 50%); top: calc(var(--sage-seal-y, 53%) - var(--sage-seal-r, 80px)); width: auto; padding: 0; transform: translateX(-50%); }
 .atelier-sage:has(.sage-3d) .sage-seal-hitarea { display: block; width: calc(var(--sage-seal-r, 80px) * 2); height: calc(var(--sage-seal-r, 80px) * 2); border-radius: 50%; }
 .atelier-sage:has(.sage-3d) .atelier-touch { margin-top: 14px; }

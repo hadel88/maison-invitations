@@ -3,6 +3,28 @@ import assert from 'node:assert/strict';
 import {sageEnvelopeProfiles,traceSageFlap,sageFlapLift} from '../src/sageEnvelopeProfiles.js';
 import {paintSageLetter} from '../src/paintSageLetter.js';
 import {sageThemes} from '../src/sageDesigns.js';
+import {paperCoverTile} from '../src/invitationMaterials.js';
+import {readFileSync} from 'node:fs';
+
+test('paper stock covers the full panel without transparent top or bottom bands',()=>{
+ for(const [iw,ih] of [[1024,1536],[941,1672],[1536,1024]]){
+  for(const [width,height,envWidth] of [[1024,1707,.6],[2560,1440,1.78],[1024,2275,.6]]){
+   const tile=paperCoverTile(iw,ih,width,height,envWidth);
+   assert.ok(tile.top<=.00001);
+   assert.ok(tile.top+tile.height>=height-.00001);
+   assert.ok(tile.width>=width*.6/envWidth-.00001);
+   assert.ok(Math.abs(tile.width/tile.height-iw/ih)<.00001,'artwork aspect ratio is preserved');
+  }
+ }
+});
+test('loading fallback uses the chosen design, never a hardcoded green stock',()=>{
+ const css=readFileSync(new URL('../src/atelier.css',import.meta.url),'utf8');
+ const component=readFileSync(new URL('../src/Cinema.jsx',import.meta.url),'utf8');
+ assert.ok(!css.includes("url('/atelier-sage-cover.webp')"));
+ assert.ok(!css.includes("url('/atelier-sage.webp')"));
+ assert.match(component,/--sage-cover.*design\.materialCover/);
+ assert.match(css,/background: var\(--sage-cover, none\)/);
+});
 
 test('flap fold stays attached to the envelope body throughout rotation',()=>{
  const rootLift=sageFlapLift(0,.54);

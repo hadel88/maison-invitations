@@ -1,4 +1,4 @@
-import {paperStock,paperRelief,ornamentGlyph,waxStock} from './invitationMaterials';
+import {paperStock,paperRelief,ornamentGlyph,waxStock,paperCoverTile} from './invitationMaterials';
 import {traceSageFlap,sageFlapLift} from './sageEnvelopeProfiles.js';
 import {paintSageLetter} from './paintSageLetter.js';
 import * as THREE from 'three';
@@ -58,7 +58,7 @@ function toPx(c, x, y) { return [(x / W + 0.5) * c.width, (0.5 - y / H) * c.heig
 // the cover photo is a little narrower than the envelope: use its full width, crop height
 // one photo width = 0.6 world units; on a wider envelope the paper repeats, mirrored, so it stays seamless
 function drawPaper(g, img, c) {
-  const tw = c.width * 0.6 / W, th = img.height * tw / img.width, y = (c.height - th) / 2;
+  const {width:tw,height:th,top:y}=paperCoverTile(img.width,img.height,c.width,c.height,W);
   const n = Math.ceil((c.width / tw - 1) / 2) + 1;
   for (let i = -n; i <= n; i++) {
     const x = c.width / 2 - tw / 2 + i * tw;

@@ -67,7 +67,7 @@ function SageEnvelope({design,opened,onComplete,stage,card,guestLine,inviteLine}
  openedRef.current=opened;
  const cardKey=JSON.stringify(card),guestRef=useRef(guestLine);
  const placeSeal=(p)=>{const el=stage.current;if(!el||!p)return;el.style.setProperty('--sage-seal-x',p.x+'px');el.style.setProperty('--sage-seal-y',p.y+'px');el.style.setProperty('--sage-seal-r',p.r+'px')};
- useEffect(()=>{let dead=false;
+ useEffect(()=>{let dead=false;setGl(false);
   import('./sageEnvelope').then(async({createSageEnvelope})=>{if(dead||!canvas.current)return;
    try{const e=createSageEnvelope(canvas.current,{design,card,guestLine:guestRef.current,inviteLine,onSeal:placeSeal,onShape:()=>setShape(n=>n+1)});engine.current=e;await e.ready;if(dead)return;setGl(true);
     if(openedRef.current){matchMedia('(prefers-reduced-motion: reduce)').matches?(e.finish(),onComplete(true)):e.play(()=>onComplete(true))}}
@@ -82,7 +82,7 @@ function SageEnvelope({design,opened,onComplete,stage,card,guestLine,inviteLine}
  useEffect(()=>{const e=engine.current,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(gl&&e){if(!opened){e.reset();return}if(reduced){e.finish();onComplete(true);return}e.play(()=>onComplete(true));return}
   if(!opened)return;const timer=setTimeout(()=>onComplete(true),reduced?0:2850);return()=>clearTimeout(timer)},[opened,onComplete,gl]);
- return <div className={`sage-envelope-scene ${gl?'sage-3d':''}`} aria-hidden="true">
+ return <div className={`sage-envelope-scene ${gl?'sage-3d':''}`} style={{'--sage-cover':`url("/${design.materialCover||design.cover}.webp")`,'--sage-setting':`url("/${design.image}.webp")`,'--sage-wax-hue':`${design.waxHue||0}deg`}} aria-hidden="true">
   <div className="sage-envelope-body"/>
   <div className="sage-envelope-pocket"/>
   <div className="sage-envelope-flap">

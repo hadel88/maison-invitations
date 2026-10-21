@@ -1,4 +1,9 @@
 // Colour, height and fibre maps only. No geometry, camera or animation code.
+export function paperCoverTile(imageWidth,imageHeight,textureWidth,textureHeight,envelopeWidth){
+ const width=Math.max(textureWidth*.6/envelopeWidth,textureHeight*imageWidth/imageHeight);
+ const height=imageHeight*width/imageWidth;
+ return {width,height,top:(textureHeight-height)/2};
+}
 export function paperStock(image, design={}){
  const c=document.createElement('canvas');c.width=image.width;c.height=image.height;
  const g=c.getContext('2d');g.drawImage(image,0,0);
