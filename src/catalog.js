@@ -1,3 +1,4 @@
+import {occasionScene,occasionEvent} from './occasionScenes.js';
 export const occasions = [
   "All designs",
   "Wedding",
@@ -10,6 +11,10 @@ export const occasions = [
   "Corporate event",
   "Christening",
   "Seasonal celebration",
+  "Marriage proposal",
+  "Workshops & seminars",
+  "Store & business opening",
+  "New Year’s Eve",
 ];
 export const templates = [
   [
@@ -200,6 +205,14 @@ export const templates = [
   badge,
 }));
 templates.push(...[
+ ['proposal','One Beautiful Question','Marriage proposal','Intimate · Romantic','olive','Emma & Louis','Will you marry me?',24,'New'],
+ ['proposal-moonlight','Under Our Stars','Marriage proposal','Midnight · Gilded','navy','Emma & Louis','One beautiful question. A lifetime together.',24,'New'],
+ ['workshop','The Ideas Atelier','Workshops & seminars','Creative · Editorial','assembly','The Creative Atelier','Learn, create and connect',24,'New'],
+ ['seminar','The Seminar Society','Workshops & seminars','Modern · Architectural','atelier','Ideas in Good Company','An inspiring day of conversation',24,'New'],
+ ['opening','The Grand Reveal','Store & business opening','Architectural · Modern','assembly','Atelier Maison','A new door opens',24,'New'],
+ ['opening-gilded','The First Chapter','Store & business opening','Gilded · Contemporary','olive','Atelier Maison','Be among the first to step inside',24,'New'],
+ ['newyear','A Midnight Wish','New Year’s Eve','Celestial · Gilded','navy','Midnight at Maison','One last dance. A beautiful new beginning.',24,'New'],
+ ['newyear-champagne','The Champagne Hour','New Year’s Eve','Champagne · Art deco','assembly','A Toast to Tomorrow','Meet us at midnight',24,'New'],
  ['jubilee','The Golden Years','Anniversary','Heirloom · Gilded','jubilee','A lifetime of us','Celebrating a beautiful love story',24,'New'],
  ['everafter','Ever After','Anniversary','Romantic · Pearl','everafter','Still, always you','Twenty-five years of love',24,''],
  ['assembly','The Grand Assembly','Corporate event','Formal · Art deco','assembly','An evening of possibility','You are cordially invited',29,'New'],
@@ -227,6 +240,7 @@ export const defaultEvent = (t = templates[0]) => ({
   music: "soft",
   rsvpDeadline: "2027-06-01",
   dressCode: "Garden elegance",
+  ...(['Marriage proposal','Workshops & seminars','Store & business opening','New Year’s Eve'].includes(t.occasion)?occasionEvent({...occasionScene(t.occasion),names:t.names,line:t.subtitle},{}):{}),
 });
 export const localeMap = { en: "en-GB", de: "de-DE", fr: "fr-FR" };
 export function dateLabel(

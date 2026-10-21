@@ -58,7 +58,7 @@ const T = {
 };
 
 // When invitations should go out, in days before the day.
-const SEND_BY = { Wedding: 120, Engagement: 30, Birthday: 21, "Baby shower": 30, Graduation: 30, "Dinner party": 14, Anniversary: 45, "Corporate event": 45, Christening: 30, "Seasonal celebration": 21 };
+const SEND_BY = { 'Marriage proposal':7,'Workshops & seminars':30,'Store & business opening':21,'New Year’s Eve':45,Wedding: 120, Engagement: 30, Birthday: 21, "Baby shower": 30, Graduation: 30, "Dinner party": 14, Anniversary: 45, "Corporate event": 45, Christening: 30, "Seasonal celebration": 21 };
 // Occasions without their own checklist use the six steps of their world,
 // minus the invitation steps that Maison already tracks itself.
 function fallback(occasion) {

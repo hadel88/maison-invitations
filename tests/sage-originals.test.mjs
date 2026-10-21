@@ -38,8 +38,8 @@ test('flap fold stays attached to the envelope body throughout rotation',()=>{
 });
 
 test('original Sage artwork never borrows an Ivory door asset',()=>{
- assert.equal(sageThemes.length,16);
- assert.equal(new Set(sageThemes.map(t=>t.materialCover)).size,16);
+ assert.equal(sageThemes.length,20);
+ assert.equal(new Set(sageThemes.map(t=>t.materialCover)).size,20);
  for(const theme of sageThemes)assert.ok(theme.materialCover.startsWith('sage-original-'),theme.id);
 });
 test('the ten envelope flap outlines are distinct and remain inside physical paper bounds',()=>{
@@ -51,7 +51,7 @@ test('the ten envelope flap outlines are distinct and remain inside physical pap
   for(const [, ...values] of calls)for(let i=0;i<values.length;i+=2){assert.ok(Math.abs(values[i])<=.3+.00001);assert.ok(values[i+1]<=0&&values[i+1]>=-.57)}
   signatures.push(JSON.stringify(calls));
  }
- assert.equal(new Set(signatures).size,10);
+ assert.equal(new Set(signatures).size,14);
 });
 test('each first invitation sheet has a different composition and preserves editable event details',()=>{
  const signatures=[];
@@ -62,5 +62,5 @@ test('each first invitation sheet has a different composition and preserves edit
   const printed=texts.join(' ');for(const value of ['Alex','Sam','19 JUNE 2027','Maison Hall'])assert.ok(printed.includes(value),theme.id+' '+value);
   signatures.push(JSON.stringify(calls));
  }
- assert.equal(new Set(signatures).size,9);
+ assert.equal(new Set(signatures).size,13);
 });

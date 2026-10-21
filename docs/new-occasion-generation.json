@@ -1,0 +1,82 @@
+[
+  {
+    "name": "sage-original-proposal",
+    "tool": "built-in image_gen",
+    "prompt": "Create original photoreal material artwork for an animated 3D envelope: romantic marriage proposal; plum handmade cotton paper with sculptural climbing white gardenias and fine gold intertwined ring engraving in one corner; quiet intimate secret letter. Portrait 2:3 flat paper sheet edge-to-edge, straight-on macro product photography with real paper fibres and dimensional embossed relief under raking daylight. Keep central 55 percent quiet for dynamic writing and wax seal. NO envelope pictured, no folds, doors, centre seam, wax seal, plaque, text, logo or surrounding mockup. Different original luxury European stationery."
+  },
+  {
+    "name": "sage-original-workshop",
+    "tool": "built-in image_gen",
+    "prompt": "Create original photoreal material artwork for an animated 3D envelope: workshop and seminar; warm stone linen paper with sculpted folded-paper geometric fans, copper compass and delicate embossed drafting arcs, contemporary creative European atelier. Portrait 2:3 flat paper sheet edge-to-edge, straight-on macro product photography with real paper fibres and dimensional embossed relief under raking daylight. Keep central 55 percent quiet for dynamic writing and wax seal. NO envelope pictured, no folds, doors, centre seam, wax seal, plaque, text, logo or surrounding mockup. Different original luxury European stationery."
+  },
+  {
+    "name": "sage-original-opening",
+    "tool": "built-in image_gen",
+    "prompt": "Create original photoreal material artwork for an animated 3D envelope: store and business grand opening; deep teal letterpress paper, elegant embossed architectural shopfront arch details at edges and warm brass sunburst flourishes, confident refined launch. Portrait 2:3 flat paper sheet edge-to-edge, straight-on macro product photography with real paper fibres and dimensional embossed relief under raking daylight. Keep central 55 percent quiet for dynamic writing and wax seal. NO envelope pictured, no folds, doors, centre seam, wax seal, plaque, text, logo or surrounding mockup. Different original luxury European stationery."
+  },
+  {
+    "name": "sage-original-newyear",
+    "tool": "built-in image_gen",
+    "prompt": "Create original photoreal material artwork for an animated 3D envelope: New Year's Eve; midnight blue rag paper, spectacular restrained gold-foil Art Deco starbursts and sculptural tiny champagne bubbles framing blank centre, elegant European midnight celebration. Portrait 2:3 flat paper sheet edge-to-edge, straight-on macro product photography with real paper fibres and dimensional embossed relief under raking daylight. Keep central 55 percent quiet for dynamic writing and wax seal. NO envelope pictured, no folds, doors, centre seam, wax seal, plaque, text, logo or surrounding mockup. Different original luxury European stationery."
+  },
+  {
+    "name": "ivory-proposal-cover",
+    "tool": "built-in image_gen",
+    "prompt": "Create ORIGINAL photoreal full-bleed front artwork for a luxurious vertical invitation with TWO CLOSED PAPER GATEFOLD DOORS. Occasion: marriage proposal; warm ivory and plum tones, realistic white gardenias and fine gold ring details. Portrait 9:16, front-facing orthographic, edge to edge thick paper panels meeting at a fine central vertical seam. Distinctive realistic sculptural embossing concentrated in outer corners and edges, restrained foil details, blank central area for a small plaque added later. Physically tactile invitation stationery, not architectural doors or room. No lettering, numbers, plaques, seals, ribbons, bows, people, interface or mockup. Soft studio raking light, believable material relief, European craftsmanship."
+  },
+  {
+    "name": "ivory-workshop-cover",
+    "tool": "built-in image_gen",
+    "prompt": "Create ORIGINAL photoreal full-bleed front artwork for a luxurious vertical invitation with TWO CLOSED PAPER GATEFOLD DOORS. Occasion: workshop and seminar; stone and copper, sculpted geometric fans and a fine architectural compass motif. Portrait 9:16, front-facing orthographic, edge to edge thick paper panels meeting at a fine central vertical seam. Distinctive realistic sculptural embossing concentrated in outer corners and edges, restrained foil details, blank central area for a small plaque added later. Physically tactile invitation stationery, not architectural doors or room. No lettering, numbers, plaques, seals, ribbons, bows, people, interface or mockup. Soft studio raking light, believable material relief, European craftsmanship."
+  },
+  {
+    "name": "ivory-opening-cover",
+    "tool": "built-in image_gen",
+    "prompt": "Create ORIGINAL photoreal full-bleed front artwork for a luxurious vertical invitation with TWO CLOSED PAPER GATEFOLD DOORS. Occasion: store and business grand opening; ivory and teal, elegant sculptural shopfront arch and warm brass sunburst details. Portrait 9:16, front-facing orthographic, edge to edge thick paper panels meeting at a fine central vertical seam. Distinctive realistic sculptural embossing concentrated in outer corners and edges, restrained foil details, blank central area for a small plaque added later. Physically tactile invitation stationery, not architectural doors or room. No lettering, numbers, plaques, seals, ribbons, bows, people, interface or mockup. Soft studio raking light, believable material relief, European craftsmanship."
+  },
+  {
+    "name": "ivory-newyear-cover",
+    "tool": "built-in image_gen",
+    "prompt": "Create ORIGINAL photoreal full-bleed front artwork for a luxurious vertical invitation with TWO CLOSED PAPER GATEFOLD DOORS. Occasion: New Year's Eve; ivory and midnight blue, sculptural gold Art Deco starbursts and tiny champagne bubble embossing. Portrait 9:16, front-facing orthographic, edge to edge thick paper panels meeting at a fine central vertical seam. Distinctive realistic sculptural embossing concentrated in outer corners and edges, restrained foil details, blank central area for a small plaque added later. Physically tactile invitation stationery, not architectural doors or room. No lettering, numbers, plaques, seals, ribbons, bows, people, interface or mockup. Soft studio raking light, believable material relief, European craftsmanship."
+  },
+  {
+    "name": "occasion-proposal-door",
+    "tool": "built-in image_gen",
+    "prompt": "Original photoreal flat front artwork for animated ribbon-opening digital invitation. romantic marriage proposal; pearl and deep plum, climbing sculptural white gardenias with subtle gold intertwined-ring engraving. Portrait 9:16, two premium thick decorative paper panels with a very fine closed vertical centre seam, full bleed. Beautiful realistic embossed materials and elegant relief around corners. CENTRAL HORIZONTAL BAND and centre area quiet and blank for real velvet bow rendered later. No bow, ribbons, text, letters, seals, plaques, logos, people, room or mockup. Macro stationery product photography straight on; deep believable paper relief and natural studio shadows, sophisticated European design."
+  },
+  {
+    "name": "occasion-workshop-door",
+    "tool": "built-in image_gen",
+    "prompt": "Original photoreal flat front artwork for animated ribbon-opening digital invitation. workshop and seminar; warm sand and burnt copper, intricate sculpted folded-paper geometry and fine architectural drafting lines. Portrait 9:16, two premium thick decorative paper panels with a very fine closed vertical centre seam, full bleed. Beautiful realistic embossed materials and elegant relief around corners. CENTRAL HORIZONTAL BAND and centre area quiet and blank for real velvet bow rendered later. No bow, ribbons, text, letters, seals, plaques, logos, people, room or mockup. Macro stationery product photography straight on; deep believable paper relief and natural studio shadows, sophisticated European design."
+  },
+  {
+    "name": "occasion-opening-door",
+    "tool": "built-in image_gen",
+    "prompt": "Original photoreal flat front artwork for animated ribbon-opening digital invitation. store and business grand opening; ivory and deep teal, refined embossed architectural arches with brass sunburst details. Portrait 9:16, two premium thick decorative paper panels with a very fine closed vertical centre seam, full bleed. Beautiful realistic embossed materials and elegant relief around corners. CENTRAL HORIZONTAL BAND and centre area quiet and blank for real velvet bow rendered later. No bow, ribbons, text, letters, seals, plaques, logos, people, room or mockup. Macro stationery product photography straight on; deep believable paper relief and natural studio shadows, sophisticated European design."
+  },
+  {
+    "name": "occasion-newyear-door",
+    "tool": "built-in image_gen",
+    "prompt": "Original photoreal flat front artwork for animated ribbon-opening digital invitation. New Year's Eve; dark midnight blue, brushed gold Art Deco fan relief and tiny sculptural champagne bubbles. Portrait 9:16, two premium thick decorative paper panels with a very fine closed vertical centre seam, full bleed. Beautiful realistic embossed materials and elegant relief around corners. CENTRAL HORIZONTAL BAND and centre area quiet and blank for real velvet bow rendered later. No bow, ribbons, text, letters, seals, plaques, logos, people, room or mockup. Macro stationery product photography straight on; deep believable paper relief and natural studio shadows, sophisticated European design."
+  },
+  {
+    "name": "occasion-proposal-inside",
+    "tool": "built-in image_gen",
+    "prompt": "Photoreal cinematic vertical 9:16 invitation interior background, an intimate candlelit rose observatory glasshouse at twilight, two empty chairs and a small table beneath flowering gardenias, romantic proposal setting, plum velvet and subtle gold, no ring box in foreground. One immersive coherent scene, realistic physical materials and lighting, elegant European event photography, atmospheric depth, central area calm enough for translucent invitation paper to overlay. No cards, envelopes, mockup borders, readable text, logos or watermarks."
+  },
+  {
+    "name": "occasion-workshop-inside",
+    "tool": "built-in image_gen",
+    "prompt": "Photoreal cinematic vertical 9:16 invitation interior background, a beautiful sunlit European creative workshop studio with oak workbenches, handmade papers, brass tools and linen curtains, architectural windows, inviting quiet learning space, no people. One immersive coherent scene, realistic physical materials and lighting, elegant European event photography, atmospheric depth, central area calm enough for translucent invitation paper to overlay. No cards, envelopes, mockup borders, readable text, logos or watermarks."
+  },
+  {
+    "name": "occasion-opening-inside",
+    "tool": "built-in image_gen",
+    "prompt": "Photoreal cinematic vertical 9:16 invitation interior background, a newly opened refined European concept boutique, elegant teal storefront doorway opening into a beautiful oak-and-brass interior, subtle celebratory white flowers and a cut ribbon at the sides, no people or shop signs. One immersive coherent scene, realistic physical materials and lighting, elegant European event photography, atmospheric depth, central area calm enough for translucent invitation paper to overlay. No cards, envelopes, mockup borders, readable text, logos or watermarks."
+  },
+  {
+    "name": "occasion-newyear-inside",
+    "tool": "built-in image_gen",
+    "prompt": "Photoreal cinematic vertical 9:16 invitation interior background, a spectacular elegant European rooftop New Year's Eve dinner at midnight, illuminated city skyline with restrained distant gold fireworks, midnight blue velvet chairs, gold champagne glasses and candlelit tables, no people or lettering. One immersive coherent scene, realistic physical materials and lighting, elegant European event photography, atmospheric depth, central area calm enough for translucent invitation paper to overlay. No cards, envelopes, mockup borders, readable text, logos or watermarks."
+  }
+]

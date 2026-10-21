@@ -95,6 +95,9 @@ export function GuestExperience({
   useEffect(()=>{document.documentElement.dataset.world=event.worldTheme||"midnight"},[event.worldTheme]);
   const [lang, setLang] = useState(event.language || "en");
   const c = copy[lang];
+  const proposal=event.occasion==='Marriage proposal',workshop=event.occasion==='Workshops & seminars';
+  const animatedInterior=sceneFor(event).kind==='sage'||['proposal','workshop','opening','newyear'].includes(sceneFor(event).pageLayout);
+  const responseLabels=proposal?{en:['Will you marry me?','A thousand times yes','Let’s talk'],de:['Willst du mich heiraten?','Tausendmal ja','Lass uns reden'],fr:['Veux-tu m’épouser ?','Mille fois oui','Parlons-en']}[lang]:workshop?{en:['Reserve your place','I’ll be there','Unable to attend'],de:['Platz reservieren','Ich bin dabei','Ich kann nicht teilnehmen'],fr:['Réservez votre place','Je serai là','Je ne peux pas venir']}[lang]:null;
   const crafted = event.scene === 'embroidered-chateau';
   const [muted, toggleSound] = useSound(event.music, opened);
   const [name, setName] = useState(guest?.name || "");
@@ -137,7 +140,7 @@ export function GuestExperience({
           token: rsvpToken,
           name,
           response,
-          partySize: party,
+          partySize: proposal?1:party,
           note: responseNote({note,meal,allergies,attending:response==='yes'}),
           website,
         },
@@ -151,7 +154,7 @@ export function GuestExperience({
     }
   }
   return (
-    <div className="invitation-screen"><div data-stationery={sceneFor(event).kind === 'sage' ? sceneFor(event).pageLayout : undefined} style={{...sceneVariables(sceneFor(event)),...ivoryVariables(sceneFor(event))}} className={"guest-experience cinema-guest " + (sceneFor(event).kind==='sage'?'cinema-sage ':sceneFor(event).kind==='rose'?'cinema-ribbon ':'') + (sceneFor(event).kind==='ivory'?'cinema-ivory ':'') + (crafted ? "cinema-craft " : ["castle-gates","castle-story","pearl-promise","little-wonder"].includes(event.scene) ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
+    <div className="invitation-screen"><div data-stationery={sceneFor(event).pageLayout} style={{...sceneVariables(sceneFor(event)),...ivoryVariables(sceneFor(event))}} className={"guest-experience cinema-guest " + (sceneFor(event).kind==='sage'?'cinema-sage ':sceneFor(event).kind==='rose'?'cinema-ribbon ':'') + (sceneFor(event).kind==='ivory'?'cinema-ivory ':'') + (crafted ? "cinema-craft " : ["castle-gates","castle-story","pearl-promise","little-wonder"].includes(event.scene) ? "cinema-film " : event.scene === "birthday-wish" ? "cinema-birthday " : ["graduation-flight","graduation-curtain"].includes(event.scene) ? "cinema-birthday cinema-graduation " : "") + (opened ? "is-open" : "")}>
       <div className="guest-controls">
         <a href="/" className="brand">
           maison
@@ -185,7 +188,7 @@ export function GuestExperience({
       <CinemaStage event={event} guest={guest} opened={opened} onOpen={()=>setOpened(true)} onReplay={()=>setOpened(false)} onAnswer={(r)=>{if(r){setResponse(r);setSaved(false);}setTimeout(()=>document.querySelector('.cinema-detail-sheet .rsvp')?.scrollIntoView({behavior:'smooth',block:'start'}),60)}} lang={lang} preview={preview}/>
       {opened && (
         <div className="cinema-detail-sheet" aria-label="Invitation details and RSVP">
-        <div className="opened-invite">{sceneFor(event).kind === 'sage' && <SageInterior theme={sceneFor(event)} event={event} lang={lang}/> }
+        <div className="opened-invite">{animatedInterior && <SageInterior theme={sceneFor(event)} event={event} lang={lang}/> }
           {sceneFor(event).kind==='ivory'&&<IvoryDetailsHeading event={event} theme={sceneFor(event)}/>}
           <div className="guest-phase-message">{{en:{before:'The lovely anticipation begins.',today:'Today is the day. We are so happy you are here.',after:'Thank you for being part of our story.'},de:{before:'Die Vorfreude beginnt.',today:'Heute ist der große Tag. Schön, dass du da bist.',after:'Danke, dass du Teil unserer Geschichte bist.'},fr:{before:'Le bonheur de se retrouver approche.',today:'Le grand jour est arrivé. Quel bonheur de vous retrouver.',after:'Merci de faire partie de notre histoire.'}}[lang]?.[eventPhase(event)]}</div>
           {crafted ? <CraftWelcome event={event} lang={lang} /> : <p className="guest-message">{event.message}</p>}
@@ -287,10 +290,10 @@ export function GuestExperience({
               </ul>
             </section>
           )}
-          <section className="rsvp">{sceneFor(event).kind === 'sage' && <SageReplyHeading theme={sceneFor(event)} lang={lang}/> }
-            <span className="eyebrow">WE SAVED YOU A PLACE</span>
-            <h2>{c.rsvp}</h2>
-            <p>{dateLabel(event.rsvpDeadline, lang)}</p>
+          <section className="rsvp">{animatedInterior && <SageReplyHeading theme={sceneFor(event)} lang={lang}/> }
+            <span className="eyebrow">{proposal?({en:'JUST BETWEEN US',de:'NUR ZWISCHEN UNS',fr:'RIEN QU’ENTRE NOUS'}[lang]):workshop?({en:'YOUR PLACE AT THE ATELIER',de:'DEIN PLATZ IM ATELIER',fr:'VOTRE PLACE À L’ATELIER'}[lang]):'WE SAVED YOU A PLACE'}</span>
+            <h2>{responseLabels?.[0]||c.rsvp}</h2>
+            {!proposal&&<p>{dateLabel(event.rsvpDeadline, lang)}</p>}
             {saved ? (
               <div className="response-saved" role="status">
                 <CheckCircle2 size={35} />
@@ -298,7 +301,7 @@ export function GuestExperience({
                 <p>
                   {preview
                     ? "This is a preview response. Publish your invitation to collect real RSVPs."
-                    : response === "yes"
+                    : proposal?({en:'Your answer has been shared with your host.',de:'Deine Antwort wurde geteilt.',fr:'Votre réponse a été transmise à votre hôte.'}[lang]):response === "yes"
                       ? "We can’t wait to celebrate with you."
                       : "Your host has received your reply."}
                 </p>
@@ -323,17 +326,17 @@ export function GuestExperience({
                     onClick={() => setResponse("yes")}
                   >
                     <Heart size={16} />
-                    {c.yes}
+                    {responseLabels?.[1]||c.yes}
                   </button>
                   <button
                     type="button"
                     className={response === "no" ? "selected" : ""}
                     onClick={() => setResponse("no")}
                   >
-                    {c.no}
+                    {responseLabels?.[2]||c.no}
                   </button>
                 </div>
-                {response === "yes" && (
+                {response === "yes" && !proposal && (
                   <label className="field">
                     {lang === "de"
                       ? "Anzahl der Gäste"
@@ -352,7 +355,7 @@ export function GuestExperience({
                     </select>
                   </label>
                 )}
-                {response==='yes'&&<div className="guest-dietary"><label className="field">{{en:'Meal preference (optional)',de:'Essenswunsch (optional)',fr:'Préférence de repas (facultatif)'}[lang]}<select value={meal} onChange={e=>setMeal(e.target.value)}><option value="">—</option><option value="Standard">{{en:'Standard',de:'Standard',fr:'Classique'}[lang]}</option><option value="Vegetarian">{{en:'Vegetarian',de:'Vegetarisch',fr:'Végétarien'}[lang]}</option><option value="Vegan">{{en:'Vegan',de:'Vegan',fr:'Végétalien'}[lang]}</option><option value="Other / see note">{{en:'Other · see note',de:'Andere · siehe Nachricht',fr:'Autre · voir le message'}[lang]}</option></select></label><Field label={{en:'Allergies or dietary needs (optional)',de:'Allergien oder Ernährungsbedürfnisse (optional)',fr:'Allergies ou besoins alimentaires (facultatif)'}[lang]} value={allergies} onChange={setAllergies} maxLength={150}/></div>}
+                {response==='yes'&&!proposal&&<div className="guest-dietary"><label className="field">{{en:'Meal preference (optional)',de:'Essenswunsch (optional)',fr:'Préférence de repas (facultatif)'}[lang]}<select value={meal} onChange={e=>setMeal(e.target.value)}><option value="">—</option><option value="Standard">{{en:'Standard',de:'Standard',fr:'Classique'}[lang]}</option><option value="Vegetarian">{{en:'Vegetarian',de:'Vegetarisch',fr:'Végétarien'}[lang]}</option><option value="Vegan">{{en:'Vegan',de:'Vegan',fr:'Végétalien'}[lang]}</option><option value="Other / see note">{{en:'Other · see note',de:'Andere · siehe Nachricht',fr:'Autre · voir le message'}[lang]}</option></select></label><Field label={{en:'Allergies or dietary needs (optional)',de:'Allergien oder Ernährungsbedürfnisse (optional)',fr:'Allergies ou besoins alimentaires (facultatif)'}[lang]} value={allergies} onChange={setAllergies} maxLength={150}/></div>}
                 <label className="field">
                   {lang === "de"
                     ? "Nachricht an den Gastgeber (optional)"

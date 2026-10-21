@@ -19,6 +19,10 @@ const rows = [
  ['ivory-christening-boy','The Blue Olive Blessing','Christening','Boys','christening-boy','#e8eef2','#516575','#a49a70','olive','Oliver'],
  ['ivory-christening-girl','The Blossom Blessing','Christening','Girls','christening-girl','#f4e9e6','#7b5a60','#b29b67','blossoms','Sophie'],
  ['ivory-seasonal','The Evergreen Letter','Seasonal celebration','Neutral','seasonal','#e6eadd','#425b47','#a9914e','evergreen','A winter gathering'],
+ ['ivory-proposal','The Gardenia Question','Marriage proposal','Neutral','proposal','#f5e8ed','#653e59','#be9865','botanical','Emma & Louis'],
+ ['ivory-workshop','The Paper Atelier','Workshops & seminars','Neutral','workshop','#f0e6d8','#5b4a39','#ad7849','geometry','The Creative Atelier'],
+ ['ivory-opening','The Opening Arch','Store & business opening','Neutral','opening','#e1efea','#28584f','#c0a36a','geometry','Atelier Maison'],
+ ['ivory-newyear','The Midnight Star','New Year’s Eve','Neutral','newyear','#eae7f2','#353b60','#c4a262','stars','Midnight at Maison'],
 ];
 
 export const ivoryThemes=rows.map(([id,name,occasion,audience,art,paper,ink,gold,motif,names])=>{

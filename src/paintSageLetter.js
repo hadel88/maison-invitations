@@ -18,6 +18,19 @@ export function paintSageLetter(g,w,h,card,design){
  const kicker=(y=200,colour=gold)=>text(card.overline,w/2,y,29,colour);
  const subtitle=(y=1050,colour=ink)=>lines(card.subtitle,w/2,y,42,colour,w-240);
  switch(layout){
+  case 'proposal':{
+   g.fillStyle='#744660';g.fillRect(0,0,w,400);text('♡',w/2,230,150,'#e6c694');text(card.overline,w/2,520,29,gold);lines(card.names,w/2,740,145,ink,w-220);subtitle(1080);footer(1330);break;
+  }
+  case 'workshop':{
+   g.strokeStyle='#b99a6733';g.lineWidth=1;for(let y=130;y<h-90;y+=64){g.beginPath();g.moveTo(90,y);g.lineTo(w-90,y);g.stroke()}
+   g.fillStyle=gold;g.fillRect(90,130,12,h-260);kicker(270);lines(card.names,w/2+30,550,140,ink,w-280);subtitle(1040);footer(1310);break;
+  }
+  case 'opening':{
+   g.fillStyle='#28584f';g.fillRect(0,0,w,520);text('OPEN',w/2,250,150,'#e5cca2');text(card.overline,w/2,660,29,gold);lines(card.names,w/2,850,150,ink,w-220);rule(1170);footer(1300);break;
+  }
+  case 'newyear':{
+   g.fillStyle='#18253e';g.fillRect(0,0,w,h);text('✦',w/2,240,140,gold);text(card.overline,w/2,430,29,'#ddc694');lines(card.names,w/2,660,155,'#f8edda',w-210);rule(1150);footer(1300,'#eee2bf');text('✧',w/2,1510,52,gold);break;
+  }
   case 'ticket':{
    g.fillStyle='#68416e';g.fillRect(0,0,175,h);g.save();g.translate(85,h/2);g.rotate(-Math.PI/2);text(card.date,0,0,42,'#fff0d5','center',false,h-220);g.restore();
    g.setLineDash([15,18]);g.strokeStyle=gold;g.lineWidth=4;g.beginPath();g.moveTo(190,0);g.lineTo(190,h);g.stroke();g.setLineDash([]);

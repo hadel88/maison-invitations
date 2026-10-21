@@ -2,8 +2,13 @@ import React,{useEffect,useRef} from 'react';
 import {dateLabel} from './catalog';
 import './sageInterior.css';
 import './sageWorlds.css';
+import './additionalOccasions.css';
 
 const captions={
+ proposal:['One beautiful question','Eine wunderschöne Frage','Une si belle question'],
+ workshop:['Ideas worth gathering for','Ideen, die uns verbinden','Des idées à partager'],
+ opening:['A new door opens','Eine neue Tür öffnet sich','Une nouvelle porte s’ouvre'],
+ newyear:['Meet me at midnight','Wir sehen uns um Mitternacht','Rendez-vous à minuit'],
  arch:['A garden promise','Ein Gartenversprechen','Une promesse au jardin'],
  ticket:['Make a little magic','Ein bisschen Geburtstagsmagie','Un peu de magie'],
  diamond:['The beginning of forever','Für immer beginnt hier','Le début de toujours'],
@@ -38,10 +43,14 @@ function SageWorldContent({layout,theme,event,lang}){
  const date=<time dateTime={event.date}>{dateLabel(event.date,lang)}</time>;
  const caption=captions[layout]?.[{en:0,de:1,fr:2}[lang]||0];
  const title=<h2>{event.names}</h2>,venue=<p className="sage-world-venue">{event.venue}</p>;
- const stock={backgroundImage:`url("/${theme.materialCover}.webp")`};
+ const stock={backgroundImage:`url("/${theme.materialCover||theme.cover}.webp")`};
  const number=String(event.date||'').split('-')[2]||'19';
  const names=event.names.split(/\s*&\s*/);
  switch(layout){
+  case 'proposal':return <div className="sage-proposal-letter"><div className="sage-proposal-fold" style={stock}/><article><span className="sage-world-kicker">{caption}</span><i>♡</i>{title}<p className="sage-proposal-question">{event.subtitle}</p>{date}{venue}</article><div className="sage-proposal-petal" style={stock}/></div>;
+  case 'workshop':return <div className="sage-workshop-book"><aside style={stock}><span>MAISON / ATELIER</span></aside><article><span className="sage-world-kicker">{caption}</span>{title}{date}<ol>{event.timeline?.map((item,i)=><li key={i}><b>{item.time}</b><span>{item.title}</span></li>)}</ol>{venue}</article></div>;
+  case 'opening':return <div className="sage-launch"><article><span className="sage-world-kicker">{caption}</span><b>OPEN</b>{title}{date}{venue}</article><div className="sage-launch-door left" style={stock}/><div className="sage-launch-door right" style={stock}/><i className="sage-launch-ribbon"/></div>;
+  case 'newyear':return <div className="sage-midnight"><div className="sage-midnight-clock" aria-hidden="true"><span>XII</span><span>III</span><span>VI</span><span>IX</span><i/><b/></div><article><span className="sage-world-kicker">{caption}</span>{title}{date}{venue}<p>{event.subtitle}</p></article></div>;
   case 'ticket':return <div className="sage-party-ticket"><aside><b>{number}</b>{date}</aside><article><span className="sage-world-kicker">{caption}</span>{title}{venue}<div className="sage-ticket-barcode" aria-hidden="true"/></article><div className="sage-ticket-stub"><span>MAISON</span><i>✦</i></div></div>;
   case 'diamond':return <div className="sage-two-leaves"><article className="sage-leaf-one" style={stock}><span className="sage-world-kicker">{caption}</span><h2>{names[0]}</h2><b>&amp;</b></article><article className="sage-leaf-two"><h2>{names[1]||event.names}</h2>{date}{venue}</article></div>;
   case 'cloud':return <div className="sage-storybook"><article className="sage-storybook-picture" style={stock}><span>{caption}</span></article><article className="sage-storybook-letter"><span className="sage-world-kicker">MAISON</span>{title}<p>{event.subtitle||theme.line}</p>{date}{venue}</article></div>;
@@ -55,6 +64,6 @@ function SageWorldContent({layout,theme,event,lang}){
  }
 }
 export function SageReplyHeading({theme,lang='en'}){
- const labels={arch:['The reply letter','Die Antwort','Votre réponse'],ticket:['Your party pass','Dein Partyticket','Votre billet de fête'],diamond:['Be part of our beginning','Sei bei unserem Anfang dabei','Partagez notre premier chapitre'],cloud:['A note for our little wonder','Eine Nachricht fürs kleine Wunder','Un mot pour notre petit bonheur'],diploma:['Join the next chapter','Feiere das nächste Kapitel','Rejoignez ce nouveau chapitre'],menu:['A place at the table','Ein Platz an unserem Tisch','Une place à notre table'],cameo:['Another beautiful memory','Eine weitere schöne Erinnerung','Un nouveau beau souvenir'],editorial:['Confirm your attendance','Teilnahme bestätigen','Confirmez votre présence'],chapel:['Share this blessing','Teile diesen Segen','Partagez cette bénédiction'],festive:['Save a little seasonal magic','Gemeinsam die Festzeit genießen','Partageons la magie des fêtes']};
+ const labels={proposal:['Your answer, just for us','Deine Antwort, nur für uns','Votre réponse, rien que pour nous'],workshop:['Your seat at the atelier','Dein Platz im Atelier','Votre place à l’atelier'],opening:['Join our first chapter','Sei bei unserem Anfang dabei','Partagez notre premier chapitre'],newyear:['Save your midnight moment','Dein Platz zur Mitternacht','Votre place pour minuit'],arch:['The reply letter','Die Antwort','Votre réponse'],ticket:['Your party pass','Dein Partyticket','Votre billet de fête'],diamond:['Be part of our beginning','Sei bei unserem Anfang dabei','Partagez notre premier chapitre'],cloud:['A note for our little wonder','Eine Nachricht fürs kleine Wunder','Un mot pour notre petit bonheur'],diploma:['Join the next chapter','Feiere das nächste Kapitel','Rejoignez ce nouveau chapitre'],menu:['A place at the table','Ein Platz an unserem Tisch','Une place à notre table'],cameo:['Another beautiful memory','Eine weitere schöne Erinnerung','Un nouveau beau souvenir'],editorial:['Confirm your attendance','Teilnahme bestätigen','Confirmez votre présence'],chapel:['Share this blessing','Teile diesen Segen','Partagez cette bénédiction'],festive:['Save a little seasonal magic','Gemeinsam die Festzeit genießen','Partageons la magie des fêtes']};
  return <div className="sage-reply-heading" aria-hidden="true"><span>{theme.pageLayout==='ticket'?'ADMIT ONE':theme.pageLayout==='menu'?'À TABLE':theme.pageLayout==='editorial'?'RÉPONSE':'MAISON'}</span><p>{labels[theme.pageLayout]?.[{en:0,de:1,fr:2}[lang]||0]}</p><i/></div>;
 }
