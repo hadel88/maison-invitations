@@ -20,7 +20,7 @@ const FLAP_L = 0.54;                  // hinge → flap tip
 const FLAP_SIDE = 0.3;                // hinge → where the flap's sides turn to the tip
 const FLAP_MID = (FLAP_SIDE + FLAP_L) / 2 + 0.012; // a gentle outward curve along each edge
 const SEAL = 0.19;                    // seal diameter
-const CARD_W = 0.44, CARD_H = CARD_W * 1.4, CARD_T = 0.0025;
+const CARD_W = 0.38, CARD_H = CARD_W * 1.4, CARD_T = 0.0025;
 const CARD_HIDDEN_Y = V_DIP - 0.012 - CARD_H / 2;
 // the card's bottom corners must clear the pocket's edge before it comes forward
 const CARD_RISEN_Y = V_DIP + (V_SIDE - V_DIP) * (CARD_W / W) + 0.012 + CARD_H / 2;
@@ -305,9 +305,10 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     // closed, the envelope fills the whole screen
     const vh0 = Math.min(H, W / aspect) * 0.985;
     const c0 = 0;
-    const vh1 = Math.min(1.4, W / aspect * 0.985);
-    const c1 = CARD_RISEN_Y + CARD_H / 2 + 0.08 * vh1 - vh1 / 2;
-    const vhz = Math.max(CARD_W / (0.86 * aspect), CARD_H / 0.8);
+    // no zoom-out while opening: the camera only glides up with the card, so everything stays big
+    const vh1 = vh0;
+    const c1 = CARD_RISEN_Y + CARD_H / 2 + 0.05 * vh1 - vh1 / 2;
+    const vhz = Math.min(Math.max(CARD_W / (0.94 * aspect), CARD_H / 0.86), vh1 * 0.9); // always in front of the envelope
     return { vh0, c0, vh1, c1, vhz };
   }
   let cardLoaded = false;
