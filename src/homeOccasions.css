@@ -35,21 +35,38 @@
 }
 @media(prefers-reduced-motion:reduce) { .home-occasion-arch,.home-occasion-spark,.home-occasion-label svg { transition: none; } }
 
-/* Homepage: the occasion frames sit inside the bottom of the hero picture, visible on arrival. */
+/* Homepage: the occasion frames are the base of the hero picture, a full-width row along its
+   bottom edge; the mood chooser sits just above it. */
 .home-hero-with-occasions { position: relative; }
 .home-hero-with-occasions .hero-story-note { display: none; }
-@media (max-width: 799px) { .home-hero-with-occasions .royal-hero { padding-bottom: 270px; } }
-.home-occasions-compact { position: absolute; z-index: 4; left: 16px; right: 0; bottom: 108px; }
-.home-occasions-compact h2 { display: flex; align-items: center; gap: 7px; margin: 0 0 10px; font: 600 9px/1.4 'DM Sans', system-ui, sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #e5c88f; text-shadow: 0 1px 8px #0009; }
-.home-occasions-compact .home-occasion-row { display: flex; gap: 12px; max-width: none; margin: 0; padding: 4px 16px 6px 2px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+.home-hero-with-occasions .royal-hero { padding-bottom: 262px; }
+.home-hero-with-occasions .hero-theme-dock { bottom: 168px; }
+.home-occasions-compact { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; padding: 12px 0 14px; border-top: 1px solid #d9bc7e38; background: linear-gradient(180deg, #08101c55, color-mix(in srgb, var(--royal-night, #101b2d) 92%, black) 70%); }
+.home-occasions-compact h2 { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 0 0 9px; font: 600 9px/1.4 'DM Sans', system-ui, sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #e5c88f; }
+.home-occasions-compact .home-occasion-row { display: flex; gap: 12px; max-width: none; margin: 0; padding: 3px 18px 2px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 28px), transparent); }
 .home-occasions-compact .home-occasion-row::-webkit-scrollbar { display: none; }
-.home-occasions-compact .home-occasion { flex: 0 0 74px; gap: 7px; scroll-snap-align: start; color: #f8ecd5; }
-.home-occasions-compact .home-occasion-arch { height: 96px; box-shadow: 0 8px 20px #0007, 0 0 0 2px #f0d39a33; }
-.home-occasions-compact .home-occasion-label { font-size: 13px; min-height: 0; text-shadow: 0 1px 8px #000c; white-space: nowrap; }
+.home-occasions-compact .home-occasion { flex: 0 0 70px; gap: 6px; scroll-snap-align: start; color: #f8ecd5; }
+.home-occasions-compact .home-occasion-arch { height: 90px; box-shadow: 0 8px 20px #0007, 0 0 0 2px #f0d39a33; }
+.home-occasions-compact .home-occasion-label { font-size: 12.5px; line-height: 1.12; min-height: 2.24em; align-items: flex-start; white-space: normal; text-align: center; width: 100%; overflow-wrap: break-word; }
 .home-occasions-compact .home-occasion-spark { display: none; }
 @media (min-width: 800px) {
-  .home-occasions-compact { left: auto; right: 7%; width: min(48%, 640px); bottom: 112px; }
-  .home-occasions-compact .home-occasion { flex-basis: 92px; }
-  .home-occasions-compact .home-occasion-arch { height: 118px; }
-  .home-occasions-compact .home-occasion-label { font-size: 15px; }
+  .home-hero-with-occasions .royal-hero { padding-top: 58px; padding-bottom: 150px; }
+  .home-hero-with-occasions .hero-theme-dock { left: auto; right: 7%; width: min(44%, 560px); bottom: 162px; border-top: 0; padding-top: 0; }
+  .home-occasions-compact .home-occasion-row { justify-content: safe center; gap: 16px; }
+  .home-occasions-compact .home-occasion { flex-basis: 78px; }
+  .home-occasions-compact .home-occasion-arch { height: 92px; }
+  .home-occasions-compact .home-occasion-label { font-size: 13.5px; }
 }
+
+/* the moods are alive: the large picture glides between them, the small pictures breathe */
+.home-hero-with-occasions .royal-hero-art { transition: background-image 1.8s ease; }
+.hero-theme-dock .world-themes .theme-image { background-size: 135% auto; animation: mood-drift 9s ease-in-out infinite alternate; }
+.hero-theme-dock .world-themes button:nth-child(2) .theme-image { animation-delay: -3s; }
+.hero-theme-dock .world-themes button:nth-child(3) .theme-image { animation-delay: -6s; }
+.hero-theme-dock .world-themes button { position: relative; overflow: hidden; }
+.hero-theme-dock .world-themes button::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent 35%, #fff3d633 50%, transparent 65%); transform: translateX(-120%); animation: mood-shimmer 6s ease-in-out infinite; }
+.hero-theme-dock .world-themes button:nth-child(2)::after { animation-delay: 2s; }
+.hero-theme-dock .world-themes button:nth-child(3)::after { animation-delay: 4s; }
+@keyframes mood-drift { from { background-position: 0% 40%; } to { background-position: 100% 60%; } }
+@keyframes mood-shimmer { 0%, 70% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) { .hero-theme-dock .world-themes .theme-image, .hero-theme-dock .world-themes button::after { animation: none; } }

@@ -87,6 +87,16 @@ function App() {
   const [favOnly, setFavOnly] = useState(false);
   const [user, setUser] = useState(null);
   const [view, setView] = useState(() => { const v = new URLSearchParams(location.search).get("view"); return ["cinema", "gallery", "experts", "dashboard"].includes(v) ? v : "cinema"; });
+  // On the homepage the hero glides through the three moods by itself until the visitor picks one.
+  const [autoTheme,setAutoTheme]=useState(null),[themePicked,setThemePicked]=useState(false);
+  const shownTheme=view==="cinema"&&autoTheme?autoTheme:worldTheme;
+  useEffect(()=>{
+    if(view!=="cinema"||themePicked||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+    const ids=["midnight","garden","rose"];
+    const id=setInterval(()=>setAutoTheme(t=>ids[(ids.indexOf(t||worldTheme)+1)%ids.length]),7000);
+    return()=>clearInterval(id);
+  },[view,themePicked,worldTheme]);
+  useEffect(()=>{document.documentElement.dataset.world=shownTheme},[shownTheme]);
   const [editor, setEditor] = useState(null);
   const [spaceTab, setSpaceTab] = useState("listing");
   const [experience, setExperience] = useState(null);
@@ -360,8 +370,8 @@ function App() {
               heroOnly
               occasion={worldOccasion}
               onOccasion={setWorldOccasion}
-              theme={worldTheme}
-              onTheme={setWorldTheme}
+              theme={shownTheme}
+              onTheme={(t)=>{setThemePicked(true);setAutoTheme(null);setWorldTheme(t)}}
               lang={lang}
               onCreate={() => studio(firstEvent(), "design")}
               onWorld={() => go('designs')}
