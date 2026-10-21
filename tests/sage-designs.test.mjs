@@ -6,6 +6,19 @@ import {cinemaThemes,cinemaEvent} from '../src/cinemaThemes.js';
 import {occasionScenes,sceneVariables} from '../src/occasionScenes.js';
 import {filterInvitationDesigns} from '../src/ivoryDesigns.js';
 
+test('Sage suites differ in structure and artwork, with no shared reveal backgrounds',()=>{
+ const neutral=sageThemes.filter(t=>t.audience==='Neutral');
+ assert.equal(new Set(neutral.map(t=>t.pageLayout)).size,neutral.length,'each occasion needs its own stationery format');
+ assert.equal(new Set(neutral.map(t=>t.envelopePattern)).size,neutral.length,'paper designs must differ beyond tint');
+ assert.equal(new Set(neutral.map(t=>t.image)).size,neutral.length,'reveal scenery belongs to the occasion');
+ assert.ok(new Set(neutral.map(t=>t.sealShape)).size>=5,'wax dies need different outlines');
+ for(const theme of sageThemes){
+  assert.ok(theme.pageLayout&&theme.envelopePattern&&theme.sealShape,theme.id);
+  const parent=neutral.find(t=>t.occasion===theme.occasion);
+  assert.equal(theme.pageLayout,parent.pageLayout,'audience variants retain their occasion format');
+ }
+});
+
 test('every existing occasion has a Sage envelope with available reveal art and matching stationery',()=>{
  assert.equal(new Set(cinemaThemes.map(t=>t.id)).size,cinemaThemes.length);
  for(const {occasion} of occasionScenes){

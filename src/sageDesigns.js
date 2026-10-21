@@ -15,7 +15,8 @@ const palettes = [
 export const sageThemes = palettes.map(([occasion,id,name,envelope,paper,ink,color,ornament,image,waxHue])=>{
  const base=occasionScenes.find(s=>s.occasion===occasion);
  const radius={botanical:4,stars:26,diamonds:0,clouds:42,laurel:0,olive:18,medallion:55,geometric:0,cross:28,snowflake:8}[ornament];
- return {...base,...(id==='sage'?{names:'Clara & Gabriel',line:'Some days stay with us forever.'}:{}),id,name,kind:'sage',sageCollection:true,occasionDoor:false,cover:'atelier-sage-cover',image,envelope,paper,ink,color,ornament,waxHue,radius,audience:'Neutral',motif:'envelope',tag:'EMBOSSED PAPER · '+occasion.toUpperCase()};
+ const stationery={Wedding:['botanical','round','arch'],Birthday:['confetti','scalloped','ticket'],Engagement:['trellis','diamond','diamond'], 'Baby shower':['clouds','oval','cloud'],Graduation:['laurel','octagon','diploma'],'Dinner party':['olive','oval','menu'],Anniversary:['damask','scalloped','cameo'],'Corporate event':['deco','octagon','editorial'],Christening:['chapel','oval','chapel'],'Seasonal celebration':['snowflakes','star','festive']}[occasion];
+ return {...base,...(id==='sage'?{names:'Clara & Gabriel',line:'Some days stay with us forever.'}:{}),id,name,kind:'sage',sageCollection:true,occasionDoor:false,cover:'atelier-sage-cover',image,envelope,paper,ink,color,ornament,waxHue,radius,envelopePattern:stationery[0],sealShape:stationery[1],pageLayout:stationery[2],audience:'Neutral',motif:'envelope',tag:'EMBOSSED PAPER · '+occasion.toUpperCase()};
 });
 for(const occasion of ['Birthday','Baby shower','Christening']){
  const base=sageThemes.find(t=>t.occasion===occasion);

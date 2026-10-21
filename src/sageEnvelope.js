@@ -1,4 +1,4 @@
-import {paperStock,paperRelief,ornamentGlyph} from './invitationMaterials';
+import {paperStock,paperRelief,ornamentGlyph,waxStock} from './invitationMaterials';
 import * as THREE from 'three';
 import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js';
 
@@ -28,7 +28,7 @@ const CARD_RISEN_Y = V_DIP + (V_SIDE - V_DIP) * (CARD_W / W) + 0.012 + CARD_H / 
 const FOV = 32, TAN = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
 
 // timeline (seconds)
-export const SAGE_TIMES = { press: [0, 0.45], flap: [0.3, 2.35], camera: [1.45, 3.8], rise: [2.35, 4.45], forward: [4.25, 6.05], done: 6.15 };
+export const SAGE_TIMES = { press: [0, 0.45], flap: [0.3, 2.35], camera: [1.45, 3.8], rise: [2.35, 4.45], forward: [4.25, 6.05], withdraw: [6.25, 7.65], done: 7.65 };
 
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
 const span = (t, [a, b]) => clamp01((t - a) / (b - a));
@@ -180,6 +180,15 @@ export async function drawSageCard(card) {
   const c = canvas(1024, Math.round(1024 * 1.6)), g = c.getContext('2d'), w = c.width, h = c.height, cx = w / 2;
   const paper = g.createLinearGradient(0, 0, w, h);
   const design=card.design||{};
+  const layout=design.pageLayout||'arch';
+  // The sheet itself has a category-specific cut, not a rectangular colour overlay.
+  g.beginPath();
+  if(layout==='diamond'){g.moveTo(w/2,12);g.lineTo(w-16,170);g.lineTo(w-16,h-170);g.lineTo(w/2,h-12);g.lineTo(16,h-170);g.lineTo(16,170);g.closePath();}
+  else if(layout==='cameo'){g.ellipse(w/2,h/2,w*.485,h*.49,0,0,Math.PI*2);}
+  else if(layout==='ticket'){g.roundRect(12,12,w-24,h-24,20);}
+  else if(layout==='chapel'||layout==='arch'){g.moveTo(12,h-12);g.lineTo(12,300);g.bezierCurveTo(12,-80,w-12,-80,w-12,300);g.lineTo(w-12,h-12);g.closePath();}
+  else g.roundRect(12,12,w-24,h-24,layout==='cloud'?180:layout==='menu'?70:4);
+  g.clip();
   paper.addColorStop(0, '#fffdf7'); paper.addColorStop(0.55, design.paper||'#f4efe2'); paper.addColorStop(1, design.paper||'#ece5d3');
   g.globalAlpha=.72; g.fillStyle = paper; g.fillRect(0, 0, w, h); g.globalAlpha=1;
   // cotton grain
@@ -200,8 +209,13 @@ export async function drawSageCard(card) {
   g.fillStyle = gold(150, 270); g.fillRect(cx - 45, 312, 90, 2);
   const fit = (txt, size, max) => { let s = size; do { g.font = `italic 400 ${s}px ${fam}`; s -= 4; } while (g.measureText(txt).width > max && s > 40); };
   g.fillStyle = ink;
+  if(layout==='editorial'||layout==='diploma'){
+    g.fillStyle=design.color;g.fillRect(90,370,12,480);
+    g.textAlign='left';fit(card.names,layout==='editorial'?128:144,w-260);g.fillText(card.names,140,620,w-260);g.textAlign='center';
+  }
   const names = card.names.split(/\s*&\s*/);
-  if (names.length > 1) {
+  if(layout==='editorial'||layout==='diploma'){ /* heading is in the editorial column above */ }
+  else if (names.length > 1) {
     fit(names[0], 158, w - 190); g.fillText(names[0], cx, 510);
     g.fillStyle = '#a99563'; g.font = `italic 400 84px ${serif}`; g.fillText('&', cx, 645);
     g.fillStyle = ink; fit(names[1], 158, w - 190); g.fillText(names[1], cx, 780);
@@ -216,6 +230,8 @@ export async function drawSageCard(card) {
   g.fillStyle = '#5c624c'; g.font = `500 36px ${serif}`; g.letterSpacing = '5px';
   g.fillText(card.date.toUpperCase(), cx, y + 85, w - 180); g.letterSpacing = '0px';
   g.fillStyle = ink; g.font = `italic 400 54px ${serif}`; g.fillText(card.venue || '', cx, y + 175, w - 180);
+  if(layout==='ticket'){g.setLineDash([12,14]);g.strokeStyle=design.color;g.beginPath();g.moveTo(50,1350);g.lineTo(w-50,1350);g.stroke();g.setLineDash([]);}
+  if(layout==='festive'||layout==='cloud'){g.fillStyle=design.color;g.font='70px Georgia';for(const x of [140,w-140])g.fillText(ornamentGlyph(design.ornament),x,500);}
   return c;
 }
 
@@ -253,21 +269,23 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   };
 
   const env = new THREE.Group(); scene.add(env);
+  // Withdraw the paper shell only after the original card movement has settled.
+  const shell = new THREE.Group(); env.add(shell);
   // a soft shadow under the envelope, so it lies in the scene instead of floating
   { const c = canvas(256, Math.round(256 * H / W)), g = c.getContext('2d');
     g.filter = 'blur(14px)'; g.fillStyle = 'rgba(14,18,10,.55)'; g.fillRect(26, 26, c.width - 52, c.height - 52);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(W * 1.16, H * 1.16), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
-    m.position.set(0.006, -0.014, -0.004); env.add(m); }
+    m.position.set(0.006, -0.014, -0.004); shell.add(m); }
   // back panel (its inside is the liner)
   const back = new THREE.Mesh(envUV(new THREE.PlaneGeometry(W, H)), new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.92 }));
-  back.receiveShadow = true; env.add(back);
+  back.receiveShadow = true; shell.add(back);
   // pocket: the front of the envelope below the V opening
   const pocketShape = new THREE.Shape();
   pocketShape.moveTo(-W / 2, -H / 2); pocketShape.lineTo(W / 2, -H / 2); pocketShape.lineTo(W / 2, V_SIDE);
   pocketShape.quadraticCurveTo(0.03, V_DIP + 0.012, 0, V_DIP); pocketShape.quadraticCurveTo(-0.03, V_DIP + 0.012, -W / 2, V_SIDE);
   pocketShape.closePath();
   const pocket = new THREE.Mesh(envUV(new THREE.ShapeGeometry(pocketShape, 24)), new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: 0.9 }));
-  pocket.position.z = 0.009; pocket.castShadow = true; pocket.receiveShadow = true; env.add(pocket);
+  pocket.position.z = 0.009; pocket.castShadow = true; pocket.receiveShadow = true; shell.add(pocket);
 
   // flap, hinged at the top edge. Tessellated so it can bend like paper.
   const flapShape = new THREE.Shape();
@@ -281,7 +299,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   envUV(flapGeo, TOP);
   flapGeo.computeVertexNormals();
   const flapRest = Float32Array.from(flapGeo.attributes.position.array);
-  const hinge = new THREE.Group(); hinge.position.set(0, TOP, 0.0005); env.add(hinge);
+  const hinge = new THREE.Group(); hinge.position.set(0, TOP, 0.0005); shell.add(hinge);
   const flapFront = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: 0.88, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }));
   const flapBack = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.92, side: THREE.BackSide, name: 'flapLiner' }));
   flapFront.castShadow = true; flapFront.receiveShadow = true; flapBack.receiveShadow = true;
@@ -317,6 +335,9 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   let cardLoaded = false;
   function pose(t) {
     const v = views();
+    const withdrawal = inOut(span(t, SAGE_TIMES.withdraw));
+    shell.position.y = -2.5 * withdrawal;
+    shell.visible = withdrawal < 1;
     // seal press and the flap's journey
     const press = span(t, SAGE_TIMES.press);
     const f = span(t, SAGE_TIMES.flap);
@@ -395,8 +416,8 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     for (const [m, map] of [[pocket.material, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.bumpMap = new THREE.CanvasTexture(paperRelief(map.image)); m.bumpScale = .018; m.roughness = .92; m.color.set(0xffffff); m.needsUpdate = true; }
     back.material.map = liner; back.material.bumpMap = liner; back.material.bumpScale = .007; back.material.color.set(0xffffff); back.material.needsUpdate = true;
     Object.assign(flapBack.material, { map: gumTex, bumpMap: gumTex, bumpScale: .007, roughnessMap: gumRough, roughness: 1 }); flapBack.material.color.set(0xf4eee0); flapBack.material.needsUpdate = true;
-    const waxCanvas=canvas(wax.width,wax.height),wg=waxCanvas.getContext('2d');
-    wg.filter=`hue-rotate(${design.waxHue||0}deg)`;wg.drawImage(wax,0,0);
+    const waxCanvas=waxStock(wax,design);
+
     const waxTex = tex(waxCanvas),waxBump=new THREE.CanvasTexture(paperRelief(waxCanvas));
     sealLayers.forEach((m) => { m.material.map = waxTex; m.material.bumpMap = waxBump; m.material.bumpScale = .002; m.material.needsUpdate = true; });
     const cardCanvas = await drawSageCard(card);
