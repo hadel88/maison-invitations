@@ -1,0 +1,72 @@
+/* The guest's shared celebration space, dressed in the invitation's own design. */
+.shared-themed {
+  --sc-paper: var(--ivory-paper, var(--occasion-paper, #f6efe6));
+  --sc-ink: var(--occasion-ink, #4d4438);
+  --sc-accent: var(--occasion-accent, #b0915f);
+  --sc-radius: var(--stationery-radius, 16px);
+  min-height: 100vh; margin: 0; padding: 0 0 60px; color: var(--sc-ink);
+  background: var(--occasion-pattern, none), var(--sc-paper);
+  font-family: var(--serif, 'Cormorant Garamond', Georgia, serif);
+}
+.shared-themed .shared-kicker { display: block; font: 600 10px/1.6 'DM Sans', system-ui, sans-serif; letter-spacing: .22em; color: var(--sc-accent); }
+.shared-themed h2 { font: 400 30px/1.15 var(--serif, Georgia); margin: 8px 0 18px; color: var(--sc-ink); }
+.shared-muted { font: 13px/1.6 'DM Sans', system-ui, sans-serif; opacity: .75; display: flex; gap: 8px; align-items: flex-start; }
+.shared-loading { padding: 40vh 24px 0; text-align: center; font-style: italic; font-size: 20px; }
+
+/* hero: the invitation's scene behind a paper card */
+.shared-hero { position: relative; padding: 70px 20px 40px; min-height: 560px; display: grid; place-items: center; overflow: hidden; isolation: isolate; }
+.shared-hero-scene { position: absolute; inset: 0; z-index: -1; background: var(--shared-scene) center / cover no-repeat, var(--sc-paper); transform: scale(1.06); animation: shared-drift 24s ease-in-out infinite alternate; }
+.shared-hero-scene::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--sc-paper) 40%, transparent) 70%, var(--sc-paper) 100%); }
+@keyframes shared-drift { to { transform: scale(1.12) translateY(-12px); } }
+.shared-back { position: absolute; top: 18px; left: 18px; display: inline-flex; gap: 6px; align-items: center; padding: 8px 14px; border-radius: 30px; background: color-mix(in srgb, var(--sc-paper) 82%, transparent); color: var(--sc-ink); font: 500 12px 'DM Sans', system-ui, sans-serif; text-decoration: none; backdrop-filter: blur(8px); }
+.shared-hero-card { width: min(100%, 440px); text-align: center; padding: 38px 26px 30px; border-radius: var(--sc-radius); background: color-mix(in srgb, var(--sc-paper) 90%, white); border: 1px solid color-mix(in srgb, var(--sc-accent) 45%, transparent); box-shadow: 0 30px 70px #2b211722, inset 0 0 0 6px #ffffff70, inset 0 0 0 7px color-mix(in srgb, var(--sc-accent) 30%, transparent); animation: shared-rise 1s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes shared-rise { from { opacity: 0; transform: translateY(24px); } }
+.shared-hero-card h1 { margin: 16px 0 8px; font-weight: 400; font-size: clamp(44px, 12vw, 64px); line-height: 1; color: var(--sc-ink); }
+.shared-hero-card h1 span { display: block; }
+.shared-hero-card h1 em { display: block; font: italic 26px/1.4 Georgia, serif; color: var(--sc-accent); }
+.shared-line { font-style: italic; font-size: 18px; margin: 6px 0 0; opacity: .85; }
+.shared-ornament { display: block; margin: 18px auto 14px; color: var(--sc-accent); font: 18px/1 Georgia, serif; letter-spacing: .35em; padding-left: .35em; }
+.shared-ornament::before { content: var(--page-ornament, '❦'); }
+.shared-date { font: 600 11px/1.6 'DM Sans', system-ui, sans-serif; letter-spacing: .16em; text-transform: uppercase; margin: 0; }
+.shared-venue { font-style: italic; font-size: 20px; margin: 6px 0 0; }
+.shared-countdown { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 24px auto 0; max-width: 300px; }
+.shared-countdown div { padding: 10px 4px 8px; border-radius: 12px; background: color-mix(in srgb, var(--sc-accent) 12%, white); border: 1px solid color-mix(in srgb, var(--sc-accent) 30%, transparent); }
+.shared-countdown strong { display: block; font: 400 30px/1 var(--serif, Georgia); }
+.shared-countdown small { font: 500 10px 'DM Sans', system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; opacity: .75; }
+
+/* quick facts */
+.shared-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; max-width: 980px; margin: -10px auto 0; padding: 0 18px; position: relative; }
+.shared-fact { display: flex; gap: 12px; align-items: center; padding: 16px 18px; border-radius: var(--sc-radius); background: #fffdf8; border: 1px solid color-mix(in srgb, var(--sc-accent) 30%, transparent); color: var(--sc-ink); text-decoration: none; box-shadow: 0 10px 28px #2b21170d; }
+.shared-fact svg { color: var(--sc-accent); flex-shrink: 0; }
+.shared-fact span { display: grid; gap: 2px; font: 13px/1.4 'DM Sans', system-ui, sans-serif; min-width: 0; overflow-wrap: anywhere; flex: 1; }
+.shared-fact small { font-size: 9px; letter-spacing: .2em; color: var(--sc-accent); font-weight: 600; }
+.shared-fact strong { font: 400 19px/1.25 var(--serif, Georgia); }
+.shared-fact-table strong { font-size: 26px; }
+
+.shared-stats { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 980px; margin: 22px auto 0; padding: 0 18px; text-align: center; }
+.shared-stats div { padding: 14px 4px; border-right: 1px solid color-mix(in srgb, var(--sc-accent) 30%, transparent); }
+.shared-stats div:last-child { border-right: 0; }
+.shared-stats strong { display: block; font: 400 34px/1 var(--serif, Georgia); }
+.shared-stats span { font: 11px 'DM Sans', system-ui, sans-serif; letter-spacing: .06em; opacity: .75; }
+
+/* cards */
+.shared-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; max-width: 980px; margin: 26px auto 0; padding: 0 18px; }
+.shared-card { position: relative; padding: 30px 24px; border-radius: var(--sc-radius); background: color-mix(in srgb, var(--sc-paper) 55%, white); border: 1px solid color-mix(in srgb, var(--sc-accent) 32%, transparent); box-shadow: inset 0 0 0 5px #ffffff80, 0 14px 40px #2b21170c; }
+.shared-memories { max-width: 944px; margin: 26px auto 0; }
+@media (max-width: 980px) { .shared-memories { margin: 26px 18px 0; } }
+.shared-timeline { list-style: none; margin: 0; padding: 0 0 0 18px; border-left: 1px solid color-mix(in srgb, var(--sc-accent) 45%, transparent); }
+.shared-timeline li { position: relative; padding: 0 0 18px 16px; }
+.shared-timeline li::before { content: ''; position: absolute; left: -24px; top: 6px; width: 11px; height: 11px; border-radius: 50%; background: var(--sc-paper); border: 2px solid var(--sc-accent); }
+.shared-timeline time { display: inline-flex; gap: 5px; align-items: center; font: 600 11px 'DM Sans', system-ui, sans-serif; letter-spacing: .1em; color: var(--sc-accent); }
+.shared-timeline strong { display: block; font: 400 20px/1.3 var(--serif, Georgia); margin-top: 2px; }
+.shared-timeline p { margin: 2px 0 0; font: 13px/1.5 'DM Sans', system-ui, sans-serif; opacity: .75; }
+.shared-progress { font-size: 18px; }
+.shared-progress strong { font-size: 40px; font-weight: 400; color: var(--sc-accent); margin-right: 6px; }
+.shared-btn { display: inline-flex; gap: 8px; align-items: center; justify-content: center; padding: 13px 22px; border-radius: 40px; border: 0; background: var(--sc-ink); color: #fffdf6; font: 500 14px 'DM Sans', system-ui, sans-serif; text-decoration: none; cursor: pointer; }
+.shared-btn:disabled { opacity: .6; }
+.shared-themed .memory-upload { margin-top: 22px; }
+.shared-wishes { display: grid; gap: 12px; margin-top: 22px; }
+.shared-wishes blockquote { margin: 0; padding: 16px 18px; border-left: 3px solid var(--sc-accent); background: #fffdf8; border-radius: 0 12px 12px 0; font-style: italic; font-size: 18px; }
+.shared-foot { max-width: 940px; margin: 26px auto 0; padding: 0 18px; text-align: center; font: 12px 'DM Sans', system-ui, sans-serif; opacity: .6; }
+.shared-hero-plain { min-height: 70vh; text-align: center; gap: 12px; align-content: center; }
+@media (prefers-reduced-motion: reduce) { .shared-hero-scene, .shared-hero-card { animation: none; } }
