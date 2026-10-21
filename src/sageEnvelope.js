@@ -1,6 +1,7 @@
 import {paperStock,paperRelief,ornamentGlyph,waxStock,invitationScript} from './invitationMaterials';
 import {traceSageFlap,sageFlapLift,traceSagePocket} from './sageEnvelopeProfiles.js';
 import {paintSageLetter} from './paintSageLetter.js';
+import {createSagePocketPaper,createSageFlapEdge,bendSageFlapEdge,SAGE_FLAP_DEPTH} from './sagePaperDepth.js';
 import * as THREE from 'three';
 import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js';
 
@@ -244,7 +245,9 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   // pocket: the front of the envelope below the V opening
   const pocketShape = new THREE.Shape();
   traceSagePocket(pocketShape,W,H,V_SIDE,V_DIP,design.pageLayout);
-  const pocket = new THREE.Mesh(envUV(new THREE.ShapeGeometry(pocketShape, 24)), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped:false }));
+  const pocketFace=new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false});
+  const paperEdge=new THREE.MeshStandardMaterial({color:0xeee4d0,roughness:.9,metalness:0,side:THREE.DoubleSide});
+  const pocket = new THREE.Mesh(createSagePocketPaper(pocketShape,W,H),[pocketFace,paperEdge]);
   pocket.position.z = 0.009; pocket.castShadow = true; pocket.receiveShadow = true; shell.add(pocket);
 
   // flap, hinged at the top edge. Tessellated so it can bend like paper.
@@ -260,8 +263,11 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   const hinge = new THREE.Group(); hinge.position.set(0, TOP, 0.0005); shell.add(hinge);
   const flapFront = new THREE.Mesh(flapGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped:false, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }));
   const flapBack = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.92, side: THREE.BackSide, name: 'flapLiner' }));
+  flapBack.position.z=-SAGE_FLAP_DEPTH;
+  const flapEdgeGeo=createSageFlapEdge(flapShape),flapEdge=new THREE.Mesh(flapEdgeGeo,paperEdge);
+  flapEdge.castShadow=true;flapEdge.receiveShadow=true;
   flapFront.castShadow = true; flapFront.receiveShadow = true; flapBack.receiveShadow = true;
-  const flap = new THREE.Group(); flap.add(flapFront, flapBack); hinge.add(flap);
+  const flap = new THREE.Group(); flap.add(flapFront, flapBack,flapEdge); hinge.add(flap);
 
   // the wax seal: a few stacked layers give it body when it tilts
   const seal = new THREE.Group(); flap.add(seal);
@@ -334,6 +340,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
       pos.setZ(i, flapRest[i * 3 + 2] - bend * y * y * FLAP_L * 0.55);
     }
     pos.needsUpdate = true; flapGeo.computeVertexNormals();
+    bendSageFlapEdge(flapEdgeGeo,FLAP_L,bend,sageFlapLift);
     const ty = SEAL_Y / FLAP_L, tz = sageFlapLift(SEAL_Y,FLAP_L) - bend * ty * ty * FLAP_L * 0.55, slope = -.025/FLAP_L - bend * 2 * ty * 0.55;
     seal.position.set(0, SEAL_Y, tz); seal.rotation.x = Math.atan(slope);
     const s = 1 - Math.sin(press * Math.PI) * 0.035; seal.scale.set(s, s, 1);
@@ -395,7 +402,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     const { pocket: pc, flap: fc } = outsideTextures(cover, guestLine, family, inviteLine, script, design);
     const linerCanvas = linerTexture(cover), liner = tex(linerCanvas);
     const gum = flapLinerTextures(linerCanvas,design), gumTex = tex(gum.color), gumRough = new THREE.CanvasTexture(gum.rough);
-    for (const [m, map] of [[pocket.material, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.color.set(0xffffff); m.needsUpdate = true; }
+    for (const [m, map] of [[pocketFace, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.color.set(0xffffff); m.needsUpdate = true; }
     back.material.map = liner; back.material.bumpMap = liner; back.material.bumpScale = .007; back.material.color.set(0xffffff); back.material.needsUpdate = true;
     Object.assign(flapBack.material, { map: gumTex, bumpMap: gumTex, bumpScale: .007, roughnessMap: gumRough, roughness: 1 }); flapBack.material.color.set(0xf4eee0); flapBack.material.needsUpdate = true;
     const waxCanvas=waxStock(wax,design);
