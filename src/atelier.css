@@ -362,7 +362,7 @@
 
 /* Stationery finishes do not alter the opening transform or its timeline. */
 .atelier-sage .sage-envelope-scene.sage-3d { background: transparent; }
-.sage-poster-canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:fill; }
+.sage-poster-canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 :is(.cinema-sage,.cinema-ribbon) .cinema-detail-sheet {
   background: linear-gradient(115deg,#ffffff54,transparent 40%),var(--occasion-paper);
   color:var(--occasion-ink); padding:52px 25px 46px;

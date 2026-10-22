@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 
-export const SAGE_POCKET_DEPTH=.016;
-export const SAGE_FLAP_DEPTH=.009;
+export const SAGE_POCKET_DEPTH=.008;
+export const SAGE_FLAP_DEPTH=.004;
 
 export function createSagePocketPaper(shape,width,height){
- const geometry=new THREE.ExtrudeGeometry(shape,{depth:SAGE_POCKET_DEPTH,bevelEnabled:true,bevelSize:.005,bevelThickness:.0018,bevelSegments:4,curveSegments:48,steps:1});
+ const geometry=new THREE.ExtrudeGeometry(shape,{depth:SAGE_POCKET_DEPTH,bevelEnabled:true,bevelSize:.003,bevelThickness:.0018,bevelSegments:4,curveSegments:48,steps:1});
  // Keep the printed face at its established position; thickness extends backwards.
  geometry.translate(0,0,-SAGE_POCKET_DEPTH);
  const pos=geometry.attributes.position,uv=geometry.attributes.uv;
