@@ -84,6 +84,5 @@ export function invitationScript(){
   if(![...document.fonts].some(f=>f.family.replace(/['"]/g,'')==='Great Vibes')){
    const face=new FontFace('Great Vibes',"url(/fonts/great-vibes-400.woff2) format('woff2')");document.fonts.add(await face.load());
   }
-  await document.fonts.load('52px "Great Vibes"');
  })().catch(()=>{});
 }

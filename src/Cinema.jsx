@@ -63,15 +63,15 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
 function SageEnvelope({design,opened,onComplete,stage,card,guestLine,inviteLine}){
  // A real 3D envelope (see sageEnvelope.js). The layered CSS envelope below stays as the fallback
  // when WebGL is not available.
- const canvas=useRef(null),engine=useRef(null),openedRef=useRef(opened),[gl,setGl]=useState(false),[failed,setFailed]=useState(false),[shape,setShape]=useState(0);
+ const canvas=useRef(null),engine=useRef(null),openedRef=useRef(opened),[gl,setGl]=useState(false),[shape,setShape]=useState(0);
  openedRef.current=opened;
  const cardKey=JSON.stringify(card),guestRef=useRef(guestLine);
  const placeSeal=(p)=>{const el=stage.current;if(!el||!p)return;el.style.setProperty('--sage-seal-x',p.x+'px');el.style.setProperty('--sage-seal-y',p.y+'px');el.style.setProperty('--sage-seal-r',p.r+'px')};
- useEffect(()=>{let dead=false;setGl(false);setFailed(false);
+ useEffect(()=>{let dead=false;setGl(false);
   import('./sageEnvelope').then(async({createSageEnvelope})=>{if(dead||!canvas.current)return;
    try{const e=createSageEnvelope(canvas.current,{design,card,guestLine:guestRef.current,inviteLine,onSeal:placeSeal,onShape:()=>setShape(n=>n+1)});engine.current=e;await e.ready;if(dead)return;setGl(true);
     if(openedRef.current){matchMedia('(prefers-reduced-motion: reduce)').matches?(e.finish(),onComplete(true)):e.play(()=>onComplete(true))}}
-   catch{if(!dead){setGl(false);setFailed(true)}}}).catch(()=>{if(!dead){setGl(false);setFailed(true)}});
+   catch{setGl(false)}}).catch(()=>setGl(false));
   return()=>{dead=true;engine.current?.destroy();engine.current=null};
   // eslint-disable-next-line react-hooks/exhaustive-deps
  },[shape,design.id]);
@@ -82,8 +82,7 @@ function SageEnvelope({design,opened,onComplete,stage,card,guestLine,inviteLine}
  useEffect(()=>{const e=engine.current,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(gl&&e){if(!opened){e.reset();return}if(reduced){e.finish();onComplete(true);return}e.play(()=>onComplete(true));return}
   if(!opened)return;const timer=setTimeout(()=>onComplete(true),reduced?0:2850);return()=>clearTimeout(timer)},[opened,onComplete,gl]);
- return <div className={`sage-envelope-scene ${gl?'sage-3d':''} ${!opened||(!gl&&!failed)?'sage-show-preview':''}`} style={{'--sage-cover':`url("/${design.materialCover||design.cover}.webp")`,'--sage-setting':`url("/${design.image}.webp")`,'--sage-wax-hue':`${design.waxHue||0}deg`}} aria-hidden="true">
-  <div className="sage-closed-preview"><SagePreview theme={design} inviteLine={inviteLine} guestLine={guestLine}/></div>
+ return <div className={`sage-envelope-scene ${gl?'sage-3d':''}`} style={{'--sage-cover':`url("/${design.materialCover||design.cover}.webp")`,'--sage-setting':`url("/${design.image}.webp")`,'--sage-wax-hue':`${design.waxHue||0}deg`}} aria-hidden="true">
   <div className="sage-envelope-body"/>
   <div className="sage-envelope-pocket"/>
   <div className="sage-envelope-flap">
