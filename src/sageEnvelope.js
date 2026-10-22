@@ -170,7 +170,7 @@ export async function drawSageCard(card) {
   else g.roundRect(12,12,w-24,h-24,layout==='cloud'?180:layout==='menu'?70:4);
   g.clip();
   paper.addColorStop(0, '#fffdf7'); paper.addColorStop(0.55, design.paper||'#f4efe2'); paper.addColorStop(1, design.paper||'#ece5d3');
-  g.globalAlpha=.95; g.fillStyle = paper; g.fillRect(0, 0, w, h); g.globalAlpha=1;
+  g.fillStyle = paper; g.fillRect(0, 0, w, h);
   // cotton grain
   const n = g.getImageData(0, 0, w, h), p = n.data;
   for (let i = 0; i < p.length; i += 4) { const r = (Math.random() - 0.5) * 7; p[i] += r; p[i + 1] += r; p[i + 2] += r; }
@@ -296,7 +296,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   // the card
   // Printed ink keeps its intended contrast; only the paper edge takes scene lighting.
   const cardMats = [0, 1, 2, 3, 4, 5].map((i) => i===4
-    ? new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,depthWrite:true})
+    ? new THREE.MeshBasicMaterial({color:0xffffff,transparent:false,alphaTest:.5,depthWrite:true}) // solid paper: nothing behind shows through
     : new THREE.MeshStandardMaterial({color:0xf3eedf,roughness:.88,transparent:false,depthWrite:true}));
   // Die-cut paper has a physical edge and casts its own silhouette, rather than a box behind a transparent image.
   const paperShape = new THREE.Shape(), layout=design.pageLayout||'arch', x=CARD_W/2, y=CARD_H/2;
