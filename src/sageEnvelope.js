@@ -108,15 +108,7 @@ function outsideTextures(img, guestLine, family, inviteLine, script, design={}) 
   }
   g = flap.getContext('2d');
   drawPaper(g, img, flap);
-  // the flap's folded edge: a soft light line just inside, a darker line at the cut
-  flapPath(g, flap,0,0,design.pageLayout); g.save(); g.clip();
-  // a pale sage border along the V edges, the way the flap paper is cut and folded
-  { const px = flap.width / W; g.lineJoin = 'round';
-    g.strokeStyle = design.paper || 'rgba(206,214,180,.82)'; g.lineWidth = 0.026 * px; gumPath(g, flap, 0.013, design.pageLayout); g.stroke();
-    g.strokeStyle = 'rgba(236,238,214,.5)'; g.lineWidth = 0.004 * px; gumPath(g, flap, 0.025, design.pageLayout); g.stroke(); }
-  g.strokeStyle = 'rgba(246,240,216,.7)'; g.lineWidth = 6; flapPath(g, flap,0,0,design.pageLayout); g.stroke();
-  g.strokeStyle = 'rgba(16,22,12,.45)'; g.lineWidth = 2.5; flapPath(g, flap,0,0,design.pageLayout); g.stroke();
-  g.restore();
+  // Keep the photographed paper continuous; no painted band across the fold.
   return { pocket, flap };
 }
 
@@ -153,10 +145,6 @@ function flapLinerTextures(linerCanvas,design={}) {
   g.strokeStyle = 'rgba(255,250,232,.5)'; g.lineWidth = Math.max(1.5, 0.003 * px); gumPath(g, c, 0.04, design.pageLayout); g.stroke();
   g.strokeStyle = 'rgba(120,98,58,.28)'; g.lineWidth = Math.max(1, 0.002 * px); gumPath(g, c, 0.043, design.pageLayout); g.stroke();
   g.restore();
-  // a top fold crease where the flap meets the envelope
-  const [, y] = toPx(c, 0, TOP - 0.004);
-  const cr = g.createLinearGradient(0, y - 6, 0, y + 10); cr.addColorStop(0, 'rgba(90,76,50,.25)'); cr.addColorStop(1, 'rgba(90,76,50,0)');
-  g.fillStyle = cr; g.fillRect(0, y - 6, c.width, 16);
   // roughness: the gum is shinier than the paper (green channel = roughness)
   const r = canvas(Math.round(c.width / 2), Math.round(c.height / 2)), q = r.getContext('2d');
   q.fillStyle = 'rgb(240,240,240)'; q.fillRect(0, 0, r.width, r.height);

@@ -9,7 +9,7 @@ export default function SagePreview({theme}){
   const stock=paperStock(cover,theme);g.drawImage(stock,0,0,c.width,c.height);
   g.save();g.beginPath();g.save();g.translate(300,0);g.scale(1,-1);traceSageFlap(g,600,576,theme.pageLayout);g.restore();
   g.shadowColor='#162014aa';g.shadowBlur=24;g.shadowOffsetY=13;g.fillStyle=theme.envelope;g.fill();g.clip();g.drawImage(stock,0,0,600,1066);
-  g.shadowColor='transparent';g.strokeStyle='#ede8cfbb';g.lineWidth=14;g.stroke();g.restore();
+  g.restore();
   g.save();g.shadowColor='#15201099';g.shadowBlur=18;g.shadowOffsetY=12;g.drawImage(waxStock(wax,theme),195,407,210,192);g.restore();
   g.fillStyle=theme.ink;g.textAlign='center';g.font='52px "Great Vibes", cursive';g.fillText('You are invited',300,735);g.font='30px Georgia';g.fillText(ornamentGlyph(theme.ornament),300,855);
  }).catch(()=>{});return()=>{dead=true}},[theme]);
