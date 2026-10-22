@@ -227,6 +227,9 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   pocketShape.closePath();
   const pocket = new THREE.Mesh(envUV(new THREE.ShapeGeometry(pocketShape, 24)), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped:false }));
   pocket.position.z = 0.009; pocket.castShadow = true; pocket.receiveShadow = true; shell.add(pocket);
+  // Photographic colours stay unlit, with real moving shadows on a separate receiver.
+  const foldShadow = new THREE.Mesh(pocket.geometry,new THREE.ShadowMaterial({color:0x162014,opacity:.55,depthWrite:false}));
+  foldShadow.position.z=pocket.position.z+.0001;foldShadow.receiveShadow=true;shell.add(foldShadow);
 
   // flap, hinged at the top edge. Tessellated so it can bend like paper.
   const flapShape = new THREE.Shape();
@@ -243,6 +246,8 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   const flapBack = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.92, side: THREE.BackSide, name: 'flapLiner' }));
   flapFront.castShadow = true; flapFront.receiveShadow = true; flapBack.receiveShadow = true;
   const flap = new THREE.Group(); flap.add(flapFront, flapBack); hinge.add(flap);
+  const waxShadow=new THREE.Mesh(flapGeo,new THREE.ShadowMaterial({color:0x152010,opacity:.48,depthWrite:false}));
+  waxShadow.position.z=.0001;waxShadow.receiveShadow=true;flap.add(waxShadow);
 
   // the wax seal: a few stacked layers give it body when it tilts
   const seal = new THREE.Group(); flap.add(seal);
