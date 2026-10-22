@@ -82,17 +82,8 @@ function SageEnvelope({design,opened,onComplete,stage,card,guestLine,inviteLine}
  useEffect(()=>{const e=engine.current,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(gl&&e){if(!opened){e.reset();return}if(reduced){e.finish();onComplete(true);return}e.play(()=>onComplete(true));return}
   if(!opened)return;const timer=setTimeout(()=>onComplete(true),reduced?0:2850);return()=>clearTimeout(timer)},[opened,onComplete,gl]);
- return <div className={`sage-envelope-scene ${gl?'sage-3d':''} ${!opened?'sage-outside-reference':''}`} style={{'--sage-cover':`url("/${design.materialCover||design.cover}.webp")`,'--sage-setting':`url("/${design.image}.webp")`,'--sage-wax-hue':`${design.waxHue||0}deg`}} aria-hidden="true">
+ return <div className={`sage-envelope-scene ${gl?'sage-3d':''} ${!opened||!gl?'sage-outside-reference':''}`} style={{'--sage-cover':`url("/${design.materialCover||design.cover}.webp")`,'--sage-setting':`url("/${design.image}.webp")`,'--sage-wax-hue':`${design.waxHue||0}deg`}} aria-hidden="true">
   <div className="sage-outside-cover"><SagePreview theme={design} inviteLine={inviteLine} guestLine={guestLine}/></div>
-  <div className="sage-envelope-body"/>
-  <div className="sage-envelope-pocket"/>
-  <div className="sage-envelope-flap">
-   <div className="sage-envelope-front"/>
-   <div className="sage-envelope-lining"/>
-   <div className="sage-wax-release"><img src="/maison-wax-seal.png" width="168" height="168" alt=""/></div>
-  </div>
-  <div className="sage-envelope-print">You are invited</div>
-  <svg className="sage-flap-seam" viewBox="0 0 100 100" preserveAspectRatio="none"><path className="sage-flap-seam-shadow" d="M0 31 L50 48 L100 31"/><path className="sage-flap-seam-light" d="M0 30.5 L50 47.5 L100 30.5"/></svg>
   <canvas ref={canvas} className="sage-envelope-canvas"/>
  </div>;
 }
