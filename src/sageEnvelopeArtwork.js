@@ -1,5 +1,7 @@
 import {ornamentGlyph} from './invitationMaterials';
 
+export const SAGE_OUTSIDE={width:600,height:1066,flap:576,sealX:195,sealY:407,sealWidth:210,sealHeight:192};
+
 // Shared printed artwork. Geometry, camera and opening movement are deliberately separate.
 export function paintEnvelopeArtwork(target,stock,design={},inviteLine='You are invited',guestLine=''){
  const g=target.getContext('2d');

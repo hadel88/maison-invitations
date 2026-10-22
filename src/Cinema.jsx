@@ -82,7 +82,8 @@ function SageEnvelope({design,opened,onComplete,stage,card,guestLine,inviteLine}
  useEffect(()=>{const e=engine.current,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(gl&&e){if(!opened){e.reset();return}if(reduced){e.finish();onComplete(true);return}e.play(()=>onComplete(true));return}
   if(!opened)return;const timer=setTimeout(()=>onComplete(true),reduced?0:2850);return()=>clearTimeout(timer)},[opened,onComplete,gl]);
- return <div className={`sage-envelope-scene ${gl?'sage-3d':''}`} style={{'--sage-cover':`url("/${design.materialCover||design.cover}.webp")`,'--sage-setting':`url("/${design.image}.webp")`,'--sage-wax-hue':`${design.waxHue||0}deg`}} aria-hidden="true">
+ return <div className={`sage-envelope-scene ${gl?'sage-3d':''} ${!opened?'sage-outside-reference':''}`} style={{'--sage-cover':`url("/${design.materialCover||design.cover}.webp")`,'--sage-setting':`url("/${design.image}.webp")`,'--sage-wax-hue':`${design.waxHue||0}deg`}} aria-hidden="true">
+  <div className="sage-outside-cover"><SagePreview theme={design} inviteLine={inviteLine} guestLine={guestLine}/></div>
   <div className="sage-envelope-body"/>
   <div className="sage-envelope-pocket"/>
   <div className="sage-envelope-flap">

@@ -413,3 +413,9 @@
 .cinema-sage[data-stationery="festive"] :is(.event-details,.rsvp) { border-radius:8px;border:6px double var(--occasion-accent);box-shadow:0 12px 35px #623b4314; }
 .cinema-sage[data-stationery] .guest-links { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; }
 .cinema-sage[data-stationery] .guest-links .btn { width:100%;min-width:0;white-space:normal;min-height:48px; }
+
+/* The original gallery composition is also the closed fullscreen envelope. */
+.sage-outside-cover{display:none;position:absolute;inset:0;z-index:12;pointer-events:none}
+.sage-envelope-scene.sage-outside-reference>.sage-outside-cover{display:block!important}
+.sage-envelope-scene.sage-outside-reference>canvas{visibility:hidden}
+.sage-envelope-scene.sage-outside-reference>:not(canvas):not(.sage-outside-cover){display:none}

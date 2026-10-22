@@ -1,4 +1,4 @@
-import {paintEnvelopeArtwork} from './sageEnvelopeArtwork';
+import {paintEnvelopeArtwork,SAGE_OUTSIDE} from './sageEnvelopeArtwork';
 import {paperStock,paperRelief,waxStock} from './invitationMaterials';
 import {traceSageFlap,sageFlapLift} from './sageEnvelopeProfiles.js';
 import {paintSageLetter} from './paintSageLetter.js';
@@ -14,16 +14,16 @@ import { TessellateModifier } from 'three/addons/modifiers/TessellateModifier.js
 // each other as they move.
 
 // envelope size in world units: portrait on phones, as wide as the screen on tablets and desktops
-let W = 0.6; const H = 1;
-export const envelopeWidth = (aspect) => Math.max(0.6, aspect * 1.005);
+const W = SAGE_OUTSIDE.width/SAGE_OUTSIDE.height, H = 1;
+export const envelopeWidth = () => W;
 const TOP = H / 2;
 // the flap's sides start partway down the envelope, so the V is wide (tip ≈ 100°)
 const V_DIP = TOP - 0.3;                   // lowest point of the pocket's V opening
 const V_SIDE = TOP - 0.16;           // the pocket edge at the envelope's sides
-const FLAP_L = 0.54;                  // hinge → flap tip
+const FLAP_L = SAGE_OUTSIDE.flap/SAGE_OUTSIDE.height;                  // hinge → flap tip
 const FLAP_SIDE = 0.3;                // hinge → where the flap's sides turn to the tip
 const FLAP_MID = (FLAP_SIDE + FLAP_L) / 2 + 0.012; // a gentle outward curve along each edge
-const SEAL = 0.19;                    // seal diameter
+const SEAL = SAGE_OUTSIDE.sealHeight/SAGE_OUTSIDE.height;                    // seal diameter
 const CARD_W = 0.38, CARD_H = CARD_W * 1.6, CARD_T = 0.0025;
 const CARD_HIDDEN_Y = V_DIP - 0.012 - CARD_H / 2;
 // the card's bottom corners must clear the pocket's edge before it comes forward
@@ -179,8 +179,6 @@ export async function drawSageCard(card) {
 }
 
 export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSeal, onShape, design = {} }) {
-  { const r0 = canvasEl.getBoundingClientRect(); if (r0.width && r0.height) W = envelopeWidth(r0.width / r0.height); }
-  const builtW = W;
   const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -248,13 +246,13 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
 
   // the wax seal: a few stacked layers give it body when it tilts
   const seal = new THREE.Group(); flap.add(seal);
-  const sealGeo = new THREE.PlaneGeometry(SEAL * 1312 / 1199, SEAL);
+  const sealGeo = new THREE.PlaneGeometry(W*SAGE_OUTSIDE.sealWidth/SAGE_OUTSIDE.width, SEAL);
   const sealLayers = [0.55, 0.62, 0.72, 1].map((shade, i) => {
     const material=i===3?new THREE.MeshBasicMaterial({color:0xffffff,alphaTest:.5,toneMapped:false}):new THREE.MeshPhysicalMaterial({color:new THREE.Color(shade,shade,shade),alphaTest:.5,roughness:.48});
     const m = new THREE.Mesh(sealGeo,material);
     m.position.z = 0.0018 * (i + 1); m.castShadow = true; seal.add(m); return m;
   });
-  const SEAL_Y = -FLAP_L + SEAL * 0.36;
+  const SEAL_Y = -(SAGE_OUTSIDE.sealY+SAGE_OUTSIDE.sealHeight/2)/SAGE_OUTSIDE.height;
 
   // the card
   // Printed ink keeps its intended contrast; only the paper edge takes scene lighting.
@@ -286,7 +284,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   let aspect = 1, cssW = 1, cssH = 1;
   function views() {
     // closed, the envelope fills the whole screen
-    const vh0 = Math.min(H, W / aspect) * 0.985;
+    const vh0 = Math.min(H, W / aspect);
     const c0 = 0;
     // no zoom-out while opening: the camera only glides up with the card, so everything stays big
     const vh1 = vh0;
@@ -350,7 +348,6 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     camera.aspect = aspect; camera.updateProjectionMatrix();
     render();
     if (t === 0) onSeal?.(seal2D());
-    if (Math.abs(envelopeWidth(aspect) - builtW) / builtW > 0.06) onShape?.();
   }
   const ro = new ResizeObserver(resize); ro.observe(canvasEl);
 
