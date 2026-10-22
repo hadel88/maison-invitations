@@ -277,7 +277,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   pocketShape.moveTo(-W / 2, -H / 2); pocketShape.lineTo(W / 2, -H / 2); pocketShape.lineTo(W / 2, V_SIDE);
   pocketShape.quadraticCurveTo(0.03, V_DIP + 0.012, 0, V_DIP); pocketShape.quadraticCurveTo(-0.03, V_DIP + 0.012, -W / 2, V_SIDE);
   pocketShape.closePath();
-  const pocket = new THREE.Mesh(envUV(new THREE.ShapeGeometry(pocketShape, 24)), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped:false }));
+  const pocket = new THREE.Mesh(envUV(new THREE.ShapeGeometry(pocketShape, 24)), new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: 0.9 }));
   pocket.position.z = 0.009; pocket.castShadow = true; pocket.receiveShadow = true; shell.add(pocket);
 
   // flap, hinged at the top edge. Tessellated so it can bend like paper.
@@ -291,7 +291,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   flapGeo.computeVertexNormals();
   const flapRest = Float32Array.from(flapGeo.attributes.position.array);
   const hinge = new THREE.Group(); hinge.position.set(0, TOP, 0.0005); shell.add(hinge);
-  const flapFront = new THREE.Mesh(flapGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped:false, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }));
+  const flapFront = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: 0.88, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }));
   const flapBack = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.92, side: THREE.BackSide, name: 'flapLiner' }));
   flapFront.castShadow = true; flapFront.receiveShadow = true; flapBack.receiveShadow = true;
   const flap = new THREE.Group(); flap.add(flapFront, flapBack); hinge.add(flap);
@@ -300,11 +300,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   const seal = new THREE.Group(); flap.add(seal);
   const sealGeo = new THREE.PlaneGeometry(SEAL * 1312 / 1199, SEAL);
   const sealLayers = [0.55, 0.62, 0.72, 1].map((shade, i) => {
-    // Preserve the photographed wax impression on the face; shaded edge layers supply its depth.
-    const material=i===3
-      ? new THREE.MeshBasicMaterial({color:0xffffff,alphaTest:.5,toneMapped:false})
-      : new THREE.MeshPhysicalMaterial({ color: new THREE.Color(shade, shade, shade), transparent: false, alphaTest: 0.5, roughness: .48, metalness: 0, clearcoat: .18, clearcoatRoughness: .38 });
-    const m = new THREE.Mesh(sealGeo, material);
+    const m = new THREE.Mesh(sealGeo, new THREE.MeshPhysicalMaterial({ color: new THREE.Color(shade, shade, shade), transparent: false, alphaTest: 0.5, roughness: .48, metalness: 0, clearcoat: .18, clearcoatRoughness: .38 }));
     m.position.z = 0.0018 * (i + 1); m.castShadow = true; seal.add(m); return m;
   });
   const SEAL_Y = -FLAP_L + SEAL * 0.36;
@@ -398,7 +394,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     const r = canvasEl.getBoundingClientRect();
     if (!r.width || !r.height) return;
     cssW = r.width; cssH = r.height; aspect = r.width / r.height;
-    renderer.setPixelRatio(Math.min(2.5, Math.max(1.5, window.devicePixelRatio || 1)));
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.setSize(r.width, r.height, false);
     camera.aspect = aspect; camera.updateProjectionMatrix();
     render();
@@ -428,13 +424,13 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     const { pocket: pc, flap: fc } = outsideTextures(cover, guestLine, family, inviteLine, script, design);
     const linerCanvas = linerTexture(cover), liner = tex(linerCanvas);
     const gum = flapLinerTextures(linerCanvas,design), gumTex = tex(gum.color), gumRough = new THREE.CanvasTexture(gum.rough);
-    for (const [m, map] of [[pocket.material, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.color.set(0xffffff); m.needsUpdate = true; }
+    for (const [m, map] of [[pocket.material, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.bumpMap = new THREE.CanvasTexture(paperRelief(map.image)); m.bumpScale = .018; m.roughness = .92; m.color.set(0xffffff); m.needsUpdate = true; }
     back.material.map = liner; back.material.bumpMap = liner; back.material.bumpScale = .007; back.material.color.set(0xffffff); back.material.needsUpdate = true;
     Object.assign(flapBack.material, { map: gumTex, bumpMap: gumTex, bumpScale: .007, roughnessMap: gumRough, roughness: 1 }); flapBack.material.color.set(0xf4eee0); flapBack.material.needsUpdate = true;
     const waxCanvas=waxStock(wax,design);
 
     const waxTex = tex(waxCanvas),waxBump=new THREE.CanvasTexture(paperRelief(waxCanvas));
-    sealLayers.forEach((m) => { m.material.map = waxTex; if(!m.material.isMeshBasicMaterial){m.material.bumpMap = waxBump; m.material.bumpScale = .002;} m.material.needsUpdate = true; });
+    sealLayers.forEach((m) => { m.material.map = waxTex; m.material.bumpMap = waxBump; m.material.bumpScale = .002; m.material.needsUpdate = true; });
     const cardCanvas = await drawSageCard(card);
     if (dead) return;
     cardMats[4].map = tex(cardCanvas); cardMats[4].needsUpdate = true;
