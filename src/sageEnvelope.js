@@ -1,4 +1,5 @@
-import {paperStock,paperRelief,ornamentGlyph,waxStock,paperCoverTile} from './invitationMaterials';
+import {paintEnvelopeArtwork} from './sageEnvelopeArtwork';
+import {paperStock,paperRelief,waxStock} from './invitationMaterials';
 import {traceSageFlap,sageFlapLift} from './sageEnvelopeProfiles.js';
 import {paintSageLetter} from './paintSageLetter.js';
 import * as THREE from 'three';
@@ -57,17 +58,7 @@ function canvas(w, h) { const c = document.createElement('canvas'); c.width = w;
 function toPx(c, x, y) { return [(x / W + 0.5) * c.width, (0.5 - y / H) * c.height]; }
 // the cover photo is a little narrower than the envelope: use its full width, crop height
 // one photo width = 0.6 world units; on a wider envelope the paper repeats, mirrored, so it stays seamless
-function drawPaper(g, img, c) {
-  const {width:tw,height:th,top:y}=paperCoverTile(img.width,img.height,c.width,c.height,W);
-  const n = Math.ceil((c.width / tw - 1) / 2) + 1;
-  for (let i = -n; i <= n; i++) {
-    const x = c.width / 2 - tw / 2 + i * tw;
-    if (x > c.width || x + tw < 0) continue;
-    g.save();
-    if (i % 2) { g.translate(x + tw, 0); g.scale(-1, 1); g.drawImage(img, 0, y, tw, th); } else g.drawImage(img, x, y, tw, th);
-    g.restore();
-  }
-}
+function drawPaper(g,img,c){g.drawImage(img,0,0,c.width,c.height);}
 const texW = (base) => Math.min(base * 2.5, Math.round(base * W / 0.6));
 
 function flapPath(g, c, ox = 0, oy = 0, layout='arch') {
@@ -78,37 +69,8 @@ function flapPath(g, c, ox = 0, oy = 0, layout='arch') {
 function outsideTextures(img, guestLine, family, inviteLine, script, design={}) {
   const c = canvas(texW(1024), Math.round(texW(1024) * H / W));
   const pocket = canvas(c.width, c.height), flap = canvas(c.width, c.height);
-  let g = pocket.getContext('2d');
-  drawPaper(g, img, pocket);
-  // bottom flap seams and the edges of the side flaps
-  const line = (pts, color, width) => { g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo : g.moveTo).call(g, ...toPx(pocket, x, y))); g.strokeStyle = color; g.lineWidth = width; g.stroke(); };
-  for (const [col, w, d] of [['rgba(18,24,14,.42)', 3.2, 0], ['rgba(232,226,198,.32)', 1.6, -0.0035]]) {
-    line([[-W / 2, -H / 2 + d], [-0.035, -0.07 + d], [0.035, -0.07 + d], [W / 2, -H / 2 + d]], col, w);
-  }
-  // the pocket's cut edge catches the light
-  line([[-W / 2, V_SIDE - 0.002], [0, V_DIP - 0.002], [W / 2, V_SIDE - 0.002]], 'rgba(238,232,206,.55)', 2.4);
-  if (inviteLine) { // pressed into the paper in dark ink, like a letterpress line
-    g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
-    const [x, y] = toPx(pocket, 0, -0.19), px = pocket.width / W;
-    let size = 0.052 * px; g.font = `${size}px ${script}`;
-    while (g.measureText(inviteLine).width > 0.4 * px && size > 20) { size -= 2; g.font = `${size}px ${script}`; }
-    g.fillStyle = 'rgba(236,232,206,.22)'; g.fillText(inviteLine, x + 1, y + 3);
-    g.fillStyle = 'rgba(14,17,9,.95)'; g.strokeStyle = 'rgba(14,17,9,.8)'; g.lineWidth = Math.max(1.5, size * 0.025);
-    g.fillText(inviteLine, x, y); g.strokeText(inviteLine, x, y);
-    g.restore();
-  }
-  if (guestLine) {
-    g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
-    const [x, y] = toPx(pocket, 0, -0.29);
-    g.font = `italic 400 64px ${family}`;
-    g.fillStyle = 'rgba(16,20,12,.35)'; g.fillText(guestLine, x + 1.5, y + 2.5);
-    const gold = g.createLinearGradient(x - 220, y - 40, x + 220, y + 40);
-    gold.addColorStop(0, '#b89a5c'); gold.addColorStop(0.45, '#ecd9a4'); gold.addColorStop(0.55, '#d8bd7f'); gold.addColorStop(1, '#a8874a');
-    g.fillStyle = gold; g.fillText(guestLine, x, y); g.restore();
-  }
-  g = flap.getContext('2d');
-  drawPaper(g, img, flap);
-  // Keep the photographed paper continuous; no painted band across the fold.
+  paintEnvelopeArtwork(pocket,img,design,inviteLine,guestLine);
+  drawPaper(flap.getContext('2d'),img,flap);
   return { pocket, flap };
 }
 
@@ -265,7 +227,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   pocketShape.moveTo(-W / 2, -H / 2); pocketShape.lineTo(W / 2, -H / 2); pocketShape.lineTo(W / 2, V_SIDE);
   pocketShape.quadraticCurveTo(0.03, V_DIP + 0.012, 0, V_DIP); pocketShape.quadraticCurveTo(-0.03, V_DIP + 0.012, -W / 2, V_SIDE);
   pocketShape.closePath();
-  const pocket = new THREE.Mesh(envUV(new THREE.ShapeGeometry(pocketShape, 24)), new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: 0.9 }));
+  const pocket = new THREE.Mesh(envUV(new THREE.ShapeGeometry(pocketShape, 24)), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped:false }));
   pocket.position.z = 0.009; pocket.castShadow = true; pocket.receiveShadow = true; shell.add(pocket);
 
   // flap, hinged at the top edge. Tessellated so it can bend like paper.
@@ -279,7 +241,7 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   flapGeo.computeVertexNormals();
   const flapRest = Float32Array.from(flapGeo.attributes.position.array);
   const hinge = new THREE.Group(); hinge.position.set(0, TOP, 0.0005); shell.add(hinge);
-  const flapFront = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0x6f7a55, roughness: 0.88, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }));
+  const flapFront = new THREE.Mesh(flapGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped:false, side: THREE.FrontSide, shadowSide: THREE.DoubleSide }));
   const flapBack = new THREE.Mesh(flapGeo, new THREE.MeshStandardMaterial({ color: 0xf1ebda, roughness: 0.92, side: THREE.BackSide, name: 'flapLiner' }));
   flapFront.castShadow = true; flapFront.receiveShadow = true; flapBack.receiveShadow = true;
   const flap = new THREE.Group(); flap.add(flapFront, flapBack); hinge.add(flap);
@@ -288,7 +250,8 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
   const seal = new THREE.Group(); flap.add(seal);
   const sealGeo = new THREE.PlaneGeometry(SEAL * 1312 / 1199, SEAL);
   const sealLayers = [0.55, 0.62, 0.72, 1].map((shade, i) => {
-    const m = new THREE.Mesh(sealGeo, new THREE.MeshPhysicalMaterial({ color: new THREE.Color(shade, shade, shade), transparent: false, alphaTest: 0.5, roughness: .48, metalness: 0, clearcoat: .18, clearcoatRoughness: .38 }));
+    const material=i===3?new THREE.MeshBasicMaterial({color:0xffffff,alphaTest:.5,toneMapped:false}):new THREE.MeshPhysicalMaterial({color:new THREE.Color(shade,shade,shade),alphaTest:.5,roughness:.48});
+    const m = new THREE.Mesh(sealGeo,material);
     m.position.z = 0.0018 * (i + 1); m.castShadow = true; seal.add(m); return m;
   });
   const SEAL_Y = -FLAP_L + SEAL * 0.36;
@@ -412,13 +375,13 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     const { pocket: pc, flap: fc } = outsideTextures(cover, guestLine, family, inviteLine, script, design);
     const linerCanvas = linerTexture(cover), liner = tex(linerCanvas);
     const gum = flapLinerTextures(linerCanvas,design), gumTex = tex(gum.color), gumRough = new THREE.CanvasTexture(gum.rough);
-    for (const [m, map] of [[pocket.material, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.bumpMap = new THREE.CanvasTexture(paperRelief(map.image)); m.bumpScale = .018; m.roughness = .92; m.color.set(0xffffff); m.needsUpdate = true; }
+    for (const [m, map] of [[pocket.material, tex(pc)], [flapFront.material, tex(fc)]]) { m.map = map; m.color.set(0xffffff); m.needsUpdate = true; }
     back.material.map = liner; back.material.bumpMap = liner; back.material.bumpScale = .007; back.material.color.set(0xffffff); back.material.needsUpdate = true;
     Object.assign(flapBack.material, { map: gumTex, bumpMap: gumTex, bumpScale: .007, roughnessMap: gumRough, roughness: 1 }); flapBack.material.color.set(0xf4eee0); flapBack.material.needsUpdate = true;
     const waxCanvas=waxStock(wax,design);
 
     const waxTex = tex(waxCanvas),waxBump=new THREE.CanvasTexture(paperRelief(waxCanvas));
-    sealLayers.forEach((m) => { m.material.map = waxTex; m.material.bumpMap = waxBump; m.material.bumpScale = .002; m.material.needsUpdate = true; });
+    sealLayers.forEach((m) => { m.material.map = waxTex; if(!m.material.isMeshBasicMaterial){m.material.bumpMap = waxBump; m.material.bumpScale = .002;} m.material.needsUpdate = true; });
     const cardCanvas = await drawSageCard(card);
     if (dead) return;
     cardMats[4].map = tex(cardCanvas); cardMats[4].needsUpdate = true;
