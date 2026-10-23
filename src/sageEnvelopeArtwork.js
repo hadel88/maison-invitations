@@ -15,6 +15,15 @@ export function paintPaperEdge(target,layout='arch',pocket=false){
   g.save();g.translate(300,0);g.scale(1,-1);traceSageFlap(g,600,576,layout);g.restore();
  }
  g.clip();
+ // Finish only the free paper edge; the hinge must stay continuous and unpainted.
+ g.beginPath();g.rect(-30,40,660,990);g.clip();
+ g.beginPath();
+ if(pocket){
+  g.moveTo(600,170.56);g.quadraticCurveTo(331.98,307.008,300,319.8);
+  g.quadraticCurveTo(268.02,307.008,0,170.56);
+ }else{
+  g.save();g.translate(300,0);g.scale(1,-1);traceSageFlap(g,600,576,layout);g.restore();
+ }
  g.lineJoin='round';g.lineCap='round';
  g.globalCompositeOperation='multiply';
  g.strokeStyle='rgba(35,31,25,.38)';g.lineWidth=26;g.stroke();
