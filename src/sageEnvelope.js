@@ -110,6 +110,7 @@ function flapLinerTextures(linerCanvas,design={}) {
   g.strokeStyle = 'rgba(120,98,58,.28)'; g.lineWidth = Math.max(1, 0.002 * px); gumPath(g, c, 0.043, design.pageLayout); g.stroke();
   g.restore();
   // roughness: the gum is shinier than the paper (green channel = roughness)
+  paintPaperEdge(c,design.pageLayout);
   const r = canvas(Math.round(c.width / 2), Math.round(c.height / 2)), q = r.getContext('2d');
   q.fillStyle = 'rgb(240,240,240)'; q.fillRect(0, 0, r.width, r.height);
   q.save(); flapPath(q, r,0,0,design.pageLayout); q.clip(); q.lineJoin = 'round'; q.strokeStyle = 'rgb(95,95,95)'; q.lineWidth = band / 2; gumPath(q, r, 0.021,design.pageLayout); q.stroke(); q.restore();
