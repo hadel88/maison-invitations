@@ -1,4 +1,4 @@
-import {paintEnvelopeArtwork,SAGE_OUTSIDE} from './sageEnvelopeArtwork';
+import {paintEnvelopeArtwork,paintPaperEdge,SAGE_OUTSIDE} from './sageEnvelopeArtwork';
 import {paperStock,paperRelief,ornamentGlyph,waxStock} from './invitationMaterials';
 import {traceSageFlap,sageFlapLift} from './sageEnvelopeProfiles.js';
 import {paintSageLetter} from './paintSageLetter.js';
@@ -71,6 +71,8 @@ function outsideTextures(img, guestLine, family, inviteLine, script, design={}) 
   const pocket = canvas(c.width, c.height), flap = canvas(c.width, c.height);
   paintEnvelopeArtwork(pocket,img,design,inviteLine,guestLine);
   drawPaper(flap.getContext('2d'),img,flap);
+  paintPaperEdge(flap,design.pageLayout);
+  paintPaperEdge(pocket,design.pageLayout,true);
   return { pocket, flap };
 }
 
