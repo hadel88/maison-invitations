@@ -485,7 +485,7 @@ export default async function handler(req, res) {
       await sb('/rest/v1/maison_planning?on_conflict=owner_id,occasion',{method:'POST',token:s.token,body:{owner_id:s.user.id,occasion:key,data:seating,updated_at:new Date().toISOString()},headers:{Prefer:'resolution=merge-duplicates'}});
       return res.json(seating);
     }
-    if (["team", "team-join", "workspaces", "workspace", "event-task", "event-update"].includes(action)) {
+    if (["team", "team-join", "workspaces", "workspace", "event-task", "event-update", "hall"].includes(action)) {
       // The event team (planner first, other vendors later). Every permission check happens in the
       // database functions (database/event-team.sql); this only validates the shape of the input.
       const rpc = (fn, body = {}) => sb("/rest/v1/rpc/" + fn, { token: s.token, method: "POST", body });
@@ -513,6 +513,14 @@ export default async function handler(req, res) {
           if (!title || title.length > 200 || (b.due && !/^\d{4}-\d{2}-\d{2}$/.test(b.due)) || String(b.who || "").length > 40) return bad("Please give the task a title (and a valid date).");
           return res.json(await rpc("maison_task_save", { p_invitation: b.invitation, p_id: b.id || null, p_title: title, p_due: b.due || null, p_assignee: String(b.who || "Planner"), p_done: !!b.done }));
         }
+        if (action === "hall") {
+          // The venue floor plan with its tables (database/event-hall.sql). Its tables are the seating tables.
+          if (req.method === "GET") { if (!uuid(req.query.id)) return bad("Choose an event."); return res.json(await rpc("maison_hall", { p_invitation: req.query.id })); }
+          if (req.method !== "POST" || !uuid(b.invitation)) return bad("Choose an event.");
+          if (b.image != null && b.image !== "" && (typeof b.image !== "string" || !b.image.startsWith("data:image/jpeg;base64,") || b.image.length > 1500000)) return bad("The plan image is too large. Please use a smaller photo.");
+          if (!Array.isArray(b.tables) || b.tables.length > 60 || !b.layout || typeof b.layout !== "object" || JSON.stringify(b.layout).length > 58000) return bad("Please check the hall plan.");
+          return res.json(await rpc("maison_hall_save", { p_invitation: b.invitation, p_image: b.image ?? null, p_layout: b.layout, p_tables: b.tables }));
+        }
         if (action === "event-update") {
           if (!uuid(b.invitation)) return bad("Choose an event.");
           if (req.method === "DELETE") { if (!uuid(b.id)) return bad("Choose an update."); await rpc("maison_update_delete", { p_invitation: b.invitation, p_id: b.id }); return res.json({ ok: true }); }
@@ -521,8 +529,8 @@ export default async function handler(req, res) {
           return res.json(await rpc("maison_update_post", { p_invitation: b.invitation, p_body: text }));
         }
       } catch (e) {
-        if (/maison_(team|workspace|my_workspaces|task|update)|schema cache|does not exist/i.test(e.message || ""))
-          return res.status(503).json({ error: "The team workspace is not switched on yet. Please run database/event-team.sql in Supabase." });
+        if (/maison_(team|workspace|my_workspaces|task|update|hall)|schema cache|does not exist/i.test(e.message || ""))
+          return res.status(503).json({ error: "This part of the workspace is not switched on yet. Please run database/event-team.sql and database/event-hall.sql in Supabase." });
         throw e;
       }
     }

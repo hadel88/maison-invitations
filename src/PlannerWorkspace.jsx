@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState, lazy, Suspense } from 'react';
-import { CalendarDays, MapPin, Users, ListChecks, Clock, Megaphone, Store, LayoutDashboard, Search, Check, Plus, Send, Utensils, AlertTriangle, ArrowUpRight, Trash2, Lock, ArrowLeft } from 'lucide-react';
+import { CalendarDays, MapPin, Users, ListChecks, Clock, Megaphone, Store, LayoutDashboard, Search, Check, Plus, Send, Utensils, AlertTriangle, ArrowUpRight, Trash2, Lock, ArrowLeft, LayoutGrid } from 'lucide-react';
+import HallPlan from './HallPlan';
 import { api } from './client';
 import { sceneFor } from './cinemaThemes';
 import { sceneVariables } from './occasionScenes';
@@ -38,7 +39,8 @@ const demo = {
   updates: [{ id: 'u1', by: 'planner', when: '2027-05-10', text: 'Parking is now available at the Villa’s lower garden. Please follow the gold signs.' }],
 };
 
-const tabs = [['overview', 'Overview', LayoutDashboard], ['guests', 'Guests', Users], ['schedule', 'Schedule', Clock], ['tasks', 'Tasks', ListChecks], ['team', 'Vendor team', Store], ['updates', 'Updates', Megaphone]];
+const tabs = [['overview', 'Overview', LayoutDashboard], ['guests', 'Guests', Users], ['schedule', 'Schedule', Clock], ['hall', 'Hall plan', LayoutGrid], ['tasks', 'Tasks', ListChecks], ['team', 'Vendor team', Store], ['updates', 'Updates', Megaphone]];
+const demoTables = [1, 2, 3, 4, 5].map((n) => ({ id: '00000000-0000-4000-8000-00000000000' + n, name: 'Table ' + n, capacity: 8 }));
 const CATEGORIES = ['planner', 'catering', 'photography', 'music', 'flowers', 'cakes'];
 const cap = (x) => String(x || '').charAt(0).toUpperCase() + String(x || '').slice(1);
 const when = (d) => (d ? dateLabel(String(d).slice(0, 10), 'en') : 'No date');
@@ -68,7 +70,7 @@ export default function PlannerWorkspace({ demo: isDemo = false, eventId = null,
 
   async function openEvent(eid) {
     setPhase('loading');
-    try { setData(normalize(await api('workspace', { query: { id: eid } }))); setId(eid); setPhase('ready'); history.replaceState(null, '', '/?workspace=planner&event=' + eid); }
+    try { setData(normalize(await api('workspace', { query: { id: eid } }))); setId(eid); setPhase('ready'); const tab = new URLSearchParams(location.search).get('tab'); history.replaceState(null, '', '/?workspace=planner&event=' + eid + (tab ? '&tab=' + encodeURIComponent(tab) : '')); }
     catch (e) { setProblem(e.message); setPhase('error'); }
   }
   async function start() {
@@ -107,7 +109,7 @@ export default function PlannerWorkspace({ demo: isDemo = false, eventId = null,
 }
 
 function Workspace({ data, setData, id, isDemo, multiple, onAll }) {
-  const [tab, setTab] = useState('overview');
+  const [tab, setTab] = useState(() => (tabs.some((t) => t[0] === new URLSearchParams(location.search).get('tab')) ? new URLSearchParams(location.search).get('tab') : 'overview'));
   const [draft, setDraft] = useState(''), [busy, setBusy] = useState(false), [note, setNote] = useState('');
   const [newTask, setNewTask] = useState({ title: '', due: '', who: 'Planner' });
   const [query, setQuery] = useState(''), [filter, setFilter] = useState('all');
@@ -239,7 +241,7 @@ function Workspace({ data, setData, id, isDemo, multiple, onAll }) {
     <div className="pw-main">
       <header className="pw-top"><span className="pw-kicker">{tabs.find((t) => t[0] === tab)[1].toUpperCase()}{isDemo ? ' · DEMO, NOTHING IS SAVED' : ''}</span><i aria-hidden="true">✦</i></header>
       {note && <p className="pw-warn" role="alert"><AlertTriangle size={14} />{note}</p>}
-      {tab === 'overview' && overview}{tab === 'guests' && guests}{tab === 'schedule' && schedule}{tab === 'tasks' && taskList}{tab === 'team' && team}{tab === 'updates' && updatesTab}
+      {tab === 'overview' && overview}{tab === 'guests' && guests}{tab === 'schedule' && schedule}{tab === 'tasks' && taskList}{tab === 'team' && team}{tab === 'hall' && <HallPlan id={id} isDemo={isDemo} demoTables={demoTables} onSaved={() => api('workspace', { query: { id } }).then((d) => setData(normalize(d))).catch(() => {})} />}{tab === 'updates' && updatesTab}
     </div>
   </main>;
 }
