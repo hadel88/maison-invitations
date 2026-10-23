@@ -3,7 +3,7 @@ import {traceSageFlap} from './sageEnvelopeProfiles.js';
 
 export const SAGE_OUTSIDE={width:600,height:1066,flap:576,sealX:195,sealY:407,sealWidth:210,sealHeight:192};
 
-// A fine cut-paper lip, painted inside the contour rather than a decorative stripe.
+// A broad pressed-paper bevel. Blending preserves the stock's own colour and grain.
 export function paintPaperEdge(target,layout='arch',pocket=false){
  const g=target.getContext('2d');
  g.save();g.scale(target.width/600,target.height/1066);g.beginPath();
@@ -15,8 +15,15 @@ export function paintPaperEdge(target,layout='arch',pocket=false){
   g.save();g.translate(300,0);g.scale(1,-1);traceSageFlap(g,600,576,layout);g.restore();
  }
  g.clip();
- g.strokeStyle='rgba(25,30,18,.28)';g.lineWidth=5;g.stroke();
- g.strokeStyle='rgba(249,237,202,.72)';g.lineWidth=2.4;g.stroke();
+ g.lineJoin='round';g.lineCap='round';
+ g.globalCompositeOperation='multiply';
+ g.strokeStyle='rgba(35,31,25,.38)';g.lineWidth=26;g.stroke();
+ g.globalCompositeOperation='screen';
+ g.strokeStyle='rgba(255,255,255,.25)';g.lineWidth=21;g.stroke();
+ g.globalCompositeOperation='multiply';
+ g.strokeStyle='rgba(65,58,46,.13)';g.lineWidth=12;g.stroke();
+ g.globalCompositeOperation='screen';
+ g.strokeStyle='rgba(255,255,255,.38)';g.lineWidth=3;g.stroke();
  g.restore();
 }
 
