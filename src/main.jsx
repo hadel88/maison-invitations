@@ -55,6 +55,7 @@ const AuthDialog = lazy(() => import("./AuthDialog"));
 const Editor = lazy(() => import("./Editor"));
 const Dashboard = lazy(() => import("./Dashboard"));
 const SharedDashboard = lazy(() => import("./SharedCelebration"));
+const PlannerWorkspace = lazy(() => import("./PlannerWorkspace"));
 const AlbumPreview = lazy(() => import('./AlbumPreview'));
 const ExpertSpace = lazy(() => import("./ExpertSpace"));
 const ShareDialog = lazy(() => import("./Dialogs").then((m) => ({ default: m.ShareDialog })));
@@ -264,6 +265,8 @@ function App() {
         />
       </Suspense>
     );
+  // The vendor workspace (planner first): /?join=<private invite token> or /?workspace=planner[&event=<id>]; demo: &demo=1
+  if (q.get('workspace')==='planner'||q.get('join')) return <Suspense fallback={<Loading/>}><PlannerWorkspace demo={q.get('demo')==='1'} eventId={q.get('event')} join={q.get('join')} Modal={Modal} Field={Field}/></Suspense>;
   if (q.get('album')==='preview') return <Suspense fallback={<Loading/>}><AlbumPreview/></Suspense>;
   if (q.get('shared')) return <Suspense fallback={<Loading/>}><SharedDashboard slug={q.get('shared')} token={q.get('guest')}/></Suspense>;
   if (publicSlug)

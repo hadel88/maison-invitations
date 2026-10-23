@@ -373,6 +373,13 @@ export default async function handler(req, res) {
         throw e;
       }
     }
+    if (action === "event-updates") {
+      // Guests (no account): the latest updates the host or planner posted for a published invitation.
+      if (req.method !== "GET") return res.status(405).end();
+      if (!/^[0-9a-f-]{36}$/i.test(req.query.slug || "")) return res.json([]);
+      try { return res.json(await sb("/rest/v1/rpc/maison_public_updates", { method: "POST", body: { p_slug: req.query.slug } }) || []); }
+      catch { return res.json([]); } // feature not installed yet: the invitation simply shows no updates
+    }
     const s = await session(req, res);
     if (action === "session")
       return res.json({
@@ -477,6 +484,47 @@ export default async function handler(req, res) {
       const seating=validateSeating(b.seating,guests);
       await sb('/rest/v1/maison_planning?on_conflict=owner_id,occasion',{method:'POST',token:s.token,body:{owner_id:s.user.id,occasion:key,data:seating,updated_at:new Date().toISOString()},headers:{Prefer:'resolution=merge-duplicates'}});
       return res.json(seating);
+    }
+    if (["team", "team-join", "workspaces", "workspace", "event-task", "event-update"].includes(action)) {
+      // The event team (planner first, other vendors later). Every permission check happens in the
+      // database functions (database/event-team.sql); this only validates the shape of the input.
+      const rpc = (fn, body = {}) => sb("/rest/v1/rpc/" + fn, { token: s.token, method: "POST", body });
+      const uuid = (x) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(x || ""));
+      const bad = (m) => res.status(400).json({ error: m });
+      try {
+        if (action === "team") {
+          if (req.method === "GET") { if (!uuid(req.query.id)) return bad("Choose an invitation."); return res.json(await rpc("maison_team", { p_invitation: req.query.id })); }
+          if (req.method === "DELETE") { if (!uuid(b.id)) return bad("Choose a team member."); await rpc("maison_team_remove", { p_team: b.id }); return res.json({ ok: true }); }
+          const cats = ["planner", "catering", "photography", "music", "flowers", "cakes", "venue", "beauty", "decoration"];
+          if (!uuid(b.invitation) || !cats.includes(b.category) || String(b.name || "").length > 120) return bad("Please check the invitation details.");
+          return res.json(await rpc("maison_team_invite", { p_invitation: b.invitation, p_category: b.category, p_vendor_name: String(b.name || "").trim() }));
+        }
+        if (action === "team-join") {
+          if (req.method !== "POST") return res.status(405).end();
+          if (!uuid(b.token)) return bad("This invitation link is not valid.");
+          return res.json(await rpc("maison_team_join", { p_token: b.token }));
+        }
+        if (action === "workspaces") return res.json(await rpc("maison_my_workspaces"));
+        if (action === "workspace") { if (!uuid(req.query.id)) return bad("Choose an event."); return res.json(await rpc("maison_workspace", { p_invitation: req.query.id })); }
+        if (action === "event-task") {
+          if (!uuid(b.invitation) || (b.id && !uuid(b.id))) return bad("Choose a task.");
+          if (req.method === "DELETE") { await rpc("maison_task_delete", { p_invitation: b.invitation, p_id: b.id }); return res.json({ ok: true }); }
+          const title = String(b.title || "").trim();
+          if (!title || title.length > 200 || (b.due && !/^\d{4}-\d{2}-\d{2}$/.test(b.due)) || String(b.who || "").length > 40) return bad("Please give the task a title (and a valid date).");
+          return res.json(await rpc("maison_task_save", { p_invitation: b.invitation, p_id: b.id || null, p_title: title, p_due: b.due || null, p_assignee: String(b.who || "Planner"), p_done: !!b.done }));
+        }
+        if (action === "event-update") {
+          if (!uuid(b.invitation)) return bad("Choose an event.");
+          if (req.method === "DELETE") { if (!uuid(b.id)) return bad("Choose an update."); await rpc("maison_update_delete", { p_invitation: b.invitation, p_id: b.id }); return res.json({ ok: true }); }
+          const text = String(b.text || "").trim();
+          if (!text || text.length > 600) return bad("Please write an update of up to 600 characters.");
+          return res.json(await rpc("maison_update_post", { p_invitation: b.invitation, p_body: text }));
+        }
+      } catch (e) {
+        if (/maison_(team|workspace|my_workspaces|task|update)|schema cache|does not exist/i.test(e.message || ""))
+          return res.status(503).json({ error: "The team workspace is not switched on yet. Please run database/event-team.sql in Supabase." });
+        throw e;
+      }
     }
     if(action==='journey'){
       const [planning,shortlist,guests]=await Promise.all([

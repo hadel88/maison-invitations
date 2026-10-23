@@ -35,6 +35,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { copy, dateLabel, defaultEvent, templates } from "./catalog";
+import "./guestUpdates.css";
 import { api, download, calendar } from "./client";
 import { Field } from "./ui";
 import { CinemaStage } from "./Cinema";
@@ -116,6 +117,14 @@ export function GuestExperience({
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
   const [sharedAccess, setSharedAccess] = useState(false);
+  // Updates the host or planner posted (e.g. a changed time); shown on the invitation for every guest.
+  const [updates, setUpdates] = useState([]);
+  useEffect(()=>{
+    if(!slug||preview)return;
+    let live=true;
+    api('event-updates',{query:{slug}}).then(d=>{if(live&&Array.isArray(d))setUpdates(d)}).catch(()=>{});
+    return()=>{live=false};
+  },[slug,preview]);
   useEffect(()=>{
     if(!slug||!token||preview)return;
     let live=true;
@@ -255,6 +264,12 @@ export function GuestExperience({
               <a className="btn secondary" href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent('hotels near '+event.venue+' '+event.address)} target="_blank" rel="noreferrer">{{en:'Places to stay',de:'Unterkünfte',fr:'Où séjourner'}[lang]}<ArrowUpRight size={14}/></a>
             </div>
           </section>
+          {updates.length > 0 && (
+            <section className="event-details guest-updates" aria-live="polite">
+              <span className="eyebrow">{{ en: "LATEST NEWS", de: "NEUIGKEITEN", fr: "DERNIÈRES NOUVELLES" }[lang] || "LATEST NEWS"}</span>
+              {updates.slice(0, 3).map((u, i) => <p key={i}><small>{dateLabel(String(u.when).slice(0, 10), lang)}</small>{u.text}</p>)}
+            </section>
+          )}
           {crafted && event.dressCode && <section className="craft-dress"><CraftGarland /><span className="craft-eyebrow">{craftWords(lang).attire}</span><h2>{craftWords(lang).dress}</h2><p>{event.dressCode}</p></section>}
           {Array.isArray(event.timeline) && event.timeline.length > 0 && (
             <section className="event-details guest-timeline">

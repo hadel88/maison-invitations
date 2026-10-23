@@ -1,0 +1,12 @@
+/* "Your team" in the host dashboard */
+.team-panel .team-card { margin-top: 18px; padding: 22px 22px 20px; border: 1px solid #e3d4ae; background: #fffdf8; box-shadow: inset 0 0 0 5px #fffdf8, inset 0 0 0 6px #efe2c2; display: grid; gap: 10px; }
+.team-panel .team-name { font: 400 26px/1.2 var(--serif, 'Cormorant Garamond', Georgia, serif); }
+.team-panel .team-invite { display: grid; gap: 12px; }
+.team-panel .team-invite label { display: grid; gap: 6px; font-size: 13px; }
+.team-panel input { padding: 11px 12px; border: 1px solid #e0d8c6; background: #fff; font: inherit; color: inherit; min-width: 0; }
+.team-panel .team-link { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.team-panel .team-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.team-panel .team-invite .lx-btn { justify-self: start; }
+.team-panel .ws-muted svg { vertical-align: -2px; }
+.team-panel .team-next { margin-top: 16px; }
+@media (max-width: 560px) { .team-panel .team-link { grid-template-columns: 1fr; } }

@@ -37,6 +37,7 @@ import "./app.css";
 import Stationery from './Stationery';
 import PhotoAlbum from './PhotoAlbum';
 import SeatingPlan from './SeatingPlan';
+import TeamPanel from './TeamPanel';
 
 const DAY = 86400000;
 function countdown(date) {
@@ -579,6 +580,7 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
     ["photos", "Photo gallery" + (photos.length ? " · " + photos.length : "")],
     ["stationery", "Matching stationery"],
     ['seating', 'Seating plan'],
+    ['team', 'Your team'],
   ];
   const town = townOf(c);
   const daysLeft = Math.round((new Date(c.date + "T12:00:00") - new Date(new Date().toDateString() + " 12:00")) / DAY);
@@ -678,6 +680,7 @@ function JourneySpace({ invite, initialTab, onExperts, notify, onRefresh, onBack
           {tab === "photos" && <PhotosPanel invite={invite} photos={photos} setWall={setWall} off={wallOff} notify={notify} onSaveContent={saveContent}/>}
           {tab === 'stationery' && <Stationery content={c} guests={guests} onSaveContent={saveContent}/>}
           {tab === 'seating' && <SeatingPlan invite={invite} guests={guests} notify={notify}/>}
+          {tab === 'team' && <TeamPanel invite={invite} notify={notify}/>}
         </div>
         <button className="ev-experts-link" onClick={() => onExperts(invite, { city: town })}>
           <Compass size={15} /> Find venues & experts{town ? " in " + town : ""} <ArrowRight size={14} />
