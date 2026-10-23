@@ -1,4 +1,4 @@
-import {paintEnvelopeArtwork,SAGE_OUTSIDE} from './sageEnvelopeArtwork';
+import {paintEnvelopeArtwork,paintPaperEdge,SAGE_OUTSIDE} from './sageEnvelopeArtwork';
 import React,{useEffect,useRef} from 'react';
 import {paperStock,invitationScript,waxStock} from './invitationMaterials';
 import {traceSageFlap} from './sageEnvelopeProfiles.js';
@@ -11,6 +11,7 @@ export default function SagePreview({theme,inviteLine='You are invited',guestLin
   g.save();g.beginPath();g.save();g.translate(300,0);g.scale(1,-1);traceSageFlap(g,SAGE_OUTSIDE.width,SAGE_OUTSIDE.flap,theme.pageLayout);g.restore();
   g.shadowColor='#162014aa';g.shadowBlur=24;g.shadowOffsetY=13;g.fillStyle=theme.envelope;g.fill();g.clip();g.drawImage(stock,0,0,600,1066);
   g.restore();
+  paintPaperEdge(c,theme.pageLayout);
   g.save();g.shadowColor='#15201099';g.shadowBlur=18;g.shadowOffsetY=12;g.drawImage(waxStock(wax,theme),SAGE_OUTSIDE.sealX,SAGE_OUTSIDE.sealY,SAGE_OUTSIDE.sealWidth,SAGE_OUTSIDE.sealHeight);g.restore();
  }).catch(()=>{});return()=>{dead=true}},[theme,inviteLine,guestLine]);
  return <canvas ref={ref} className="sage-poster-canvas" aria-hidden="true"/>;
