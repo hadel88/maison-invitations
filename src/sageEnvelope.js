@@ -292,16 +292,19 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     const vh0 = Math.min(H, W / aspect);
     const c0 = 0;
     // no zoom-out while opening: the camera only glides up with the card, so everything stays big
-    const vh1 = vh0;
-    const c1 = CARD_RISEN_Y + CARD_H / 2 + 0.05 * vh1 - vh1 / 2;
+    const vh1 = Math.max(H + FLAP_L + .15, W / aspect);
+    const c1 = FLAP_L / 2;
     const vhz = Math.min(Math.max(CARD_W / (0.97 * aspect), CARD_H / 0.9), vh1 * 0.9); // always in front of the envelope
     return { vh0, c0, vh1, c1, vhz };
   }
   let cardLoaded = false;
+  const shellFades=[];
+  shell.traverse(object=>{if(object.isMesh){for(const material of (Array.isArray(object.material)?object.material:[object.material]))shellFades.push({material,opacity:material.opacity});}});
   function pose(t) {
     const v = views();
     const withdrawal = inOut(span(t, SAGE_TIMES.withdraw));
-    shell.position.y = -2.5 * withdrawal;
+    shell.position.y = 0;
+    for(const {material,opacity} of shellFades){material.transparent=true;material.opacity=opacity*(1-withdrawal);}
     shell.visible = withdrawal < 1;
     // seal press and the flap's journey
     const press = span(t, SAGE_TIMES.press);
@@ -323,13 +326,15 @@ export function createSageEnvelope(canvasEl, { card, guestLine, inviteLine, onSe
     // camera steps back
     const k = sine(span(t, SAGE_TIMES.camera));
     const vh = mix(v.vh0, v.vh1, k), cy = mix(v.c0, v.c1, k);
-    camera.position.set(0, cy, vh / (2 * TAN)); camera.lookAt(0, cy, 0);
+    const follow = inOut(span(t,SAGE_TIMES.forward));
+    const cameraY = mix(cy,CARD_RISEN_Y,follow);
+    camera.position.set(0, cameraY, vh / (2 * TAN)); camera.lookAt(0, cameraY, 0);
     // the card rises out of the pocket, then comes forward
     const r = span(t, SAGE_TIMES.rise), fw = span(t, SAGE_TIMES.forward);
     const ry = mix(CARD_HIDDEN_Y, CARD_RISEN_Y, inOut(r));
     const d1 = v.vh1 / (2 * TAN), zc = d1 - v.vhz / (2 * TAN);
     const fz = outCubic(clamp01(fw * 1.35)), fy = inOut(fw);
-    cardGroup.position.set(0, mix(ry, v.c1 + 0.04 * v.vhz, fy), mix(0.0045, zc, fz) + Math.sin(fw * Math.PI) * 0.05);
+    cardGroup.position.set(0, ry, mix(0.0045, zc, fz) + Math.sin(fw * Math.PI) * 0.05);
     cardGroup.rotation.set(Math.sin(fw * Math.PI) * -0.16, 0, Math.sin(fw * Math.PI) * 0.035 + Math.sin(r * Math.PI) * 0.012);
     cardGroup.visible = cardLoaded && t >= SAGE_TIMES.flap[0];
     // the light softens on the envelope once the card is presented
