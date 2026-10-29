@@ -161,6 +161,20 @@ export default async function handler(req, res) {
     if (!SB || !KEY)
       return res.status(503).json({ error: "Database connection is pending." });
     const b = req.method === "GET" ? {} : bodyOf(req);
+    // ZEITZO hand-off: a one-time sign-in code made by ZEITZO's "maison-handoff" function (same account, same database).
+    // Exchanged here for a new Maison session, so the member arrives signed in. The code works once and expires.
+    if (action === "handoff") {
+      if (req.method !== "POST") return res.status(405).end();
+      const h = typeof b.h === "string" ? b.h.trim() : "";
+      if (!/^[A-Za-z0-9_-]{20,128}$/.test(h)) return res.status(400).json({ error: "This sign-in link is not valid." });
+      let s = null;
+      for (const type of ["magiclink", "email"]) {
+        try { s = await sb("/auth/v1/verify", { method: "POST", body: { type, token_hash: h } }); if (s?.access_token) break; } catch { s = null; }
+      }
+      if (!s?.access_token) return res.status(401).json({ error: "This sign-in link has expired. Please sign in." });
+      setSession(res, s);
+      return res.json({ user: { id: s.user.id, email: s.user.email } });
+    }
     if (action === "health")
       return res.json({ database: true, payments: paymentsReady() });
     if(action==='discover-demo'||action==='provider-status'){

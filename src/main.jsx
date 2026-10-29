@@ -69,6 +69,14 @@ function Loading() {
 }
 const firstEvent = () => cinemaEvent(cinemaThemes.find(t => t.id === 'rose-garden'), defaultEvent(templates[0]));
 
+// One-time sign-in code from ZEITZO (#mh=...). Read once and removed from the address bar straight away.
+const HANDOFF = (() => {
+  try {
+    const h = new URLSearchParams(location.hash.slice(1)).get("mh");
+    if (h) history.replaceState(null, "", location.pathname + location.search);
+    return h;
+  } catch { return null; }
+})();
 function App() {
   const [lang, setLang] = useState(
     () => localStorage.getItem("maison-language") || "en",
@@ -160,9 +168,12 @@ function App() {
     localStorage.setItem("maison-language", lang);
   }, [lang]);
   useEffect(() => {
-    api("session")
-      .then((d) => setUser(d.user))
-      .catch(() => {});
+    // Arriving from ZEITZO: sign in with the one-time code (same account), then open the chosen design, details filled in.
+    (HANDOFF
+      ? api("handoff", { method: "POST", data: { h: HANDOFF } }).catch((e) => { setToast(e.message); return api("session"); })
+      : api("session"))
+      .then((d) => { setUser(d.user); openLinkedDesign(); })
+      .catch(() => openLinkedDesign());
     api("health")
       .then(setHealth)
       .catch(() => {});
@@ -201,6 +212,33 @@ function App() {
     try { draft = JSON.parse(localStorage.getItem("maison-preview-draft:" + t.id)); } catch {}
     if (draft) setEditor({ ...draft, step: "details" });
     else studio(cinemaEvent(cinemaThemes[0], defaultEvent(t)), "design");
+  }
+  // ?design=<id or name>&type=&title=&date=&time=&place=&partner=zeitzo&free=1 (links from ZEITZO)
+  function openLinkedDesign() {
+    const want = q.get("design");
+    if (!want) return;
+    const slug = (v) => String(v || "").toLowerCase().replace(/&/g, " and ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const occ = { wedding: "Wedding", babyshower: "Baby shower", birthday: "Birthday" }[q.get("type")];
+    const theme = cinemaThemes.find((t) => t.id === want) || cinemaThemes.find((t) => slug(t.name) === slug(want)) || cinemaThemes.find((t) => t.occasion === occ) || cinemaThemes[0];
+    const tpl = templates.find((t) => t.occasion === theme.occasion) || templates[0];
+    const val = (k, n) => String(q.get(k) || "").trim().slice(0, n);
+    const title = val("title", 120), date = val("date", 10), time = val("time", 5), place = val("place", 160);
+    const okDate = /^\d{4}-\d{2}-\d{2}$/.test(date) && new Date(date + "T12:00:00Z").toISOString().slice(0, 10) === date;
+    const content = { ...cinemaEvent(theme, defaultEvent(tpl)) };
+    if (title) content.names = title;
+    if (/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) content.time = time;
+    if (okDate) {
+      content.date = date;
+      // RSVP one week before, but never in the past
+      const d = new Date(date + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() - 7);
+      const today = new Date().toISOString().slice(0, 10), dl = d.toISOString().slice(0, 10);
+      content.rsvpDeadline = dl < today ? (today < date ? today : date) : dl;
+    }
+    if (place) { const i = place.indexOf(","); content.venue = i > 0 ? place.slice(0, i).trim() : place; content.address = i > 0 ? place.slice(i + 1).trim() : ""; }
+    if (q.get("partner") === "zeitzo") { content.partner = "zeitzo"; content.timezone = "Europe/Berlin"; }
+    history.replaceState(null, "", location.pathname);
+    studio(content, "details");
+    if (q.get("free") === "1") setToast("Free with ZEITZO. Check your details, then publish.");
   }
   function favorite(id) {
     setFavs((old) => {
