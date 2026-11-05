@@ -66,7 +66,11 @@ export function createDoors(canvas, { image = '/doors-closed.webp', onReady } = 
   let angle = 0, push = 1;
   function resize() {
     const r = canvas.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
-    renderer.setPixelRatio(d); renderer.setSize(Math.max(1, r.width), Math.max(1, r.height), false);
+    const w = Math.max(1, r.width), h = Math.max(1, r.height);
+    renderer.setPixelRatio(d); renderer.setSize(w, h, false);
+    // the canvas covers the whole screen; the closed doors sit in the centred 2:3 frame (fitted, nothing cut)
+    const frameH = Math.min(h, w * 1.5), visible = (3 * h) / frameH;
+    camera.aspect = w / h; camera.fov = (2 * Math.atan(visible / 2 / D) * 180) / Math.PI; camera.updateProjectionMatrix();
   }
   function draw() {
     if (disposed) return;

@@ -2,13 +2,17 @@
 .dr-stage { --angle: 0deg; --door-scale: 1; --inside-scale: 1.02; --bright: .82; --light: 0; --ribbon: 1; --dust: 0;
   --c0: 0; --c1: 0; --c2: 0; --c3: 0; --c4: 0; --c5: 0;
   position: relative; width: 100%; height: 100dvh; min-height: 560px; overflow: hidden; background: #f3ecdf; }
-.dr-phone { position: relative; width: 100%; height: 100%; overflow: hidden; container-type: size; }
+.dr-phone { position: relative; width: 100%; height: 100%; overflow: hidden; container-type: size;
+  background: radial-gradient(ellipse at 50% 45%, #fbf6ec 0%, #efe4cf 70%, #e3d4b6 100%); }
+/* the ivory wall around the doors: the whole design stays visible on any screen */
+.dr-phone::before { content: ''; position: absolute; inset: -40px; background: url(/doors-closed.webp) center / cover; filter: blur(26px) saturate(.9); opacity: .45; }
+.dr-phone::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 90px #b8924f22; }
 /* stand-alone preview: a phone-sized stage on a soft blurred background */
 .dr-standalone { position: fixed; inset: 0; display: grid; place-items: center; background: #e9dfcd url(/doors-closed.webp) center / cover; }
 .dr-standalone::before { content: ''; position: absolute; inset: 0; backdrop-filter: blur(24px) brightness(.92); background: #efe5d455; }
 .dr-standalone .dr-stage { width: min(100vw, calc(100dvh * 9 / 19.5)); box-shadow: 0 0 80px #3b2d1a33; }
 /* a 2:3 picture that covers the phone screen */
-.dr-frame { position: absolute; left: 50%; top: 50%; width: max(100cqw, 66.667cqh); aspect-ratio: 2 / 3; transform: translate(-50%, -50%); container-type: inline-size; cursor: pointer; }
+.dr-frame { position: absolute; left: 50%; top: 50%; width: min(100cqw, 66.667cqh); aspect-ratio: 2 / 3; transform: translate(-50%, -50%); container-type: inline-size; cursor: pointer; }
 
 .dr-inside { position: absolute; inset: 0; background: url(/doors-open.webp) center / 100% 100%; transform-origin: 50% 42%;
   transform: scale(var(--inside-scale)) translateY(calc((var(--inside-scale) - 1.02) * 12%)); filter: brightness(var(--bright)); }

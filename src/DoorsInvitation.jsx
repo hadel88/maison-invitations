@@ -106,9 +106,9 @@ export function DoorsStage({ event, guest, opened, onOpen, onReplay, lang = 'en'
           <div className="dr-leaf dr-left"><i /></div>
           <div className="dr-leaf dr-right"><i /></div>
         </div>
-        <canvas ref={doorsCanvas} className="dr-doors-gl" aria-hidden="true" />
         <div className="dr-sparkles" aria-hidden="true">{Array.from({ length: 14 }, (_, i) => <b key={i} style={{ '--i': i }} />)}</div>
       </div>
+      <canvas ref={doorsCanvas} className="dr-doors-gl" aria-hidden="true" />
       <canvas ref={canvas} className="dr-ribbon" aria-hidden="true" />
       {!opened && <button className="dr-open" onClick={onOpen}>{c.open}</button>}
       {phase === 'open' && <>
