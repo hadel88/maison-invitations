@@ -28,7 +28,7 @@ test('every Ivory design has its own plaque silhouette and an ornament',()=>{
 test('combined filters never mix families, occasions or intended audiences',()=>{
  const boys=filterInvitationDesigns(cinemaThemes,{occasion:'Birthday',family:'ivory',audience:'Boys'});
  assert.deepEqual(boys.map(t=>t.id),['ivory-birthday-boy']);
- assert.ok(filterInvitationDesigns(cinemaThemes,{family:'ribbon'}).every(t=>t.kind==='rose'));
+ assert.ok(filterInvitationDesigns(cinemaThemes,{family:'ribbon'}).every(t=>['rose','doors'].includes(t.kind)));
  assert.ok(filterInvitationDesigns(cinemaThemes,{family:'other'}).every(t=>!['rose','ivory'].includes(t.kind)));
  assert.equal(filterInvitationDesigns(cinemaThemes).length,cinemaThemes.length);
  assert.equal(new Set(cinemaThemes.map(t=>t.id)).size,cinemaThemes.length);

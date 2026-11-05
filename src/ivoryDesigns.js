@@ -45,7 +45,7 @@ export function ivoryEvent(theme,base={}) {
 
 export function filterInvitationDesigns(scenes,{occasion='All designs',family='all',audience='all'}={}) {
  return scenes.filter(scene=>(occasion==='All designs'||scene.occasion===occasion)
-  &&(family==='all'||(family==='ivory'?scene.kind==='ivory':family==='ribbon'?scene.kind==='rose':family==='sage'?scene.kind==='sage':!['ivory','rose'].includes(scene.kind)))
+  &&(family==='all'||(family==='ivory'?scene.kind==='ivory':family==='ribbon'?['rose','doors'].includes(scene.kind):family==='sage'?scene.kind==='sage':!['ivory','rose','doors'].includes(scene.kind)))
   &&(audience==='all'||(['Boys','Girls'].includes(scene.audience)?scene.audience:'Neutral')===audience));
 }
 

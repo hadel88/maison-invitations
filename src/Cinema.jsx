@@ -19,6 +19,7 @@ import {occasionScenes,sceneVariables} from './occasionScenes';
 import {filterInvitationDesigns} from './ivoryDesigns';
 import IvoryPlaque from './IvoryPlaque';
 import {IvoryStage} from './IvoryInvitation';
+import {DoorsStage} from './DoorsInvitation';
 const words={en:{open:'Open your invitation',touch:'Touch to open',scroll:'Scroll to discover',invited:'TOGETHER WITH OUR FAMILIES',celebrate:'invite you to celebrate our wedding',replay:'Replay opening'},de:{open:'Einladung öffnen',touch:'Zum Öffnen berühren',scroll:'Nach unten entdecken',invited:'GEMEINSAM MIT UNSEREN FAMILIEN',celebrate:'laden wir euch zu unserer Hochzeit ein',replay:'Erneut öffnen'},fr:{open:'Ouvrir votre invitation',touch:'Touchez pour ouvrir',scroll:'Faites défiler pour découvrir',invited:'ENTOURÉS DE NOS FAMILLES',celebrate:'nous vous invitons à célébrer notre mariage',replay:'Revoir l’ouverture'}};
 export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='en',preview=false}){
  const theme=sceneFor(event),c=words[lang]||words.en,root=useRef(null),ribbonCanvas=useRef(null),ribbonEngine=useRef(null);
@@ -31,6 +32,7 @@ export function CinemaStage({event,guest,opened,onOpen,onReplay,onAnswer,lang='e
  const names=event.names.split(/\s*&\s*/);
  const font=ensureFont(event.font);
  const toned=content=><div className="occasion-tone" style={sceneVariables(theme)}>{content}</div>;
+ if(theme.kind==='doors')return toned(<DoorsStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>);
  if(theme.kind==='ivory')return toned(<IvoryStage theme={theme} event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>);
  if(['birthday','graduation','graduation-curtain'].includes(theme.kind))return toned(<BirthdayStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} lang={lang}/>);
  if(theme.kind==='baby-film')return toned(<BabyStage event={event} guest={guest} opened={opened} onOpen={onOpen} onReplay={onReplay} onAnswer={onAnswer} lang={lang}/>);
